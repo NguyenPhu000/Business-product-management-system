@@ -1,0 +1,8 @@
+{
+    "name": "vendor/package",
+    "description": "Mô tả",
+    "require": {
+        "php": "^8.0"
+    },
+    "license": "MIT"
+}
