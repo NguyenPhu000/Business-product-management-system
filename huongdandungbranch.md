@@ -26,3 +26,10 @@ git push -u origin feature/my-feature
 # lệnh clone project về máy
 
 git clone https://github.com/NguyenPhu000/Business-product-management-system.git
+
+# especially if it merges an updated upstrcommit 'update huong dan'
+
+                                                                                                    # the commit.
+
+~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ .git/MERGE_MSG[+] [unix] (19:36 19/10/2025) 11,0-1 All
+E492: Not an editor command: .git/Phu
