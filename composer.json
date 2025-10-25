@@ -1,8 +1,29 @@
 {
-    "name": "vendor/package",
-    "description": "Mô tả",
+    "name": "yourcompany/business-product-management",
+    "description": "Hệ thống quản lý sản phẩm kinh doanh",
+    "type": "project",
+    "license": "MIT",
     "require": {
         "php": "^8.0"
     },
-    "license": "MIT"
+    "autoload": {
+        "psr-4": {
+            "Core\\": "src/core/",
+            "Modules\\": "src/modules/"
+        },
+        "files": [
+            "src/core/Helpers.php",
+            "config/constants.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php -r \"copy('.env.example', '.env');\""
+        ]
+    }
 }

@@ -1,0 +1,1 @@
+<!-- stock_list.php - Danh sách tồn kho -->

@@ -1,0 +1,1 @@
+<!-- detail.php (Sales) - Chi tiết đơn bán + in hóa đơn -->
