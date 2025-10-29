@@ -19,4 +19,12 @@ define('ORDER_PROCESSING', 'processing');
 define('ORDER_COMPLETED', 'completed');
 define('ORDER_CANCELLED', 'cancelled');
 
+// App config
+define('APP_DEBUG', true);
+define('APP_ENV', 'development');
+
+// Pagination
+define('DEFAULT_PAGE_SIZE', 20);
+define('MAX_PAGE_SIZE', 100);
+
 // TODO: Thêm các hằng số khác

@@ -7,6 +7,10 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
     str_starts_with($currentPath, '/admin/logs') ||
     str_starts_with($currentPath, '/admin/config') ||
     str_starts_with($currentPath, '/admin/password-reset');
+
+$isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
+    str_starts_with($currentPath, '/admin/brands') ||
+    str_starts_with($currentPath, '/admin/suppliers');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -70,6 +74,44 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
                             </a>
                         </li>
                     <?php endif; ?>
+                </ul>
+            </li>
+        <?php endif; ?>
+
+        <!-- Menu Danh mục sản phẩm -->
+        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+            <li class="menu-item-has-children <?= $isCategoryMenuActive ? 'active' : '' ?>">
+                <input type="checkbox" id="category-menu-toggle" class="menu-toggle"
+                    <?= $isCategoryMenuActive ? 'checked' : '' ?>>
+                <label for="category-menu-toggle" class="menu-label">
+                    <i class="fas fa-folder-tree"></i>
+                    <span>Danh mục sản phẩm</span>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </label>
+                <ul class="submenu">
+                    <li>
+                        <a href="/admin/categories"
+                            class="<?= str_starts_with($currentPath, '/admin/categories') ? 'active' : '' ?>">
+                            <i class="fas fa-folder"></i>
+                            <span>Danh mục</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/admin/brands" 
+                            class="<?= str_starts_with($currentPath, '/admin/brands') ? 'active' : '' ?>">
+                            <i class="fas fa-tag"></i>
+                            <span>Thương hiệu</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/admin/suppliers" 
+                            class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
+                            <i class="fas fa-truck"></i>
+                            <span>Nhà cung cấp</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
         <?php endif; ?>
