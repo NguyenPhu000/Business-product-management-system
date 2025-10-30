@@ -6,10 +6,10 @@
 
 return [
     'driver' => 'mysql',
-    'host' => 'localhost',
+    'host' => '100.106.99.41',
     'port' => 3306,
     'database' => 'business_product_management_system',
-    'username' => 'root',
+    'username' => 'dev',
     'password' => '',
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',
