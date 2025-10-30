@@ -44,6 +44,12 @@ class ProductModel extends BaseModel
             $params[] = $filters['category_id'];
         }
 
+        // Lọc theo thương hiệu
+        if (!empty($filters['brand_id'])) {
+            $where[] = "p.brand_id = ?";
+            $params[] = $filters['brand_id'];
+        }
+
         // Lọc theo từ khóa
         if (!empty($filters['keyword'])) {
             $where[] = "(p.name LIKE ? OR p.sku LIKE ?)";
@@ -53,23 +59,51 @@ class ProductModel extends BaseModel
         }
 
         // Lọc theo trạng thái
-        if (isset($filters['status'])) {
+        if (isset($filters['status']) && $filters['status'] !== '') {
             $where[] = "p.status = ?";
             $params[] = $filters['status'];
         }
 
         $whereClause = implode(' AND ', $where);
 
+        // Xử lý ORDER BY
+        $orderBy = 'p.created_at DESC'; // Mặc định
+        if (!empty($filters['sort_by'])) {
+            switch ($filters['sort_by']) {
+                case 'created_at_asc':
+                    $orderBy = 'p.created_at ASC';
+                    break;
+                case 'created_at_desc':
+                    $orderBy = 'p.created_at DESC';
+                    break;
+                case 'price_asc':
+                    // Ưu tiên giá khuyến mãi (sale_price), nếu không có mới lấy giá bán (price)
+                    $orderBy = 'COALESCE(NULLIF(p.sale_price, 0), p.price, 0) ASC';
+                    break;
+                case 'price_desc':
+                    // Ưu tiên giá khuyến mãi (sale_price), nếu không có mới lấy giá bán (price)
+                    $orderBy = 'COALESCE(NULLIF(p.sale_price, 0), p.price, 0) DESC';
+                    break;
+                case 'name_asc':
+                    $orderBy = 'p.name ASC';
+                    break;
+                case 'name_desc':
+                    $orderBy = 'p.name DESC';
+                    break;
+            }
+        }
+
         $query = "
             SELECT p.*,
                    GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS category_names,
-                   GROUP_CONCAT(DISTINCT c.id) AS category_ids
+                   GROUP_CONCAT(DISTINCT c.id) AS category_ids,
+                   (SELECT pi2.url FROM product_images pi2 WHERE pi2.product_id = p.id AND pi2.is_primary = 1 LIMIT 1) AS primary_image
             FROM {$this->table} p
             LEFT JOIN product_categories pc ON p.id = pc.product_id
             LEFT JOIN categories c ON pc.category_id = c.id
             WHERE {$whereClause}
             GROUP BY p.id
-            ORDER BY p.created_at DESC
+            ORDER BY {$orderBy}
             LIMIT ? OFFSET ?
         ";
 
@@ -92,6 +126,11 @@ class ProductModel extends BaseModel
             $params[] = $filters['category_id'];
         }
 
+        if (!empty($filters['brand_id'])) {
+            $where[] = "p.brand_id = ?";
+            $params[] = $filters['brand_id'];
+        }
+
         if (!empty($filters['keyword'])) {
             $where[] = "(p.name LIKE ? OR p.sku LIKE ?)";
             $keyword = '%' . $filters['keyword'] . '%';
@@ -99,7 +138,7 @@ class ProductModel extends BaseModel
             $params[] = $keyword;
         }
 
-        if (isset($filters['status'])) {
+        if (isset($filters['status']) && $filters['status'] !== '') {
             $where[] = "p.status = ?";
             $params[] = $filters['status'];
         }

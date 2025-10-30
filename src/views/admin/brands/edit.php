@@ -23,7 +23,7 @@ $pageTitle = $pageTitle ?? 'Sửa thương hiệu';
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="POST" action="/admin/brands/update/<?= $brand['id'] ?>">
+            <form method="POST" action="/admin/brands/update/<?= $brand['id'] ?>" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-8">
                         <div class="mb-3">
@@ -40,15 +40,28 @@ $pageTitle = $pageTitle ?? 'Sửa thương hiệu';
                         </div>
 
                         <div class="mb-3">
-                            <label for="logo_url" class="form-label">URL Logo</label>
-                            <input type="url" class="form-control" id="logo_url" name="logo_url"
-                                   value="<?= htmlspecialchars($brand['logo_url'] ?? '') ?>">
+                            <label for="logo_image" class="form-label">
+                                <i class="fas fa-image me-1"></i>Logo thương hiệu
+                            </label>
+                            
                             <?php if ($brand['logo_url']): ?>
-                                <div class="mt-2">
+                                <div class="mb-2">
+                                    <strong>Logo hiện tại:</strong><br>
                                     <img src="<?= htmlspecialchars($brand['logo_url']) ?>" 
-                                         alt="Logo" class="brand-logo img-thumbnail">
+                                         alt="Logo" class="img-thumbnail mt-2"
+                                         style="max-width: 200px; max-height: 200px;">
                                 </div>
                             <?php endif; ?>
+                            
+                            <input type="file" class="form-control" id="logo_image" name="logo_image" accept="image/*">
+                            <div class="form-text">Chọn ảnh mới để thay đổi logo (JPG, PNG, GIF - Max 5MB)</div>
+                            
+                            <!-- Preview ảnh mới -->
+                            <div id="logoPreview" class="mt-3" style="display: none;">
+                                <strong>Ảnh mới:</strong><br>
+                                <img id="previewImg" src="" alt="Preview" class="img-thumbnail mt-2"
+                                     style="max-width: 200px; max-height: 200px;">
+                            </div>
                         </div>
                     </div>
 
@@ -93,6 +106,39 @@ $pageTitle = $pageTitle ?? 'Sửa thương hiệu';
 <link rel="stylesheet" href="/assets/css/brand-style.css">
 
 <script>
+// Preview ảnh khi chọn file
+document.getElementById('logo_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Kiểm tra kích thước file (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Kích thước file không được vượt quá 5MB!');
+            this.value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            return;
+        }
+        
+        // Kiểm tra định dạng file
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('Chỉ chấp nhận file ảnh JPG, PNG, GIF!');
+            this.value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            return;
+        }
+        
+        // Preview ảnh
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('logoPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        document.getElementById('logoPreview').style.display = 'none';
+    }
+});
+
 function deleteBrand(id, name) {
     if (confirm('Bạn có chắc chắn muốn xóa thương hiệu "' + name + '"?')) {
         const form = document.getElementById('deleteForm');

@@ -130,6 +130,27 @@ $router->post('/admin/suppliers/delete/{id}', 'Admin\SupplierController@delete',
 $router->get('/admin/suppliers/detail/{id}', 'Admin\SupplierController@detail', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->post('/admin/suppliers/toggle-active/{id}', 'Admin\SupplierController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
 
+// ============ PRODUCT MANAGEMENT (Protected) ============
+
+// Product CRUD
+$router->get('/admin/products', 'Admin\ProductController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/products/create', 'Admin\ProductController@create', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/store', 'Admin\ProductController@store', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/products/{id}/edit', 'Admin\ProductController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/{id}/update', 'Admin\ProductController@update', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/{id}/delete', 'Admin\ProductController@destroy', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/{id}/toggle', 'Admin\ProductController@toggle', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Product Images
+$router->post('/admin/products/delete-image', 'Admin\ProductController@deleteImage', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/set-primary-image', 'Admin\ProductController@setPrimaryImage', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Product Variants - Quản lý biến thể
+$router->get('/admin/products/{id}/variants', 'Admin\ProductVariantController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/products/{id}/variants/create', 'Admin\ProductVariantController@create', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/{id}/variants/store', 'Admin\ProductVariantController@store', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/products/{productId}/variants/{variantId}/delete', 'Admin\ProductVariantController@destroy', [AuthMiddleware::class, RoleMiddleware::class]);
+
 // ============ PRODUCT-CATEGORY MANAGEMENT (Protected) ============
 
 // Product-Category Relations - Gán sản phẩm vào nhiều danh mục
