@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Delete Product</title>
+  </head>
+  <body>
+    <h1>Test Delete Product</h1>
+
+    <h2>Test 1: Form trực tiếp</h2>
+    <form method="POST" action="/admin/products/1/delete">
+      <p>Xóa product ID 1 (17 Pro Max)</p>
+      <button type="submit">Xóa Product 1</button>
+    </form>
+
+    <hr />
+
+    <h2>Test 2: JavaScript tạo form</h2>
+    <button id="testBtn" data-id="2" data-name="Xiaomi K70E">
+      Xóa Product 2 (Xiaomi K70E)
+    </button>
+
+    <script>
+      document.getElementById("testBtn").addEventListener("click", function () {
+        const productId = this.dataset.id;
+        const productName = this.dataset.name;
+
+        console.log("Deleting product:", { productId, productName });
+
+        if (confirm(`Xóa sản phẩm "${productName}"?`)) {
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = `/admin/products/${productId}/delete`;
+
+          console.log("Form action:", form.action);
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    </script>
+  </body>
+</html>
