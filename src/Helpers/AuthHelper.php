@@ -89,6 +89,25 @@ class AuthHelper
     }
 
     /**
+     * Kiểm tra quyền Chủ tiệm
+     */
+    public static function isOwner(): bool
+    {
+        self::startSession();
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] == ROLE_OWNER;
+    }
+
+    /**
+     * Kiểm tra quyền Admin hoặc Chủ tiệm (quyền quản lý cao)
+     */
+    public static function isAdminOrOwner(): bool
+    {
+        self::startSession();
+        $role = $_SESSION['user_role'] ?? null;
+        return $role == ROLE_ADMIN || $role == ROLE_OWNER;
+    }
+
+    /**
      * Kiểm tra có role cụ thể
      */
     public static function hasRole(int $roleId): bool

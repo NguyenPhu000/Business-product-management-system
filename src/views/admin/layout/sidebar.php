@@ -14,7 +14,7 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
     </div>
 
     <ul class="sidebar-menu">
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
             <li class="menu-item-has-children <?= $isCompanyMenuActive ? 'active' : '' ?>">
                 <input type="checkbox" id="company-menu-toggle" class="menu-toggle"
                     <?= $isCompanyMenuActive ? 'checked' : '' ?>>
@@ -53,15 +53,16 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
                         </a>
                     </li>
 
-                    <?php if (\Helpers\AuthHelper::isAdmin()): ?>
-                        <li>
-                            <a href="/admin/password-reset"
-                                class="<?= str_starts_with($currentPath, '/admin/password-reset') ? 'active' : '' ?>">
-                                <i class="fas fa-key"></i>
-                                <span>Yêu cầu đặt lại MK</span>
-                            </a>
-                        </li>
+                    <li>
+                        <a href="/admin/password-reset"
+                            class="<?= str_starts_with($currentPath, '/admin/password-reset') ? 'active' : '' ?>">
+                            <i class="fas fa-key"></i>
+                            <span>Yêu cầu đặt lại MK</span>
+                        </a>
+                    </li>
 
+                    <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+                        <!-- CHỈ ADMIN - Chủ tiệm KHÔNG hiển thị menu này -->
                         <li>
                             <a href="/admin/config"
                                 class="<?= str_starts_with($currentPath, '/admin/config') ? 'active' : '' ?>">

@@ -16,21 +16,21 @@ abstract class BaseModel extends DatabaseModel
 {
     protected string $table = '';
     protected string $primaryKey = 'id';
-    
+
     /**
      * Lấy tất cả bản ghi
      */
     public function all(string $orderBy = '', string $order = 'ASC'): array
     {
         $sql = "SELECT * FROM {$this->table}";
-        
+
         if ($orderBy) {
             $sql .= " ORDER BY {$orderBy} {$order}";
         }
-        
+
         return $this->query($sql);
     }
-    
+
     /**
      * Tìm bản ghi theo ID
      */
@@ -39,7 +39,7 @@ abstract class BaseModel extends DatabaseModel
         $sql = "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ? LIMIT 1";
         return $this->queryOne($sql, [$id]);
     }
-    
+
     /**
      * Tìm bản ghi theo điều kiện
      */
@@ -47,16 +47,16 @@ abstract class BaseModel extends DatabaseModel
     {
         $where = [];
         $params = [];
-        
+
         foreach ($conditions as $key => $value) {
-            $where[] = "{$key} = ?";
+            $where[] = "`{$key}` = ?";
             $params[] = $value;
         }
-        
+
         $sql = "SELECT * FROM {$this->table} WHERE " . implode(' AND ', $where) . " LIMIT 1";
         return $this->queryOne($sql, $params);
     }
-    
+
     /**
      * Lấy nhiều bản ghi theo điều kiện
      */
@@ -64,21 +64,21 @@ abstract class BaseModel extends DatabaseModel
     {
         $where = [];
         $params = [];
-        
+
         foreach ($conditions as $key => $value) {
-            $where[] = "{$key} = ?";
+            $where[] = "`{$key}` = ?";
             $params[] = $value;
         }
-        
+
         $sql = "SELECT * FROM {$this->table} WHERE " . implode(' AND ', $where);
-        
+
         if ($orderBy) {
-            $sql .= " ORDER BY {$orderBy} {$order}";
+            $sql .= " ORDER BY `{$orderBy}` {$order}";
         }
-        
+
         return $this->query($sql, $params);
     }
-    
+
     /**
      * Thêm bản ghi mới
      */
@@ -86,18 +86,18 @@ abstract class BaseModel extends DatabaseModel
     {
         $fields = array_keys($data);
         $placeholders = array_fill(0, count($fields), '?');
-        
+
         $sql = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
             $this->table,
             implode(', ', $fields),
             implode(', ', $placeholders)
         );
-        
+
         $this->execute($sql, array_values($data));
         return (int) $this->lastInsertId();
     }
-    
+
     /**
      * Cập nhật bản ghi
      */
@@ -105,24 +105,24 @@ abstract class BaseModel extends DatabaseModel
     {
         $fields = [];
         $params = [];
-        
+
         foreach ($data as $key => $value) {
             $fields[] = "{$key} = ?";
             $params[] = $value;
         }
-        
+
         $params[] = $id;
-        
+
         $sql = sprintf(
             "UPDATE %s SET %s WHERE %s = ?",
             $this->table,
             implode(', ', $fields),
             $this->primaryKey
         );
-        
+
         return $this->execute($sql, $params);
     }
-    
+
     /**
      * Xóa bản ghi
      */
@@ -131,32 +131,32 @@ abstract class BaseModel extends DatabaseModel
         $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = ?";
         return $this->execute($sql, [$id]);
     }
-    
+
     /**
      * Đếm số bản ghi
      */
     public function count(array $conditions = []): int
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-        
+
         if (!empty($conditions)) {
             $where = [];
             $params = [];
-            
+
             foreach ($conditions as $key => $value) {
                 $where[] = "{$key} = ?";
                 $params[] = $value;
             }
-            
+
             $sql .= " WHERE " . implode(' AND ', $where);
             $result = $this->queryOne($sql, $params);
         } else {
             $result = $this->queryOne($sql);
         }
-        
+
         return (int) ($result['total'] ?? 0);
     }
-    
+
     /**
      * Kiểm tra bản ghi có tồn tại không
      */
@@ -164,7 +164,7 @@ abstract class BaseModel extends DatabaseModel
     {
         return $this->count($conditions) > 0;
     }
-    
+
     /**
      * Lấy danh sách có phân trang
      */
@@ -173,7 +173,7 @@ abstract class BaseModel extends DatabaseModel
         $offset = ($page - 1) * $perPage;
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
-        
+
         if (!empty($conditions)) {
             $where = [];
             foreach ($conditions as $key => $value) {
@@ -182,12 +182,12 @@ abstract class BaseModel extends DatabaseModel
             }
             $sql .= " WHERE " . implode(' AND ', $where);
         }
-        
+
         $sql .= " LIMIT {$perPage} OFFSET {$offset}";
-        
+
         $data = $this->query($sql, $params);
         $total = $this->count($conditions);
-        
+
         return [
             'data' => $data,
             'total' => $total,

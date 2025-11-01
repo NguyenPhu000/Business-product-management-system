@@ -9,6 +9,7 @@
 
 use Middlewares\AuthMiddleware;
 use Middlewares\RoleMiddleware;
+use Middlewares\AdminOnlyMiddleware;
 
 // Redirect root to admin login
 $router->get('/', function () {
@@ -53,11 +54,11 @@ $router->post('/admin/logs/cleanup', 'Admin\LogsController@cleanup', [AuthMiddle
 $router->post('/admin/logs/update/{id}', 'Admin\LogsController@update', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->post('/admin/logs/delete/{id}', 'Admin\LogsController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
 
-// System Config
-$router->get('/admin/config', 'Admin\ConfigController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/store', 'Admin\ConfigController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/update', 'Admin\ConfigController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/delete', 'Admin\ConfigController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+// System Config (CHỈ ADMIN - Chủ tiệm KHÔNG được vào)
+$router->get('/admin/config', 'Admin\ConfigController@index', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/store', 'Admin\ConfigController@store', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/update', 'Admin\ConfigController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/delete', 'Admin\ConfigController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // Password Reset Management
 $router->get('/admin/password-reset', 'Admin\PasswordResetController@index', [AuthMiddleware::class, RoleMiddleware::class]);
