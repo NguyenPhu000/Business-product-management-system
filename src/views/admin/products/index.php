@@ -8,7 +8,8 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-box-seam"></i> Quản lý sản phẩm <span class="text-muted fs-6 fw-normal">Tổng: <?= $totalProducts ?> sản phẩm</span></h2>
+        <h2><i class="bi bi-box-seam"></i> Quản lý sản phẩm <span class="text-muted fs-6 fw-normal">Tổng:
+                <?= $totalProducts ?> sản phẩm</span></h2>
         <a href="/admin/products/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Thêm sản phẩm
         </a>
@@ -38,20 +39,26 @@
         </div>
         <div class="card-body">
             <form method="GET" action="/admin/products" id="filterForm">
-                <!-- Row 1: Tìm kiếm -->
-                <div class="mb-3">
-                    <label for="keyword" class="form-label fw-semibold">
-                        <i class="bi bi-search"></i> Tìm kiếm
-                    </label>
-                    <input type="text" class="form-control form-control-lg" id="keyword" name="keyword"
-                        placeholder="Nhập tên sản phẩm hoặc mã SKU..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
-                </div>
+                <!-- Tìm kiếm và các bộ lọc ngang -->
+                <div class="row mb-3 align-items-end"
+                    style="display: flex !important; flex-wrap: wrap !important; gap: 1rem;">
+                    <!-- Tìm kiếm -->
+                    <div class="col-lg-3 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
+                        <label for="keyword" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="keyword" name="keyword"
+                            placeholder="Tên sản phẩm hoặc SKU..."
+                            value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
+                    </div>
 
-                <!-- Row 2: Bộ lọc ngang -->
-                <div class="row g-2 mb-3 align-items-end">
-                    <div class="col-lg-3 col-md-6">
-                        <label for="category_id" class="form-label mb-1 small fw-semibold">Danh mục</label>
-                        <select class="form-select form-select-sm" id="category_id" name="category_id">
+                    <!-- Danh mục -->
+                    <div class="col-lg-2 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
+                        <label for="category_id" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">Danh
+                            mục</label>
+                        <select class="form-select form-select-lg" id="category_id" name="category_id"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($categories as $category): ?>
                             <?php 
@@ -65,9 +72,12 @@
                         </select>
                     </div>
 
-                    <div class="col-lg-3 col-md-6">
-                        <label for="brand_id" class="form-label mb-1 small fw-semibold">Thương hiệu</label>
-                        <select class="form-select form-select-sm" id="brand_id" name="brand_id">
+                    <!-- Thương hiệu -->
+                    <div class="col-lg-2 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
+                        <label for="brand_id" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">Thương
+                            hiệu</label>
+                        <select class="form-select form-select-lg" id="brand_id" name="brand_id"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($brands as $brand): ?>
                             <?php $selected = ($filters['brand_id'] ?? '') == $brand['id'] ? 'selected' : ''; ?>
@@ -78,9 +88,12 @@
                         </select>
                     </div>
 
-                    <div class="col-lg-2 col-md-6">
-                        <label for="status" class="form-label mb-1 small fw-semibold">Trạng thái</label>
-                        <select class="form-select form-select-sm" id="status" name="status">
+                    <!-- Trạng thái -->
+                    <div class="col-lg-2 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
+                        <label for="status" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">Trạng
+                            thái</label>
+                        <select class="form-select form-select-lg" id="status" name="status"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <option value="1" <?= ($filters['status'] ?? '') === '1' ? 'selected' : '' ?>>Hiển thị
                             </option>
@@ -88,9 +101,12 @@
                         </select>
                     </div>
 
-                    <div class="col-lg-4 col-md-6">
-                        <label for="sort_by" class="form-label mb-1 small fw-semibold">Sắp xếp</label>
-                        <select class="form-select form-select-sm" id="sort_by" name="sort_by">
+                    <!-- Sắp xếp -->
+                    <div class="col-lg-2 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
+                        <label for="sort_by" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">Sắp
+                            xếp</label>
+                        <select class="form-select form-select-lg" id="sort_by" name="sort_by"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="created_at_desc"
                                 <?= ($filters['sort_by'] ?? 'created_at_desc') === 'created_at_desc' ? 'selected' : '' ?>>
                                 Mới nhất
@@ -117,19 +133,25 @@
                             </option>
                         </select>
                     </div>
+
+                    <!-- Buttons -->
+                    <div class="col-lg-1 col-md-12" style="flex: 0 0 auto;">
+                        <label class="form-label mb-2 fw-semibold"
+                            style="visibility: hidden; font-size: 0.95rem;">.</label>
+                        <button type="submit" class="btn btn-primary btn-lg w-100"
+                            style="padding: 0.75rem 1rem; font-size: 1rem;">
+                            <i class="bi bi-search"></i> Tìm
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Row 3: Buttons -->
+                <!-- Nút đặt lại -->
                 <div class="row">
                     <div class="col-12">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-search"></i> Tìm kiếm
-                            </button>
-                            <a href="/admin/products" class="btn btn-secondary px-4">
-                                <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
-                            </a>
-                        </div>
+                        <a href="/admin/products" class="btn btn-secondary btn-lg"
+                            style="padding: 0.75rem 1.5rem; font-size: 1rem;">
+                            <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                        </a>
                     </div>
                 </div>
             </form>
@@ -361,23 +383,26 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-delete').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             const productId = this.dataset.id;
             const productName = this.dataset.name;
-            
-            console.log('Delete button clicked:', {productId, productName});
+
+            console.log('Delete button clicked:', {
+                productId,
+                productName
+            });
 
             if (confirm(
                     `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
                 )) {
                 console.log('User confirmed delete');
-                
+
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/admin/products/${productId}/delete`;
-                
+
                 console.log('Form action:', form.action);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             } else {
@@ -406,13 +431,15 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 1rem;
 }
 
-.form-select, .form-control {
+.form-select,
+.form-control {
     border: 1px solid #d1d3e2;
     border-radius: 0.35rem;
     transition: all 0.3s ease;
 }
 
-.form-select:focus, .form-control:focus {
+.form-select:focus,
+.form-control:focus {
     border-color: #4e73df;
     box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
 }
@@ -438,10 +465,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .row.g-3 > div {
+    .row.g-3>div {
         margin-bottom: 0.5rem;
     }
-    
+
     .btn {
         width: 100%;
         margin-bottom: 0.5rem;
