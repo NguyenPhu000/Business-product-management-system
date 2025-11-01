@@ -1,0 +1,16 @@
+# .htaccess - Apache rewrite rules
+
+# Bật rewrite engine
+RewriteEngine On
+
+# Chặn truy cập các file ẩn
+<Files ".*">
+    Require all denied
+</Files>
+
+# Redirect tất cả request về index.php (front controller pattern)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# TODO: Thêm rule bảo mật, cache headers nếu cần

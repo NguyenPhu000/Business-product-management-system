@@ -1,0 +1,1 @@
+<!-- inventory_report.php - Báo cáo tồn kho -->

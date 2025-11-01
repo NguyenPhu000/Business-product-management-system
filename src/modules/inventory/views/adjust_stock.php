@@ -1,0 +1,1 @@
+<!-- adjust_stock.php - Form điều chỉnh tồn kho -->

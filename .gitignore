@@ -1,0 +1,38 @@
+# Vendor (Composer packages)
+/vendor/
+composer.phar
+
+# Environment
+.env
+
+# Storage - Logs và Cache
+/storage/logs/*.log
+!/storage/logs/.gitkeep
+/storage/cache/*
+!/storage/cache/views/.gitkeep
+!/storage/cache/data/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+
+# Uploads
+/public/uploads/*
+!/public/uploads/products/.gitkeep
+!/public/uploads/avatars/.gitkeep
+!/public/uploads/documents/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.swp
+*.swo
+*~
