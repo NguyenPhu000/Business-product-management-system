@@ -12,13 +12,26 @@ class ProductImageModel extends BaseModel
 
     /**
      * Lấy tất cả hình ảnh của sản phẩm
+     * Trả về base64 data nếu có, nếu không có thì dùng URL
      */
     public function getByProduct(int $productId): array
     {
-        return $this->query(
+        $images = $this->query(
             "SELECT * FROM {$this->table} WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC",
             [$productId]
         );
+        
+        // Convert base64 to data URL nếu có
+        foreach ($images as &$image) {
+            if (!empty($image['image_data'])) {
+                $mimeType = $image['mime_type'] ?? 'image/jpeg';
+                $image['display_url'] = "data:{$mimeType};base64,{$image['image_data']}";
+            } else {
+                $image['display_url'] = $image['url'];
+            }
+        }
+        
+        return $images;
     }
 
     /**
@@ -26,10 +39,19 @@ class ProductImageModel extends BaseModel
      */
     public function getPrimaryImage(int $productId): ?array
     {
-        return $this->queryOne(
+        $image = $this->queryOne(
             "SELECT * FROM {$this->table} WHERE product_id = ? AND is_primary = 1 LIMIT 1",
             [$productId]
         );
+        
+        if ($image && !empty($image['image_data'])) {
+            $mimeType = $image['mime_type'] ?? 'image/jpeg';
+            $image['display_url'] = "data:{$mimeType};base64,{$image['image_data']}";
+        } elseif ($image) {
+            $image['display_url'] = $image['url'];
+        }
+        
+        return $image;
     }
 
     /**

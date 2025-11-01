@@ -320,34 +320,57 @@ class ProductController extends Controller
      */
     public function destroy(int $id): void
     {
+        error_log("=== START DELETE PRODUCT ID: $id ===");
+        
         try {
+            error_log("Step 1: Finding product...");
             $product = $this->productModel->find($id);
 
             if (!$product) {
+                error_log("ERROR: Product not found");
                 AuthHelper::setFlash('error', 'Không tìm thấy sản phẩm');
                 $this->redirect('/admin/products');
                 return;
             }
+            
+            error_log("Step 2: Product found: " . $product['name']);
 
-            // Xóa hình ảnh trên server
+            // Xóa hình ảnh trên server (chỉ xóa file nếu có URL, bỏ qua base64)
+            error_log("Step 3: Getting images...");
             $images = $this->productImageModel->getByProduct($id);
+            error_log("Found " . count($images) . " images");
+            
             foreach ($images as $image) {
-                $this->deleteImageFile($image['url']);
+                // Chỉ xóa file nếu có URL (ảnh cũ), không xóa ảnh base64
+                if (!empty($image['url'])) {
+                    error_log("Deleting image file: " . $image['url']);
+                    $this->deleteImageFile($image['url']);
+                } else {
+                    error_log("Skipping base64 image ID: " . $image['id']);
+                }
             }
 
             // Xóa sản phẩm (cascade sẽ xóa categories, images trong DB)
-            $this->productModel->delete($id);
+            error_log("Step 4: Deleting product from database...");
+            $result = $this->productModel->delete($id);
+            error_log("Delete result: " . ($result ? 'SUCCESS' : 'FAILED'));
 
             // Log
+            error_log("Step 5: Logging action...");
             LogHelper::log('delete', 'product', $id, $product);
 
+            error_log("Step 6: Setting flash message...");
             AuthHelper::setFlash('success', 'Xóa sản phẩm thành công!');
+            
+            error_log("=== END DELETE PRODUCT ID: $id (SUCCESS) ===");
 
         } catch (\Exception $e) {
-            error_log('Error deleting product: ' . $e->getMessage());
+            error_log('ERROR deleting product: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
             AuthHelper::setFlash('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
 
+        error_log("Redirecting to /admin/products");
         $this->redirect('/admin/products');
     }
 
@@ -385,12 +408,6 @@ class ProductController extends Controller
     private function handleImageUpload(int $productId): array
     {
         $uploadedImages = [];
-        $uploadDir = __DIR__ . '/../../../public/assets/images/products/';
-
-        // Tạo thư mục nếu chưa có
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
 
         // Xử lý từng file
         $fileCount = count($_FILES['images']['name']);
@@ -418,29 +435,25 @@ class ProductController extends Controller
                 continue;
             }
 
-            // Tạo tên file unique
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $newFileName = $productId . '_' . uniqid() . '.' . $extension;
-            $destination = $uploadDir . $newFileName;
+            // Đọc file và convert sang base64
+            $imageData = file_get_contents($fileTmpName);
+            $base64Data = base64_encode($imageData);
+            
+            // Ảnh đầu tiên là ảnh chính
+            $isPrimary = ($i === 0 && empty($uploadedImages)) ? 1 : 0;
 
-            // Upload file
-            if (move_uploaded_file($fileTmpName, $destination)) {
-                // Lưu vào database
-                $imageUrl = '/assets/images/products/' . $newFileName;
-                
-                // Ảnh đầu tiên là ảnh chính
-                $isPrimary = ($i === 0 && empty($uploadedImages)) ? 1 : 0;
+            // Lưu vào database (base64 + mime type)
+            $imageId = $this->productImageModel->create([
+                'product_id' => $productId,
+                'url' => null, // Không cần lưu URL nữa
+                'image_data' => $base64Data,
+                'mime_type' => $fileType,
+                'is_primary' => $isPrimary,
+                'sort_order' => $i
+            ]);
 
-                $imageId = $this->productImageModel->create([
-                    'product_id' => $productId,
-                    'url' => $imageUrl,
-                    'is_primary' => $isPrimary,
-                    'sort_order' => $i
-                ]);
-
-                if ($imageId) {
-                    $uploadedImages[] = $imageUrl;
-                }
+            if ($imageId) {
+                $uploadedImages[] = "data:{$fileType};base64,{$base64Data}";
             }
         }
 

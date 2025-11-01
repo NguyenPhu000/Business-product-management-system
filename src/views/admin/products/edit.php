@@ -280,7 +280,7 @@
                                     <div class="card-header bg-success text-white text-center py-2" style="height: 45px; display: flex; align-items: center; justify-content: center;">
                                         <strong><i class="bi bi-star-fill"></i> ẢNH CHÍNH</strong>
                                     </div>
-                                    <img src="<?= htmlspecialchars($primaryImage['url']) ?>" 
+                                    <img src="<?= htmlspecialchars($primaryImage['display_url'] ?? $primaryImage['url']) ?>" 
                                          class="card-img" 
                                          alt="Ảnh chính"
                                          style="height: 200px; width: 200px; object-fit: cover;">
@@ -303,7 +303,7 @@
                                             <div class="card-header bg-light text-center py-2" style="height: 45px; display: flex; align-items: center; justify-content: center;">
                                                 <small class="text-muted">Ảnh phụ</small>
                                             </div>
-                                            <img src="<?= htmlspecialchars($image['url']) ?>" 
+                                            <img src="<?= htmlspecialchars($image['display_url'] ?? $image['url']) ?>" 
                                                  class="card-img" 
                                                  alt="Ảnh phụ"
                                                  style="height: 200px; width: 200px; object-fit: cover;">

@@ -359,22 +359,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete product
     document.querySelectorAll('.btn-delete').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
             const productId = this.dataset.id;
             const productName = this.dataset.name;
+            
+            console.log('Delete button clicked:', {productId, productName});
 
             if (confirm(
                     `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
                 )) {
+                console.log('User confirmed delete');
+                
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/admin/products/${productId}/delete`;
+                
+                console.log('Form action:', form.action);
+                
                 document.body.appendChild(form);
                 form.submit();
+            } else {
+                console.log('User cancelled delete');
             }
         });
-    });
-});
     });
 });
 </script>

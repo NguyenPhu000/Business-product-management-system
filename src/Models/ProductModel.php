@@ -97,7 +97,14 @@ class ProductModel extends BaseModel
             SELECT p.*,
                    GROUP_CONCAT(DISTINCT c.name SEPARATOR ', ') AS category_names,
                    GROUP_CONCAT(DISTINCT c.id) AS category_ids,
-                   (SELECT pi2.url FROM product_images pi2 WHERE pi2.product_id = p.id AND pi2.is_primary = 1 LIMIT 1) AS primary_image
+                   (SELECT 
+                       CASE 
+                           WHEN pi2.image_data IS NOT NULL THEN CONCAT('data:', pi2.mime_type, ';base64,', pi2.image_data)
+                           ELSE pi2.url
+                       END
+                   FROM product_images pi2 
+                   WHERE pi2.product_id = p.id AND pi2.is_primary = 1 
+                   LIMIT 1) AS primary_image
             FROM {$this->table} p
             LEFT JOIN product_categories pc ON p.id = pc.product_id
             LEFT JOIN categories c ON pc.category_id = c.id
