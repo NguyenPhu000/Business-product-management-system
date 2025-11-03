@@ -220,14 +220,13 @@ class UsersController extends Controller
             return;
         }
 
-        // Cập nhật user
+        // Cập nhật user (không thay đổi trạng thái từ giao diện theo yêu cầu)
         $data = [
             'username' => $this->input('username'),
             'email' => $this->input('email'),
             'full_name' => $this->input('full_name'),
             'phone' => $this->input('phone'),
-            'role_id' => (int) $this->input('role_id'),
-            'status' => (int) $this->input('status', STATUS_ACTIVE)
+            'role_id' => (int) $this->input('role_id')
         ];
 
         // Nếu có đổi mật khẩu

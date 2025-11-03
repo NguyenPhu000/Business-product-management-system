@@ -43,11 +43,8 @@ $router->post('/admin/users/delete/{id}', 'Admin\UsersController@delete', [AuthM
 
 // Roles Management
 $router->get('/admin/roles', 'Admin\RolesController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/roles/create', 'Admin\RolesController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/store', 'Admin\RolesController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/roles/edit/{id}', 'Admin\RolesController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/update/{id}', 'Admin\RolesController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/delete/{id}', 'Admin\RolesController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/roles/edit/{id}', 'Admin\RolesController@edit', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/roles/update/{id}', 'Admin\RolesController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // Logs Management
 $router->get('/admin/logs', 'Admin\LogsController@index', [AuthMiddleware::class, RoleMiddleware::class]);

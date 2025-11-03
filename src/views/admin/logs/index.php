@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/assets/css/logs.css">
+
 <div class="page-header">
     <h2 class="page-title">Log hoạt động</h2>
 </div>
@@ -143,14 +145,112 @@
         </table>
 
         <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
-        <div class="pagination">
-            <?php for ($i = 1; $i <= $pagination['totalPages']; $i++): ?>
-            <a href="/admin/logs?page=<?= $i ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
-                class="<?= $i == $pagination['page'] ? 'active' : '' ?>">
-                <?= $i ?>
-            </a>
-            <?php endfor; ?>
+        <!-- Phân trang hiện đại -->
+        <div class="modern-pagination-wrapper">
+            <div class="pagination-controls">
+                <!-- Nút First và Previous -->
+                <div class="pagination-nav-buttons">
+                    <a href="/admin/logs?page=1&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang đầu">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="/admin/logs?page=<?= max(1, $pagination['page'] - 1) ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang trước">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </div>
+
+                <!-- Hiển thị số trang -->
+                <div class="pagination-numbers">
+                    <?php
+                        // Hiển thị trang đầu
+                        if ($pagination['page'] > 3): ?>
+                    <a href="/admin/logs?page=1&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="page-number">1</a>
+                    <?php if ($pagination['page'] > 4): ?>
+                    <span class="page-dots">...</span>
+                    <?php endif;
+                        endif;
+
+                        // Hiển thị các trang gần current
+                        $start = max(1, $pagination['page'] - 2);
+                        $end = min($pagination['totalPages'], $pagination['page'] + 2);
+
+                        for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="/admin/logs?page=<?= $i ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="page-number <?= $i == $pagination['page'] ? 'active' : '' ?>">
+                        <?= $i ?>
+                    </a>
+                    <?php endfor;
+
+                        // Hiển thị trang cuối
+                        if ($pagination['page'] < $pagination['totalPages'] - 2): ?>
+                    <?php if ($pagination['page'] < $pagination['totalPages'] - 3): ?>
+                    <span class="page-dots">...</span>
+                    <?php endif; ?>
+                    <a href="/admin/logs?page=<?= $pagination['totalPages'] ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="page-number">
+                        <?= $pagination['totalPages'] ?>
+                    </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Nút Next và Last -->
+                <div class="pagination-nav-buttons">
+                    <a href="/admin/logs?page=<?= min($pagination['totalPages'], $pagination['page'] + 1) ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                        title="Trang sau">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="/admin/logs?page=<?= $pagination['totalPages'] ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                        title="Trang cuối">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+
+                <!-- Ô nhập trang -->
+                <div class="pagination-jump">
+                    <span class="jump-label">Đến trang:</span>
+                    <input type="number" id="jumpToPageLogs" class="jump-input" min="1"
+                        max="<?= $pagination['totalPages'] ?>" value="<?= $pagination['page'] ?>"
+                        placeholder="<?= $pagination['page'] ?>">
+                    <button onclick="jumpToPageLogs()" class="jump-btn" title="Chuyển trang">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thông tin phân trang -->
+            <div class="pagination-info-modern">
+                <span class="info-text">
+                    Trang <strong><?= $pagination['page'] ?></strong> /
+                    <strong><?= $pagination['totalPages'] ?></strong>
+                </span>
+            </div>
         </div>
+
+        <script>
+        function jumpToPageLogs() {
+            const page = document.getElementById('jumpToPageLogs').value;
+            const maxPage = <?= $pagination['totalPages'] ?>;
+            const userId = '<?= $currentUserId ?? '' ?>';
+            const action = '<?= $currentAction ?? '' ?>';
+
+            if (page && page >= 1 && page <= maxPage) {
+                window.location.href = `/admin/logs?page=${page}&user_id=${userId}&action=${action}`;
+            } else {
+                alert('Vui lòng nhập số trang hợp lệ (1 - ' + maxPage + ')');
+            }
+        }
+
+        // Enter để jump
+        document.getElementById('jumpToPageLogs')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                jumpToPageLogs();
+            }
+        });
+        </script>
         <?php endif; ?>
     </div>
 </div>

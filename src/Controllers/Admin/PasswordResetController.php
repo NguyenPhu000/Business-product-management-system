@@ -34,13 +34,29 @@ class PasswordResetController extends Controller
             return;
         }
 
-        // Lấy danh sách yêu cầu
-        $requests = $this->resetRequestModel->getAllRequests();
+        // Lấy số trang từ query string
+        $page = (int)$this->input('page', 1);
+        if ($page < 1) $page = 1;
+
+        $perPage = 10; // Mỗi trang 10 bản ghi
+
+        // Lấy danh sách yêu cầu với phân trang
+        $requests = $this->resetRequestModel->getAllRequests($page, $perPage);
+        $totalRequests = $this->resetRequestModel->countRequests();
+        $totalPages = ceil($totalRequests / $perPage);
         $pendingCount = $this->resetRequestModel->countPendingRequests();
 
         $this->view('admin/password-reset/index', [
             'requests' => $requests,
-            'pendingCount' => $pendingCount
+            'pendingCount' => $pendingCount,
+            'pagination' => [
+                // provide 'page' to match logs pagination format
+                'page' => $page,
+                'currentPage' => $page,
+                'totalPages' => $totalPages,
+                'perPage' => $perPage,
+                'totalRecords' => $totalRequests
+            ]
         ]);
     }
 
@@ -211,22 +227,6 @@ class PasswordResetController extends Controller
             'cancelledIds' => $cancelledIds,
             'count' => count($cancelledIds)
         ]);
-    }
-
-    /**
-     * Tạo mật khẩu ngẫu nhiên
-     */
-    private function generateRandomPassword(int $length = 8): string
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%';
-        $password = '';
-        $charactersLength = strlen($characters);
-
-        for ($i = 0; $i < $length; $i++) {
-            $password .= $characters[rand(0, $charactersLength - 1)];
-        }
-
-        return $password;
     }
 
     /**

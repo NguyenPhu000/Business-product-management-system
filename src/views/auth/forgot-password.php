@@ -71,7 +71,7 @@
             <?php endif; ?>
 
             <div class="back-link">
-                <a href="/admin/login">
+                <a href="#" onclick="backToLogin(event)">
                     <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
                 </a>
             </div>
@@ -83,11 +83,39 @@
         const waitingUserId = <?= $waitingUserId ?? 'null' ?>;
 
         function cancelWaiting() {
-            if (confirm('Bạn có chắc muốn hủy yêu cầu đang chờ?')) {
-                fetch('/admin/logout').then(() => {
-                    location.reload();
-                });
+            if (!confirm('Bạn có chắc muốn hủy yêu cầu đang chờ?')) {
+                return;
             }
+
+            // Gọi API hủy yêu cầu (POST JSON với user_id)
+            fetch('/forgot-password/cancel-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: waitingUserId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Thông báo nhẹ nhàng và chuyển về form gửi yêu cầu mới
+                        alert('✅ Yêu cầu đã được hủy. Bạn có thể gửi yêu cầu mới.');
+                        // Xóa session phía client bằng gọi logout rồi chuyển về trang forgot-password để tạo request mới
+                        return fetch('/admin/logout');
+                    } else {
+                        alert(data.message || 'Không thể hủy yêu cầu. Vui lòng thử lại.');
+                    }
+                })
+                .then(() => {
+                    // Reload để reset UI (nếu fetch('/admin/logout') trả về)
+                    window.location.href = '/forgot-password';
+                })
+                .catch(err => {
+                    console.error('Lỗi khi hủy yêu cầu:', err);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                });
         }
 
         function clearSession() {
@@ -95,6 +123,34 @@
             fetch('/admin/logout').then(() => {
                 window.location.href = '/forgot-password';
             });
+        }
+
+        function backToLogin(e) {
+            e.preventDefault();
+            // Nếu không có waitingUserId thì chuyển thẳng về login
+            if (!waitingUserId) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            // Silent cancel: xóa pending request phía server để admin không nhận thông báo
+            fetch('/forgot-password/cancel-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: waitingUserId,
+                        silent: true
+                    })
+                })
+                .then(() => {
+                    // Xóa session phía client và chuyển về trang login mà không hiện thông báo
+                    return fetch('/admin/logout');
+                })
+                .finally(() => {
+                    window.location.href = '/admin/login';
+                });
         }
 
         // Polling kiểm tra trạng thái - 2 giây/lần
@@ -105,8 +161,13 @@
                     .then(data => {
                         if (data.status === 'approved') {
                             clearInterval(pollInterval);
-                            window.location.href =
-                                '/forgot-password?email=<?= urlencode($waitingEmail ?? '') ?>&approved=1';
+                            // Redirect directly to reset-password-form with request_id for a cleaner flow
+                            if (data.request_id) {
+                                window.location.href = '/reset-password-form?request_id=' + data.request_id;
+                            } else {
+                                // Fallback to previous behavior
+                                window.location.href = '/forgot-password?email=<?= urlencode($waitingEmail ?? '') ?>&approved=1';
+                            }
                         } else if (data.status === 'rejected') {
                             clearInterval(pollInterval);
                             document.getElementById('waitingSection').innerHTML = `

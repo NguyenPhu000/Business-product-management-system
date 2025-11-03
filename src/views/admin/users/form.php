@@ -68,15 +68,7 @@ $formAction = isset($user) ? "/admin/users/update/{$user['id']}" : "/admin/users
                         <?php endif; ?>
                     </div>
 
-                    <div class="form-group">
-                        <label for="status" class="form-label">Trạng thái *</label>
-                        <select id="status" name="status" class="form-control" required>
-                            <option value="1" <?= ($old['status'] ?? $user['status'] ?? 1) == 1 ? 'selected' : '' ?>>
-                                Hoạt động</option>
-                            <option value="0" <?= ($old['status'] ?? $user['status'] ?? 1) == 0 ? 'selected' : '' ?>>
-                                Không hoạt động</option>
-                        </select>
-                    </div>
+                    <!-- Trạng thái đã bị loại khỏi giao diện theo yêu cầu -->
 
                     <?php if (!isset($user)): ?>
                         <div class="form-group">

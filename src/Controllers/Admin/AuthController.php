@@ -119,6 +119,35 @@ class AuthController extends Controller
             $this->redirect('/admin/dashboard');
         }
 
+        // Nếu URL có ?approved=1&email=... thì xử lý ngay (JS polling redirect sẽ gửi về URL này).
+        // Điều này là cần thiết vì route GET '/forgot-password' hiện gọi showForgotPassword().
+        $approvedParam = $this->input('approved', '');
+        $emailParam = $this->input('email', '');
+
+        if (!empty($approvedParam) && (string)$approvedParam === '1' && !empty($emailParam)) {
+            // Tìm user theo email
+            $user = $this->userModel->findByEmail($emailParam);
+            if ($user) {
+                $userId = $user['id'];
+                // Kiểm tra có request approved không
+                $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($userId);
+                if ($approvedRequest) {
+                    // Đã được approve! Chuyển sang form reset password
+                    $_SESSION['reset_email'] = $emailParam;
+                    $_SESSION['reset_user_id'] = $userId;
+                    $_SESSION['reset_request_id'] = $approvedRequest['id'];
+
+                    // Xóa session waiting nếu có
+                    unset($_SESSION['waiting_approval_email']);
+                    unset($_SESSION['waiting_approval_user_id']);
+
+                    $this->redirect('/reset-password-form');
+                    return;
+                }
+            }
+            // Nếu không tìm thấy user hoặc không có approved request, tiếp tục hiển thị form bình thường
+        }
+
         // Kiểm tra xem có session waiting không, nếu có thì check xem đã approved chưa
         if (isset($_SESSION['waiting_approval_user_id'])) {
             $userId = (int)$_SESSION['waiting_approval_user_id'];
@@ -356,7 +385,26 @@ class AuthController extends Controller
      */
     public function showResetPasswordForm(): void
     {
-        // Kiểm tra có email trong session không
+        // Nếu được gọi với request_id (redirect trực tiếp từ checkApproval), dùng request_id để validate
+        $requestId = (int)$this->input('request_id', 0);
+        if ($requestId > 0) {
+            $approvedRequest = $this->resetRequestModel->getApprovedRequestById($requestId);
+            if ($approvedRequest) {
+                // Thiết lập session cho flow đổi mật khẩu
+                $_SESSION['reset_email'] = $approvedRequest['email'];
+                $_SESSION['reset_user_id'] = $approvedRequest['user_id'];
+                $_SESSION['reset_request_id'] = $approvedRequest['id'];
+
+                $this->view('auth/reset-password-form', ['email' => $approvedRequest['email']], null);
+                return;
+            }
+            // Nếu request_id không hợp lệ hoặc hết hạn, thông báo lỗi
+            AuthHelper::setFlash('error', 'Liên kết đổi mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng gửi lại yêu cầu.');
+            $this->redirect('/forgot-password');
+            return;
+        }
+
+        // Mặc định: kiểm tra session (ví dụ admin tự reset hoặc polling redirect đã thiết lập session trước đó)
         if (!isset($_SESSION['reset_email']) || !isset($_SESSION['reset_user_id'])) {
             AuthHelper::setFlash('error', 'Phiên làm việc đã hết hạn. Vui lòng thử lại!');
             $this->redirect('/forgot-password');
@@ -487,9 +535,21 @@ class AuthController extends Controller
 
         $input = json_decode(file_get_contents('php://input'), true);
         $userId = $input['user_id'] ?? null;
+        $silent = isset($input['silent']) ? (bool)$input['silent'] : false;
 
         if (!$userId) {
             $this->json(['success' => false, 'message' => 'User ID is required']);
+            return;
+        }
+
+        if ($silent) {
+            // Silent cancel: xóa luôn các request pending của user để admin không bị thông báo
+            $deleted = $this->resetRequestModel->deletePendingRequestByUser((int)$userId);
+            if ($deleted) {
+                $this->json(['success' => true, 'message' => 'Yêu cầu đã được hủy (silent)']);
+            } else {
+                $this->json(['success' => false, 'message' => 'Không tìm thấy yêu cầu pending hoặc không thể xóa']);
+            }
             return;
         }
 
@@ -507,21 +567,5 @@ class AuthController extends Controller
                 'message' => 'Không tìm thấy yêu cầu pending hoặc không thể hủy'
             ]);
         }
-    }
-
-    /**
-     * Tạo mật khẩu ngẫu nhiên
-     */
-    private function generateRandomPassword(int $length = 8): string
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%';
-        $password = '';
-        $charactersLength = strlen($characters);
-
-        for ($i = 0; $i < $length; $i++) {
-            $password .= $characters[rand(0, $charactersLength - 1)];
-        }
-
-        return $password;
     }
 }
