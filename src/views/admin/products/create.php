@@ -18,11 +18,11 @@
 
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            <?= $flash ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <?= $flash ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <!-- Form -->
@@ -34,7 +34,7 @@
         </div>
         <div class="card-body">
             <form method="POST" action="/admin/products/store" enctype="multipart/form-data" id="productForm">
-                
+
                 <!-- Row 1: SKU và Tên sản phẩm -->
                 <div class="row mb-3">
                     <div class="col-md-4">
@@ -42,29 +42,22 @@
                             Mã sản phẩm (SKU) <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="sku" 
-                                   name="sku" 
-                                   value="<?= $autoSku ?>"
-                                   required>
-                            <button class="btn btn-outline-secondary" type="button" id="generateSku" title="Tạo mã tự động">
+                            <input type="text" class="form-control" id="sku" name="sku" value="<?= $autoSku ?>"
+                                required>
+                            <button class="btn btn-outline-secondary" type="button" id="generateSku"
+                                title="Tạo mã tự động">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
                         <small class="text-muted">Mã định danh duy nhất cho sản phẩm</small>
                     </div>
-                    
+
                     <div class="col-md-8">
                         <label for="name" class="form-label">
                             Tên sản phẩm <span class="text-danger">*</span>
                         </label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="name" 
-                               name="name" 
-                               placeholder="Nhập tên sản phẩm"
-                               required>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên sản phẩm"
+                            required>
                     </div>
                 </div>
 
@@ -76,27 +69,24 @@
                         </label>
                         <div class="category-selector border rounded p-3" style="max-height: 250px; overflow-y: auto;">
                             <?php if (!empty($categories)): ?>
-                                <?php foreach ($categories as $category): ?>
-                                    <?php 
+                            <?php foreach ($categories as $category): ?>
+                            <?php 
                                     $level = $category['level'] ?? 0;
                                     $indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $level);
                                     $disabled = $category['is_active'] == 0 ? 'disabled' : '';
                                     $badge = $category['is_active'] == 0 ? '<span class="badge bg-secondary ms-2">Ẩn</span>' : '';
                                     ?>
-                                    <div class="form-check category-level-<?= $level ?>">
-                                        <input class="form-check-input category-checkbox" 
-                                               type="checkbox" 
-                                               name="category_ids[]" 
-                                               value="<?= $category['id'] ?>" 
-                                               id="cat_<?= $category['id'] ?>"
-                                               <?= $disabled ?>>
-                                        <label class="form-check-label" for="cat_<?= $category['id'] ?>">
-                                            <?= $indent ?><?= htmlspecialchars($category['name']) ?> <?= $badge ?>
-                                        </label>
-                                    </div>
-                                <?php endforeach; ?>
+                            <div class="form-check category-level-<?= $level ?>">
+                                <input class="form-check-input category-checkbox" type="checkbox" name="category_ids[]"
+                                    value="<?= $category['id'] ?>" id="cat_<?= $category['id'] ?>" <?= $disabled ?>>
+                                <label class="form-check-label" for="cat_<?= $category['id'] ?>">
+                                    <?= $indent ?><?= htmlspecialchars($category['name']) ?> <?= $badge ?>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
                             <?php else: ?>
-                                <p class="text-muted">Chưa có danh mục nào. <a href="/admin/categories/create">Tạo danh mục mới</a></p>
+                            <p class="text-muted">Chưa có danh mục nào. <a href="/admin/categories/create">Tạo danh mục
+                                    mới</a></p>
                             <?php endif; ?>
                         </div>
                         <small class="text-muted">Có thể chọn nhiều danh mục</small>
@@ -109,11 +99,11 @@
                         <select class="form-select" id="brand_id" name="brand_id" required>
                             <option value="">-- Chọn thương hiệu --</option>
                             <?php foreach ($brands as $brand): ?>
-                                <?php if ($brand['is_active'] == 1): ?>
-                                    <option value="<?= $brand['id'] ?>">
-                                        <?= htmlspecialchars($brand['name']) ?>
-                                    </option>
-                                <?php endif; ?>
+                            <?php if ($brand['is_active'] == 1): ?>
+                            <option value="<?= $brand['id'] ?>">
+                                <?= htmlspecialchars($brand['name']) ?>
+                            </option>
+                            <?php endif; ?>
                             <?php endforeach; ?>
                         </select>
                         <small class="text-muted">
@@ -147,15 +137,8 @@
                     <div class="col-md-6">
                         <label for="tax_rate" class="form-label">Thuế VAT (%)</label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="tax_rate" 
-                                   name="tax_rate" 
-                                   min="0" 
-                                   max="100" 
-                                   step="0.01" 
-                                   value="0"
-                                   placeholder="VD: 10 (cho VAT 10%)">
+                            <input type="number" class="form-control" id="tax_rate" name="tax_rate" min="0" max="100"
+                                step="0.01" value="0" placeholder="VD: 10 (cho VAT 10%)">
                             <span class="input-group-text">%</span>
                         </div>
                         <small class="text-muted">Nhập % thuế VAT (0-100)</small>
@@ -169,14 +152,8 @@
                             Giá nhập <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="unit_cost" 
-                                   name="unit_cost" 
-                                   min="0" 
-                                   step="1000" 
-                                   value="0"
-                                   required>
+                            <input type="number" class="form-control" id="unit_cost" name="unit_cost" min="0"
+                                step="1000" value="0" required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <small class="text-muted">Giá nhập từ nhà cung cấp</small>
@@ -187,22 +164,19 @@
                             Giá bán <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="price" 
-                                   name="price" 
-                                   min="0" 
-                                   step="1000" 
-                                   value="0"
-                                   required>
+                            <input type="number" class="form-control" id="price" name="price" min="0" step="1000"
+                                value="0" required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted">Giá bán cho khách</small>
                             <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-primary btn-sm auto-price" data-margin="20">+20%</button>
-                                <button type="button" class="btn btn-outline-primary btn-sm auto-price" data-margin="30">+30%</button>
-                                <button type="button" class="btn btn-outline-primary btn-sm auto-price" data-margin="50">+50%</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm auto-price"
+                                    data-margin="20">+20%</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm auto-price"
+                                    data-margin="30">+30%</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm auto-price"
+                                    data-margin="50">+50%</button>
                             </div>
                         </div>
                         <small id="profit-info" class="text-success d-block"></small>
@@ -211,21 +185,19 @@
                     <div class="col-md-4">
                         <label for="sale_price" class="form-label">Giá khuyến mãi</label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="sale_price" 
-                                   name="sale_price" 
-                                   min="0" 
-                                   step="1000"
-                                   placeholder="Để trống nếu không KM">
+                            <input type="number" class="form-control" id="sale_price" name="sale_price" min="0"
+                                step="1000" placeholder="Để trống nếu không KM">
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-1">
                             <small class="text-muted">Giá ưu đãi</small>
                             <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale" data-discount="5">-5%</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale" data-discount="10">-10%</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale" data-discount="15">-15%</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale"
+                                    data-discount="5">-5%</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale"
+                                    data-discount="10">-10%</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm auto-sale"
+                                    data-discount="15">-15%</button>
                             </div>
                         </div>
                         <small id="discount-info" class="text-danger d-block"></small>
@@ -257,23 +229,16 @@
                 <!-- Row 5: Mô tả ngắn -->
                 <div class="mb-3">
                     <label for="short_desc" class="form-label">Mô tả ngắn</label>
-                    <textarea class="form-control" 
-                              id="short_desc" 
-                              name="short_desc" 
-                              rows="3"
-                              placeholder="Mô tả ngắn gọn về sản phẩm (tối đa 500 ký tự)"
-                              maxlength="500"></textarea>
+                    <textarea class="form-control" id="short_desc" name="short_desc" rows="3"
+                        placeholder="Mô tả ngắn gọn về sản phẩm (tối đa 500 ký tự)" maxlength="500"></textarea>
                     <small class="text-muted">Hiển thị trong danh sách sản phẩm</small>
                 </div>
 
                 <!-- Row 6: Mô tả dài -->
                 <div class="mb-3">
                     <label for="long_desc" class="form-label">Mô tả chi tiết</label>
-                    <textarea class="form-control" 
-                              id="long_desc" 
-                              name="long_desc" 
-                              rows="6"
-                              placeholder="Mô tả đầy đủ về sản phẩm, tính năng, ưu điểm..."></textarea>
+                    <textarea class="form-control" id="long_desc" name="long_desc" rows="6"
+                        placeholder="Mô tả đầy đủ về sản phẩm, tính năng, ưu điểm..."></textarea>
                     <small class="text-muted">Hiển thị trong trang chi tiết sản phẩm</small>
                 </div>
 
@@ -281,17 +246,15 @@
                 <div class="mb-3">
                     <label for="images" class="form-label">
                         Hình ảnh sản phẩm (đa ảnh)
+                        <span id="imageCounter" class="badge bg-secondary ms-2" style="display: none;">0/5 ảnh</span>
                     </label>
-                    <input type="file" 
-                           class="form-control" 
-                           id="images" 
-                           name="images[]" 
-                           accept="image/*"
-                           multiple>
+                    <input type="file" class="form-control" id="images" name="images[]"
+                        accept="image/jpeg,image/png,image/gif,image/webp" multiple>
                     <small class="text-muted">
-                        Chọn nhiều ảnh (jpg, png, gif, webp). Ảnh đầu tiên sẽ là ảnh chính. Tối đa 5MB/ảnh.
+                        Chọn nhiều ảnh (jpg, png, gif, webp). Ảnh đầu tiên sẽ là ảnh chính. Tối đa 5MB/ảnh, tối đa 5
+                        ảnh.
                     </small>
-                    
+
                     <!-- Preview container -->
                     <div id="imagePreview" class="row mt-3 g-2"></div>
                 </div>
@@ -300,14 +263,9 @@
                 <div class="mb-4">
                     <label class="form-label">Trạng thái</label>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" 
-                               type="checkbox" 
-                               id="status" 
-                               name="status" 
-                               value="1" 
-                               checked>
+                        <input class="form-check-input" type="checkbox" id="status" name="status" value="1" checked>
                         <label class="form-check-label" for="status">
-                            <span class="text-success">Kích hoạt</span> 
+                            <span class="text-success">Kích hoạt</span>
                             <small class="text-muted">(Hiển thị sản phẩm trên hệ thống)</small>
                         </label>
                     </div>
@@ -316,19 +274,21 @@
                 <!-- Divider -->
                 <hr>
 
-                <!-- Action buttons -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Lưu sản phẩm
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
-                        </button>
+                <!-- Action buttons - Sticky version -->
+                <div id="formActions" class="form-actions-sticky">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Lưu sản phẩm
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                            </button>
+                        </div>
+                        <a href="/admin/products" class="btn btn-link btn-lg text-muted">
+                            <i class="bi bi-x-circle"></i> Hủy bỏ
+                        </a>
                     </div>
-                    <a href="/admin/products" class="btn btn-link text-muted">
-                        <i class="bi bi-x-circle"></i> Hủy bỏ
-                    </a>
                 </div>
             </form>
         </div>
@@ -342,7 +302,8 @@
             <li>Mã SKU phải là duy nhất trong hệ thống</li>
             <li>Có thể gán sản phẩm vào nhiều danh mục cùng lúc</li>
             <li>Ảnh đầu tiên được chọn sẽ tự động là ảnh đại diện</li>
-            <li>Sau khi tạo, bạn có thể quản lý <strong>biến thể sản phẩm</strong> (màu sắc, kích thước) và <strong>giá bán</strong> ở trang chỉnh sửa</li>
+            <li>Sau khi tạo, bạn có thể quản lý <strong>biến thể sản phẩm</strong> (màu sắc, kích thước) và <strong>giá
+                    bán</strong> ở trang chỉnh sửa</li>
         </ul>
     </div>
 </div>
@@ -394,7 +355,7 @@
 
 #imagePreview .preview-item:hover {
     border-color: #0d6efd;
-    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #imagePreview .preview-item img {
@@ -445,10 +406,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = function(e) {
                     const col = document.createElement('div');
                     col.className = 'col-md-3 col-sm-4 col-6 mb-3';
-                    
-                    const badge = index === 0 
-                        ? '<span class="badge bg-success">Ảnh chính</span>' 
-                        : '<span class="badge bg-secondary">Ảnh phụ</span>';
+
+                    const badge = index === 0 ?
+                        '<span class="badge bg-success">Ảnh chính</span>' :
+                        '<span class="badge bg-secondary">Ảnh phụ</span>';
 
                     col.innerHTML = `
                         <div class="preview-item">
@@ -472,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     document.getElementById('productForm').addEventListener('submit', function(e) {
         const categoryCheckboxes = document.querySelectorAll('.category-checkbox:checked');
-        
+
         if (categoryCheckboxes.length === 0) {
             e.preventDefault();
             alert('Vui lòng chọn ít nhất một danh mục!');
@@ -517,24 +478,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (unitCost > 0 || price > 0) {
             document.getElementById('price-summary').style.display = 'block';
-            
+
             // Cập nhật summary
             document.getElementById('summary-cost').textContent = formatMoney(unitCost);
             document.getElementById('summary-price').textContent = formatMoney(price);
-            
+
             // Tính lợi nhuận: Ưu tiên giá khuyến mãi nếu có, không thì lấy giá bán
             const finalPrice = salePrice > 0 ? salePrice : price;
             const profit = finalPrice - unitCost;
             document.getElementById('summary-profit').textContent = formatMoney(profit);
-            
+
             // Tính margin %
             const margin = unitCost > 0 ? ((profit / unitCost) * 100).toFixed(1) : 0;
             document.getElementById('summary-margin').textContent = margin + '%';
-            document.getElementById('summary-margin').className = margin >= 20 ? 'text-success fs-5' : 'text-warning fs-5';
+            document.getElementById('summary-margin').className = margin >= 20 ? 'text-success fs-5' :
+                'text-warning fs-5';
 
             // Hiển thị profit info (theo giá cuối cùng)
             if (finalPrice > unitCost) {
-                document.getElementById('profit-info').textContent = `↑ Lãi: ${formatMoney(profit)} (${margin}%)`;
+                document.getElementById('profit-info').textContent =
+                    `↑ Lãi: ${formatMoney(profit)} (${margin}%)`;
                 document.getElementById('profit-info').className = 'text-success d-block';
             } else if (finalPrice < unitCost) {
                 document.getElementById('profit-info').textContent = `↓ Lỗ: ${formatMoney(Math.abs(profit))}`;
@@ -547,7 +510,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Hiển thị discount info
             if (salePrice > 0 && price > 0) {
                 const discount = ((price - salePrice) / price * 100).toFixed(1);
-                document.getElementById('discount-info').textContent = `Giảm ${discount}% (tiết kiệm ${formatMoney(price - salePrice)})`;
+                document.getElementById('discount-info').textContent =
+                    `Giảm ${discount}% (tiết kiệm ${formatMoney(price - salePrice)})`;
             } else {
                 document.getElementById('discount-info').textContent = '';
             }
@@ -561,14 +525,16 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const margin = parseFloat(this.dataset.margin);
             const unitCost = parseFloat(unitCostInput.value) || 0;
-            
+
             if (unitCost > 0) {
-                const calculatedPrice = Math.round(unitCost * (1 + margin / 100) / 1000) * 1000; // Làm tròn đến nghìn
+                const calculatedPrice = Math.round(unitCost * (1 + margin / 100) / 1000) *
+                1000; // Làm tròn đến nghìn
                 priceInput.value = calculatedPrice;
                 updatePriceSummary();
-                
+
                 // Highlight button
-                document.querySelectorAll('.auto-price').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.auto-price').forEach(b => b.classList.remove(
+                    'active'));
                 this.classList.add('active');
             } else {
                 alert('Vui lòng nhập giá nhập trước!');
@@ -581,14 +547,16 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const discount = parseFloat(this.dataset.discount);
             const price = parseFloat(priceInput.value) || 0;
-            
+
             if (price > 0) {
-                const calculatedSale = Math.round(price * (1 - discount / 100) / 1000) * 1000; // Làm tròn đến nghìn
+                const calculatedSale = Math.round(price * (1 - discount / 100) / 1000) *
+                1000; // Làm tròn đến nghìn
                 salePriceInput.value = calculatedSale;
                 updatePriceSummary();
-                
+
                 // Highlight button
-                document.querySelectorAll('.auto-sale').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.auto-sale').forEach(b => b.classList.remove(
+                    'active'));
                 this.classList.add('active');
             } else {
                 alert('Vui lòng nhập giá bán trước!');
@@ -605,7 +573,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gợi ý thuế phổ biến khi click vào ô thuế
     taxRateInput.addEventListener('focus', function() {
         if (this.value == '0') {
-            const common = confirm('Thuế VAT phổ biến:\n- 0%: Không thuế\n- 5%: Hàng thiết yếu\n- 8%: Dịch vụ\n- 10%: Hàng hóa thông thường\n\nBạn có muốn chọn 10% (phổ biến nhất)?');
+            const common = confirm(
+                'Thuế VAT phổ biến:\n- 0%: Không thuế\n- 5%: Hàng thiết yếu\n- 8%: Dịch vụ\n- 10%: Hàng hóa thông thường\n\nBạn có muốn chọn 10% (phổ biến nhất)?'
+                );
             if (common) {
                 this.value = '10';
             }
