@@ -13,21 +13,29 @@ if (!defined('ROLE_ADMIN')) {
 }
 
 // User status
-define('STATUS_ACTIVE', 1);
-define('STATUS_INACTIVE', 0);
+if (!defined('STATUS_ACTIVE')) {
+    define('STATUS_ACTIVE', 1);
+    define('STATUS_INACTIVE', 0);
+}
 
 // Order status
-define('ORDER_PENDING', 'pending');
-define('ORDER_PROCESSING', 'processing');
-define('ORDER_COMPLETED', 'completed');
-define('ORDER_CANCELLED', 'cancelled');
+if (!defined('ORDER_PENDING')) {
+    define('ORDER_PENDING', 'pending');
+    define('ORDER_PROCESSING', 'processing');
+    define('ORDER_COMPLETED', 'completed');
+    define('ORDER_CANCELLED', 'cancelled');
+}
 
 // App config
-define('APP_DEBUG', true);
-define('APP_ENV', 'development');
+if (!defined('APP_DEBUG')) {
+    define('APP_DEBUG', true);
+    define('APP_ENV', 'development');
+}
 
 // Pagination
-define('DEFAULT_PAGE_SIZE', 20);
-define('MAX_PAGE_SIZE', 100);
+if (!defined('DEFAULT_PAGE_SIZE')) {
+    define('DEFAULT_PAGE_SIZE', 20);
+    define('MAX_PAGE_SIZE', 100);
+}
 
 // TODO: Thêm các hằng số khác

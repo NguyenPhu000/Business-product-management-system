@@ -20,7 +20,7 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
     </div>
 
     <ul class="sidebar-menu">
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
         <li class="menu-item-has-children <?= $isCompanyMenuActive ? 'active' : '' ?>">
             <input type="checkbox" id="company-menu-toggle" class="menu-toggle"
                 <?= $isCompanyMenuActive ? 'checked' : '' ?>>
@@ -81,7 +81,7 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
         <?php endif; ?>
 
         <!-- Menu Danh mục sản phẩm -->
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
         <li class="menu-item-has-children <?= $isCategoryMenuActive ? 'active' : '' ?>">
             <input type="checkbox" id="category-menu-toggle" class="menu-toggle"
                 <?= $isCategoryMenuActive ? 'checked' : '' ?>>
@@ -119,7 +119,7 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
         <?php endif; ?>
 
         <!-- Menu Sản phẩm -->
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
         <li>
             <a href="/admin/products" class="<?= $isProductMenuActive ? 'active' : '' ?>">
                 <i class="fas fa-box"></i>

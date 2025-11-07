@@ -18,6 +18,7 @@
 4. ✨ **add_role_owner.sql** - Migration thêm role Owner
 
 ### 🔒 Backup:
+
 - Branch backup: `backup/merge-test-develop`
 - Rollback: `git reset --hard backup/merge-test-develop`
 
@@ -28,6 +29,7 @@
 ### 1. AuthHelper.php - 5 Methods mới
 
 #### 1.1 `isOwner(): bool`
+
 Kiểm tra user hiện tại có quyền **Chủ tiệm** không.
 
 ```php
@@ -38,6 +40,7 @@ if (AuthHelper::isOwner()) {
 ```
 
 #### 1.2 `isAdminOrOwner(): bool`
+
 Kiểm tra user có quyền **quản lý cao** (Admin HOẶC Chủ tiệm).
 
 ```php
@@ -50,9 +53,11 @@ if (!AuthHelper::isAdminOrOwner()) {
 ```
 
 #### 1.3 `getRoleLevel(int $roleId): int`
+
 Lấy **level quyền** của một role.
 
 **Quy tắc phân cấp**:
+
 - Admin (role_id=1): Level 3 (cao nhất)
 - Owner (role_id=5): Level 2
 - Sales Staff (role_id=2): Level 1
@@ -66,6 +71,7 @@ $staffLevel = AuthHelper::getRoleLevel(ROLE_SALES_STAFF); // 1
 ```
 
 #### 1.4 `hasHigherRoleThan(int $targetRoleId): bool`
+
 Kiểm tra user hiện tại có quyền **CAO HƠN** role được chỉ định không.
 
 **Lưu ý**: Level bằng nhau = KHÔNG có quyền cao hơn.
@@ -88,9 +94,11 @@ if (AuthHelper::hasRole(ROLE_SALES_STAFF)) {
 ```
 
 #### 1.5 `canManageRole(int $targetRoleId): bool`
+
 Kiểm tra user có thể **quản lý (edit/delete)** user với role được chỉ định không.
 
 **Quy tắc**:
+
 - Chỉ quyền CAO HƠN mới được quản lý quyền THẤP HƠN
 - Quyền BẰNG NHAU không được quản lý lẫn nhau
 - Không thể xóa tài khoản đang đăng nhập (check riêng ở controller)
@@ -101,19 +109,19 @@ public function delete(string $id): void
 {
     $userId = (int) $id;
     $user = $this->userModel->find($userId);
-    
+
     // Không cho xóa chính mình
     if ($userId == AuthHelper::id()) {
         $this->error('Không thể xóa tài khoản đang đăng nhập', 400);
         return;
     }
-    
+
     // Kiểm tra quyền quản lý
     if (!AuthHelper::canManageRole($user['role_id'])) {
         $this->error('Bạn không có quyền xóa user này', 403);
         return;
     }
-    
+
     // Xóa user
     $this->userModel->delete($userId);
     $this->success(null, 'Xóa user thành công');
@@ -127,6 +135,7 @@ public function delete(string $id): void
 Middleware chuyên dụng cho các chức năng **CHỈ ADMIN** (không cho Chủ tiệm).
 
 #### Mục đích:
+
 - Bảo vệ các tính năng nhạy cảm như **System Config**, **Role Management**
 - Chỉ Admin (role_id=1) mới được truy cập
 - Owner (role_id=5) KHÔNG được truy cập
@@ -148,10 +157,10 @@ $router->add('/admin/roles/edit/{id}', 'RolesController@edit', [AdminOnlyMiddlew
 
 #### So sánh với RoleMiddleware:
 
-| Middleware | Ai được phép? | Dùng cho |
-|------------|---------------|----------|
-| `RoleMiddleware` | Admin + Owner | Dashboard, Reports, Products, Sales |
-| `AdminOnlyMiddleware` | CHỈ Admin | System Config, Role Management |
+| Middleware            | Ai được phép? | Dùng cho                            |
+| --------------------- | ------------- | ----------------------------------- |
+| `RoleMiddleware`      | Admin + Owner | Dashboard, Reports, Products, Sales |
+| `AdminOnlyMiddleware` | CHỈ Admin     | System Config, Role Management      |
 
 ---
 
@@ -164,6 +173,7 @@ define('ROLE_OWNER', 5); // Owner - Chủ tiệm/Chủ cửa hàng
 ```
 
 **Phân cấp đầy đủ**:
+
 - `ROLE_ADMIN = 1` - Level 3 (cao nhất)
 - `ROLE_SALES_STAFF = 2` - Level 1
 - `ROLE_WAREHOUSE_MANAGER = 3` - Level 1
@@ -181,20 +191,21 @@ public function edit(string $id): void
 {
     $userId = (int) $id;
     $user = $this->userModel->find($userId);
-    
+
     // Kiểm tra quyền quản lý
     if (!AuthHelper::canManageRole($user['role_id'])) {
         AuthHelper::setFlash('error', 'Bạn không có quyền sửa user này');
         $this->redirect('/admin/users');
         return;
     }
-    
+
     // Hiển thị form edit
     $this->view('admin/users/edit', ['user' => $user]);
 }
 ```
 
 **Kết quả**:
+
 - ✅ Admin có thể sửa: Owner, Sales Staff, Warehouse Manager
 - ✅ Owner có thể sửa: Sales Staff, Warehouse Manager
 - ❌ Owner KHÔNG thể sửa: Admin
@@ -213,7 +224,7 @@ public function financialReport(): void
         $this->error('Chỉ Admin/Chủ tiệm mới xem được báo cáo tài chính', 403);
         return;
     }
-    
+
     // Hiển thị báo cáo
     $data = $this->reportModel->getFinancialData();
     $this->view('admin/reports/financial', $data);
@@ -233,6 +244,7 @@ $router->add('/admin/system-config', 'SystemConfigController@index', [AdminOnlyM
 ```
 
 **Kết quả**:
+
 - ✅ Admin có thể truy cập System Config
 - ❌ Owner bị chặn với 403 Forbidden
 - ❌ Staff bị chặn với 403 Forbidden
@@ -255,6 +267,7 @@ mysql -u root -p business_product_management < add_role_owner.sql
 ```
 
 **Script SQL**:
+
 ```sql
 INSERT INTO roles (id, name, description, created_at, updated_at)
 SELECT 5, 'Chủ tiệm', 'Chủ cửa hàng - Quyền quản lý toàn bộ cửa hàng (cao hơn Staff, thấp hơn Admin)', NOW(), NOW()
@@ -268,6 +281,7 @@ WHERE NOT EXISTS (
 ## ✅ Kiểm tra sau khi cherry-pick
 
 ### 1. Kiểm tra Syntax
+
 ```bash
 php -l src/Helpers/AuthHelper.php
 php -l src/Middlewares/AdminOnlyMiddleware.php
@@ -277,11 +291,13 @@ php -l config/constants.php
 ✅ Kết quả: **No syntax errors detected**
 
 ### 2. Kiểm tra Database
+
 ```sql
 SELECT * FROM roles ORDER BY id;
 ```
 
 Kết quả mong đợi:
+
 ```
 | id | name               | description                          |
 |----|--------------------|------------------------------------- |
@@ -292,6 +308,7 @@ Kết quả mong đợi:
 ```
 
 ### 3. Test Phân quyền
+
 ```php
 // Test trong controller hoặc tạo file test_auth.php
 require __DIR__ . '/vendor/autoload.php';
@@ -320,12 +337,14 @@ var_dump(AuthHelper::canManageRole(ROLE_OWNER)); // true (Admin quản lý đư�
 ## ⚠️ Lưu ý quan trọng
 
 ### 1. Không được xóa backup branch
+
 ```bash
 # ĐỪNG XÓA branch này
 git branch -D backup/merge-test-develop
 ```
 
 ### 2. Cập nhật routes.php
+
 Nếu có System Config hoặc chức năng nhạy cảm, thêm `AdminOnlyMiddleware`:
 
 ```php
@@ -340,6 +359,7 @@ $router->add('/admin/dashboard', 'DashboardController@index', [RoleMiddleware::c
 ```
 
 ### 3. Update Controllers
+
 Các controller quản lý User cần thêm check `canManageRole()`:
 
 ```php
@@ -369,6 +389,7 @@ git clean -fd
 ## 📝 Kết luận
 
 ✅ **Đã hoàn thành cherry-pick** các tính năng phân quyền từ Minh2244:
+
 - AuthHelper.php: +5 methods phân quyền mới
 - AdminOnlyMiddleware.php: Middleware chuyên dụng cho Admin
 - ROLE_OWNER constant: Hỗ trợ role Chủ tiệm
@@ -379,6 +400,7 @@ git clean -fd
 ✅ **Tài liệu**: File này + BRANCH_COMPARISON_Minh2244.md
 
 🚀 **Bước tiếp theo**:
+
 1. Chạy migration `add_role_owner.sql`
 2. Cập nhật routes.php (thêm AdminOnlyMiddleware cho System Config)
 3. Cập nhật UserController (thêm check canManageRole)

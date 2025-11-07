@@ -18,8 +18,8 @@ class RoleMiddleware
             exit;
         }
         
-        // Kiểm tra quyền admin
-        if (!AuthHelper::isAdmin()) {
+        // Kiểm tra quyền quản lý (Admin hoặc Owner)
+        if (!AuthHelper::isAdminOrOwner()) {
             http_response_code(403);
             echo "
             <!DOCTYPE html>
@@ -38,6 +38,7 @@ class RoleMiddleware
             <body>
                 <h1>403</h1>
                 <p>Bạn không có quyền truy cập trang này</p>
+                <p style='color: #999; font-size: 14px;'>Chức năng này chỉ dành cho Admin hoặc Chủ tiệm</p>
                 <a href='/admin/dashboard'>← Quay lại Dashboard</a>
             </body>
             </html>
