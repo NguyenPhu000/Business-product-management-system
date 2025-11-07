@@ -89,6 +89,25 @@ class AuthHelper
     }
 
     /**
+     * Kiểm tra quyền Chủ tiệm
+     */
+    public static function isOwner(): bool
+    {
+        self::startSession();
+        return isset($_SESSION['user_role']) && $_SESSION['user_role'] == ROLE_OWNER;
+    }
+
+    /**
+     * Kiểm tra quyền Admin hoặc Chủ tiệm (quyền quản lý cao)
+     */
+    public static function isAdminOrOwner(): bool
+    {
+        self::startSession();
+        $role = $_SESSION['user_role'] ?? null;
+        return $role == ROLE_ADMIN || $role == ROLE_OWNER;
+    }
+
+    /**
      * Kiểm tra có role cụ thể
      */
     public static function hasRole(int $roleId): bool
@@ -132,5 +151,58 @@ class AuthHelper
         }
 
         return false;
+    }
+
+    /**
+     * Lấy level quyền của role
+     * Quy tắc: Admin (1) > Chủ tiệm (5) > Sales Staff (2) = Warehouse Manager (3)
+     * 
+     * @param int $roleId ID của role
+     * @return int Level của role (càng cao càng nhiều quyền)
+     */
+    public static function getRoleLevel(int $roleId): int
+    {
+        $roleLevel = [
+            ROLE_ADMIN => 3,              // Admin có level cao nhất (3)
+            ROLE_OWNER => 2,              // Chủ tiệm có level 2
+            ROLE_SALES_STAFF => 1,        // Sales Staff có level 1
+            ROLE_WAREHOUSE_MANAGER => 1   // Warehouse Manager có level 1
+        ];
+
+        return $roleLevel[$roleId] ?? 0;
+    }
+
+    /**
+     * Kiểm tra user hiện tại có quyền cao hơn role được chỉ định không
+     * 
+     * Quy tắc:
+     * - Level cao hơn = có quyền cao hơn
+     * - Level bằng nhau = không có quyền cao hơn
+     * 
+     * @param int $targetRoleId Role ID cần so sánh
+     * @return bool True nếu user hiện tại có quyền CAO HƠN (không bao gồm bằng)
+     */
+    public static function hasHigherRoleThan(int $targetRoleId): bool
+    {
+        self::startSession();
+        $currentRoleId = $_SESSION['user_role'] ?? 0;
+
+        return self::getRoleLevel($currentRoleId) > self::getRoleLevel($targetRoleId);
+    }
+
+    /**
+     * Kiểm tra user hiện tại có thể quản lý (edit/delete) user có role ID được chỉ định không
+     * 
+     * Quy tắc:
+     * - Chỉ quyền CAO HƠN mới được quản lý quyền THẤP HƠN
+     * - Quyền BẰNG NHAU không được quản lý lẫn nhau
+     * - Không thể xóa tài khoản đang đăng nhập (check riêng ở controller)
+     * 
+     * @param int $targetRoleId Role ID của user cần quản lý
+     * @return bool True nếu có quyền quản lý (level cao hơn)
+     */
+    public static function canManageRole(int $targetRoleId): bool
+    {
+        return self::hasHigherRoleThan($targetRoleId);
     }
 }

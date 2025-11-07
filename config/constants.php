@@ -9,6 +9,7 @@ if (!defined('ROLE_ADMIN')) {
     define('ROLE_ADMIN', 1);           // Admin - Quản trị hệ thống toàn quyền
     define('ROLE_SALES_STAFF', 2);     // Sales Staff - Nhân viên bán hàng
     define('ROLE_WAREHOUSE_MANAGER', 3); // Warehouse Manager - Quản lý kho
+    define('ROLE_OWNER', 5);           // Owner - Chủ tiệm/Chủ cửa hàng
 }
 
 // User status
