@@ -9,16 +9,19 @@
 ## 🔍 Điều tra vấn đề
 
 ### 1. Triệu chứng
+
 - User "Mai Nhựt Minh" (role_id=5 - Owner) đăng nhập thành công
 - Dashboard hiển thị nhưng **KHÔNG CÓ MENU** sidebar
 - Truy cập các trang admin như `/admin/users`, `/admin/products` bị **403 Forbidden**
 
 ### 2. Kiểm tra Database
+
 ```sql
 SELECT id, username, email, full_name, role_id FROM users WHERE email = 'minhmap3367@gmail.com';
 ```
 
 **Kết quả**:
+
 ```
 | id | username | email                    | full_name      | role_id |
 |----|----------|--------------------------|----------------|---------|
@@ -28,6 +31,7 @@ SELECT id, username, email, full_name, role_id FROM users WHERE email = 'minhmap
 ✅ **User có role_id = 5 (Owner)** - Database đúng
 
 ### 3. Kiểm tra Constants
+
 File: `config/constants.php`
 
 ```php
@@ -50,6 +54,7 @@ Sau khi điều tra toàn bộ hệ thống, phát hiện **2 LỖI CHÍNH**:
 **File**: `src/Middlewares/RoleMiddleware.php`
 
 **Code lỗi**:
+
 ```php
 // Kiểm tra quyền admin
 if (!AuthHelper::isAdmin()) {
@@ -60,11 +65,13 @@ if (!AuthHelper::isAdmin()) {
 ```
 
 **Vấn đề**:
+
 - Middleware chỉ check `isAdmin()` (role_id=1)
 - Owner (role_id=5) bị chặn với 403 Forbidden
 - Tất cả routes có `RoleMiddleware` đều bị chặn Owner
 
 **Ảnh hưởng**:
+
 - ❌ `/admin/users` - Bị chặn
 - ❌ `/admin/roles` - Bị chặn
 - ❌ `/admin/categories` - Bị chặn
@@ -78,6 +85,7 @@ if (!AuthHelper::isAdmin()) {
 **File**: `src/views/admin/layout/sidebar.php`
 
 **Code lỗi**:
+
 ```php
 <?php if (\Helpers\AuthHelper::isAdmin()): ?>
 <li class="menu-item-has-children">
@@ -103,6 +111,7 @@ if (!AuthHelper::isAdmin()) {
 ```
 
 **Vấn đề**:
+
 - Tất cả menu chỉ hiển thị khi `isAdmin()` = true
 - Owner không thấy menu nào cả
 - Sidebar trống hoàn toàn
@@ -116,6 +125,7 @@ if (!AuthHelper::isAdmin()) {
 **File**: `src/Middlewares/RoleMiddleware.php`
 
 **Thay đổi**:
+
 ```php
 // BEFORE (SAI)
 if (!AuthHelper::isAdmin()) {
@@ -133,6 +143,7 @@ if (!AuthHelper::isAdminOrOwner()) {
 ```
 
 **Kết quả**:
+
 - ✅ Admin (role_id=1) vào được
 - ✅ Owner (role_id=5) vào được
 - ❌ Sales Staff (role_id=2) bị chặn
@@ -145,6 +156,7 @@ if (!AuthHelper::isAdminOrOwner()) {
 **File**: `src/views/admin/layout/sidebar.php`
 
 **Thay đổi**:
+
 ```php
 // BEFORE (SAI) - Chỉ Admin
 <?php if (\Helpers\AuthHelper::isAdmin()): ?>
@@ -158,12 +170,14 @@ if (!AuthHelper::isAdminOrOwner()) {
 ```
 
 **Áp dụng cho**:
+
 - ✅ Menu "Quản lý công ty" (Dashboard, Users, Roles, Logs)
 - ✅ Menu "Danh mục sản phẩm" (Categories, Brands, Suppliers)
 - ✅ Menu "Sản phẩm"
 - ⚠️ **GIỮ NGUYÊN** "Password Reset" và "System Config" chỉ cho Admin
 
 **Kết quả**:
+
 - ✅ Admin thấy TẤT CẢ menu
 - ✅ Owner thấy hầu hết menu (trừ Password Reset + System Config)
 - ❌ Staff không thấy menu gì
@@ -177,6 +191,7 @@ if (!AuthHelper::isAdminOrOwner()) {
 **Vấn đề**: Warning khi load constants nhiều lần
 
 **Giải pháp**:
+
 ```php
 // User status
 if (!defined('STATUS_ACTIVE')) {
@@ -214,26 +229,27 @@ if (!defined('DEFAULT_PAGE_SIZE')) {
 ### BEFORE (Lỗi):
 
 | User Role | Sidebar Menu | Access /admin/users | Access /admin/products |
-|-----------|-------------|---------------------|------------------------|
+| --------- | ------------ | ------------------- | ---------------------- |
 | Admin     | ✅ Hiển thị  | ✅ Được vào         | ✅ Được vào            |
-| Owner     | ❌ RỖNG     | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
-| Staff     | ❌ RỖNG     | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
+| Owner     | ❌ RỖNG      | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
+| Staff     | ❌ RỖNG      | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
 
 ### AFTER (Fix):
 
 | User Role | Sidebar Menu | Access /admin/users | Access /admin/products |
-|-----------|-------------|---------------------|------------------------|
-| Admin     | ✅ FULL     | ✅ Được vào         | ✅ Được vào            |
-| Owner     | ✅ FULL*    | ✅ Được vào         | ✅ Được vào            |
-| Staff     | ❌ RỖNG     | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
+| --------- | ------------ | ------------------- | ---------------------- |
+| Admin     | ✅ FULL      | ✅ Được vào         | ✅ Được vào            |
+| Owner     | ✅ FULL\*    | ✅ Được vào         | ✅ Được vào            |
+| Staff     | ❌ RỖNG      | ❌ 403 Forbidden    | ❌ 403 Forbidden       |
 
-*Owner không thấy: Password Reset, System Config (chỉ Admin)
+\*Owner không thấy: Password Reset, System Config (chỉ Admin)
 
 ---
 
 ## 🧪 Test Cases
 
 ### Test 1: Owner login và xem sidebar ✅
+
 ```
 1. Login với user "Mai Nhựt Minh" (role_id=5)
 2. Vào /admin/dashboard
@@ -248,6 +264,7 @@ Kết quả mong đợi:
 ```
 
 ### Test 2: Owner truy cập /admin/users ✅
+
 ```
 1. Login với Owner
 2. Vào /admin/users
@@ -258,6 +275,7 @@ Kết quả mong đợi:
 ```
 
 ### Test 3: Owner truy cập /admin/config ✅
+
 ```
 1. Login với Owner
 2. Vào /admin/config
@@ -268,6 +286,7 @@ Message: "Chỉ Admin mới có quyền truy cập trang này"
 ```
 
 ### Test 4: Staff không thấy menu ✅
+
 ```
 1. Login với Sales Staff (role_id=2)
 2. Vào /admin/dashboard
@@ -282,22 +301,26 @@ Kết quả mong đợi:
 ## 🔐 Phân quyền sau khi fix
 
 ### Admin (role_id=1):
+
 - ✅ Dashboard, Users, Roles, Logs
 - ✅ Categories, Brands, Suppliers, Products
 - ✅ Password Reset (chỉ Admin)
 - ✅ System Config (chỉ Admin)
 
 ### Owner (role_id=5):
+
 - ✅ Dashboard, Users, Roles, Logs
 - ✅ Categories, Brands, Suppliers, Products
 - ❌ Password Reset (chỉ Admin)
 - ❌ System Config (chỉ Admin)
 
 ### Sales Staff (role_id=2):
+
 - ❌ Không có quyền truy cập admin area
 - 📝 TODO: Tạo menu riêng cho Staff (nếu cần)
 
 ### Warehouse Manager (role_id=3):
+
 - ❌ Không có quyền truy cập admin area
 - 📝 TODO: Tạo menu riêng cho Warehouse (nếu cần)
 
@@ -306,10 +329,12 @@ Kết quả mong đợi:
 ## 📝 Files đã thay đổi
 
 1. ✅ `src/Middlewares/RoleMiddleware.php`
+
    - Thay `isAdmin()` → `isAdminOrOwner()`
    - Thêm message chi tiết cho 403 page
 
 2. ✅ `src/views/admin/layout/sidebar.php`
+
    - Thay TẤT CẢ `isAdmin()` → `isAdminOrOwner()` (trừ Password Reset + System Config)
 
 3. ✅ `config/constants.php`
@@ -320,14 +345,17 @@ Kết quả mong đợi:
 ## ✅ Kiểm tra sau khi fix
 
 ### 1. Syntax Check
+
 ```bash
 php -l src/Middlewares/RoleMiddleware.php
 php -l src/views/admin/layout/sidebar.php
 php -l config/constants.php
 ```
+
 ✅ Kết quả: No syntax errors detected
 
 ### 2. Test Access
+
 ```bash
 # Test Owner access
 curl -I http://localhost:8000/admin/users
@@ -351,15 +379,18 @@ curl -I http://localhost:8000/admin/users
 ## 🎯 Kết luận
 
 ✅ **Vấn đề đã được giải quyết hoàn toàn**:
+
 - Owner (Mai Nhựt Minh) giờ thấy đầy đủ menu
 - Owner có thể truy cập tất cả chức năng (trừ Password Reset + System Config)
 - Phân quyền hoạt động chính xác theo level
 
 ✅ **Root cause**:
+
 - Lỗi 1: RoleMiddleware chỉ check Admin
 - Lỗi 2: Sidebar chỉ hiển thị cho Admin
 
 ✅ **Cách fix**:
+
 - Thay `isAdmin()` → `isAdminOrOwner()` ở 2 chỗ (middleware + sidebar)
 
 ✅ **Test**: Tất cả test cases PASS

@@ -17,7 +17,7 @@ class RoleMiddleware
             header('Location: /admin/login');
             exit;
         }
-        
+
         // Kiểm tra quyền quản lý (Admin hoặc Owner)
         if (!AuthHelper::isAdminOrOwner()) {
             http_response_code(403);
@@ -45,7 +45,7 @@ class RoleMiddleware
             ";
             exit;
         }
-        
+
         return true;
     }
 }
