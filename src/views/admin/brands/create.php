@@ -14,16 +14,16 @@ $pageTitle = $pageTitle ?? 'Thêm thương hiệu mới';
     </div>
 
     <?php if (isset($_SESSION['flash_error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form method="POST" action="/admin/brands/store">
+            <form method="POST" action="/admin/brands/store" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-md-8">
                         <div class="mb-3">
@@ -41,11 +41,17 @@ $pageTitle = $pageTitle ?? 'Thêm thương hiệu mới';
                         </div>
 
                         <div class="mb-3">
-                            <label for="logo_url" class="form-label">
-                                <i class="fas fa-image me-1"></i>URL Logo
+                            <label for="logo_image" class="form-label">
+                                <i class="fas fa-image me-1"></i>Logo thương hiệu
                             </label>
-                            <input type="url" class="form-control" id="logo_url" name="logo_url">
-                            <div class="form-text">Nhập đường dẫn URL của logo thương hiệu</div>
+                            <input type="file" class="form-control" id="logo_image" name="logo_image" accept="image/*">
+                            <div class="form-text">Chọn ảnh logo từ máy tính (JPG, PNG, GIF - Max 5MB)</div>
+
+                            <!-- Preview ảnh -->
+                            <div id="logoPreview" class="mt-3" style="display: none;">
+                                <img id="previewImg" src="" alt="Preview"
+                                    style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+                            </div>
                         </div>
                     </div>
 
@@ -55,8 +61,8 @@ $pageTitle = $pageTitle ?? 'Thêm thương hiệu mới';
                                 <i class="fas fa-toggle-on me-1"></i>Trạng thái
                             </label>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_active" 
-                                       name="is_active" value="1" checked>
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                    value="1" checked>
                                 <label class="form-check-label" for="is_active">Hoạt động</label>
                             </div>
                         </div>
@@ -77,3 +83,38 @@ $pageTitle = $pageTitle ?? 'Thêm thương hiệu mới';
 </div>
 
 <link rel="stylesheet" href="/assets/css/brand-style.css">
+
+<script>
+// Preview ảnh khi chọn file
+document.getElementById('logo_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Kiểm tra kích thước file (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Kích thước file không được vượt quá 5MB!');
+            this.value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            return;
+        }
+
+        // Kiểm tra định dạng file
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('Chỉ chấp nhận file ảnh JPG, PNG, GIF!');
+            this.value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+            return;
+        }
+
+        // Preview ảnh
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('logoPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        document.getElementById('logoPreview').style.display = 'none';
+    }
+});
+</script>

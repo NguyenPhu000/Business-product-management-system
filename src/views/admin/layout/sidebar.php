@@ -11,6 +11,8 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
 $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
     str_starts_with($currentPath, '/admin/brands') ||
     str_starts_with($currentPath, '/admin/suppliers');
+
+$isProductMenuActive = str_starts_with($currentPath, '/admin/products');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -18,7 +20,7 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
     </div>
 
     <ul class="sidebar-menu">
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
             <li class="menu-item-has-children <?= $isCompanyMenuActive ? 'active' : '' ?>">
                 <input type="checkbox" id="company-menu-toggle" class="menu-toggle"
                     <?= $isCompanyMenuActive ? 'checked' : '' ?>>
@@ -79,7 +81,7 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
         <?php endif; ?>
 
         <!-- Menu Danh mục sản phẩm -->
-        <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
             <li class="menu-item-has-children <?= $isCategoryMenuActive ? 'active' : '' ?>">
                 <input type="checkbox" id="category-menu-toggle" class="menu-toggle"
                     <?= $isCategoryMenuActive ? 'checked' : '' ?>>
@@ -98,7 +100,7 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
                     </li>
 
                     <li>
-                        <a href="/admin/brands" 
+                        <a href="/admin/brands"
                             class="<?= str_starts_with($currentPath, '/admin/brands') ? 'active' : '' ?>">
                             <i class="fas fa-tag"></i>
                             <span>Thương hiệu</span>
@@ -106,13 +108,23 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
                     </li>
 
                     <li>
-                        <a href="/admin/suppliers" 
+                        <a href="/admin/suppliers"
                             class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
                             <i class="fas fa-truck"></i>
                             <span>Nhà cung cấp</span>
                         </a>
                     </li>
                 </ul>
+            </li>
+        <?php endif; ?>
+
+        <!-- Menu Sản phẩm -->
+        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
+            <li>
+                <a href="/admin/products" class="<?= $isProductMenuActive ? 'active' : '' ?>">
+                    <i class="fas fa-box"></i>
+                    <span>Sản phẩm</span>
+                </a>
             </li>
         <?php endif; ?>
     </ul>

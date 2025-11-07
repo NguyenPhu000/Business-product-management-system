@@ -5,9 +5,10 @@ namespace Middlewares;
 use Helpers\AuthHelper;
 
 /**
- * RoleMiddleware - Kiểm tra quyền admin
+ * AdminOnlyMiddleware - Chỉ cho phép Admin truy cập
+ * Sử dụng cho các chức năng nhạy cảm như Cấu hình hệ thống
  */
-class RoleMiddleware
+class AdminOnlyMiddleware
 {
     public function handle(): bool
     {
@@ -18,8 +19,8 @@ class RoleMiddleware
             exit;
         }
 
-        // Kiểm tra quyền quản lý (Admin hoặc Owner)
-        if (!AuthHelper::isAdminOrOwner()) {
+        // Chỉ cho phép Admin (không cho Chủ tiệm)
+        if (!AuthHelper::isAdmin()) {
             http_response_code(403);
             echo "
             <!DOCTYPE html>
@@ -37,8 +38,8 @@ class RoleMiddleware
             </head>
             <body>
                 <h1>403</h1>
-                <p>Bạn không có quyền truy cập trang này</p>
-                <p style='color: #999; font-size: 14px;'>Chức năng này chỉ dành cho Admin hoặc Chủ tiệm</p>
+                <p>Chỉ Admin mới có quyền truy cập trang này</p>
+                <p style='color: #999; font-size: 14px;'>Chức năng Cấu hình hệ thống chỉ dành cho Administrator</p>
                 <a href='/admin/dashboard'>← Quay lại Dashboard</a>
             </body>
             </html>

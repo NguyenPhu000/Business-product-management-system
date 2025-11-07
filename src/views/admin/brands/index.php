@@ -11,9 +11,8 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
         <h2><i class="fas fa-tag"></i> <?= $pageTitle ?></h2>
         <div class="d-flex gap-2">
             <form method="GET" action="/admin/brands" class="d-flex">
-                <input type="text" name="keyword" class="form-control" 
-                       placeholder="Tìm kiếm thương hiệu..." 
-                       value="<?= htmlspecialchars($keyword ?? '') ?>">
+                <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm thương hiệu..."
+                    value="<?= htmlspecialchars($keyword ?? '') ?>">
                 <button type="submit" class="btn btn-secondary ms-2">
                     <i class="fas fa-search"></i>
                 </button>
@@ -26,19 +25,19 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
 
     <!-- Flash messages -->
     <?php if (isset($_SESSION['flash_success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle me-2"></i>
-            <?= $_SESSION['flash_success']; unset($_SESSION['flash_success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <?= $_SESSION['flash_success']; unset($_SESSION['flash_success']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <?php if (isset($_SESSION['flash_error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <!-- Brands Table -->
@@ -58,59 +57,56 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
                 </thead>
                 <tbody>
                     <?php if (empty($brands)): ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="fas fa-inbox fa-3x mb-3"></i>
-                                <p>Chưa có thương hiệu nào</p>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>Chưa có thương hiệu nào</p>
+                        </td>
+                    </tr>
                     <?php else: ?>
-                        <?php foreach ($brands as $brand): ?>
-                            <tr>
-                                <td><?= $brand['id'] ?></td>
-                                <td>
-                                    <?php if ($brand['logo_url']): ?>
-                                        <img src="<?= htmlspecialchars($brand['logo_url']) ?>" 
-                                             alt="<?= htmlspecialchars($brand['name']) ?>"
-                                             class="brand-logo img-thumbnail">
-                                    <?php else: ?>
-                                        <div class="text-muted"><i class="fas fa-image"></i> Chưa có</div>
-                                    <?php endif; ?>
-                                </td>
-                                <td><strong><?= htmlspecialchars($brand['name']) ?></strong></td>
-                                <td>
-                                    <?php if ($brand['description']): ?>
-                                        <?= htmlspecialchars(mb_substr($brand['description'], 0, 100)) ?>
-                                        <?= mb_strlen($brand['description']) > 100 ? '...' : '' ?>
-                                    <?php else: ?>
-                                        <span class="text-muted">-</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info"><?= $brand['product_count'] ?? 0 ?> sản phẩm</span>
-                                </td>
-                                <td>
-                                    <span class="badge <?= $brand['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
-                                        <?= $brand['is_active'] ? 'Hoạt động' : 'Ẩn' ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <a href="/admin/brands/edit/<?= $brand['id'] ?>" 
-                                           class="btn btn-sm btn-warning" title="Sửa">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                data-id="<?= $brand['id'] ?>"
-                                                data-name="<?= htmlspecialchars($brand['name']) ?>"
-                                                onclick="deleteBrand(this)" 
-                                                title="Xóa">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+                    <?php foreach ($brands as $brand): ?>
+                    <tr>
+                        <td><?= $brand['id'] ?></td>
+                        <td>
+                            <?php if ($brand['logo_url']): ?>
+                            <img src="<?= htmlspecialchars($brand['logo_url']) ?>"
+                                alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-logo img-thumbnail">
+                            <?php else: ?>
+                            <div class="text-muted"><i class="fas fa-image"></i> Chưa có</div>
+                            <?php endif; ?>
+                        </td>
+                        <td><strong><?= htmlspecialchars($brand['name']) ?></strong></td>
+                        <td>
+                            <?php if ($brand['description']): ?>
+                            <?= htmlspecialchars(mb_substr($brand['description'], 0, 100)) ?>
+                            <?= mb_strlen($brand['description']) > 100 ? '...' : '' ?>
+                            <?php else: ?>
+                            <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <span class="badge bg-info"><?= $brand['product_count'] ?? 0 ?> sản phẩm</span>
+                        </td>
+                        <td>
+                            <span class="badge <?= $brand['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
+                                <?= $brand['is_active'] ? 'Hoạt động' : 'Ẩn' ?>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/admin/brands/edit/<?= $brand['id'] ?>" class="btn btn-sm btn-warning"
+                                    title="Sửa">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger" data-id="<?= $brand['id'] ?>"
+                                    data-name="<?= htmlspecialchars($brand['name']) ?>" onclick="deleteBrand(this)"
+                                    title="Xóa">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -127,8 +123,9 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
 function deleteBrand(btn) {
     const id = btn.getAttribute('data-id');
     const name = btn.getAttribute('data-name');
-    
-    if (confirm('Bạn có chắc chắn muốn xóa thương hiệu "' + name + '"?\n\nLưu ý: Chỉ có thể xóa nếu không có sản phẩm nào thuộc thương hiệu này.')) {
+
+    if (confirm('Bạn có chắc chắn muốn xóa thương hiệu "' + name +
+            '"?\n\nLưu ý: Chỉ có thể xóa nếu không có sản phẩm nào thuộc thương hiệu này.')) {
         const form = document.getElementById('deleteForm');
         form.action = '/admin/brands/delete/' + id;
         form.method = 'POST';
