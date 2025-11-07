@@ -4,10 +4,12 @@
  * constants.php - Hằng số hệ thống
  */
 
-// User roles
-define('ROLE_ADMIN', 1);
-define('ROLE_MANAGER', 2);
-define('ROLE_STAFF', 3);
+// User roles (khớp với database: roles table)
+if (!defined('ROLE_ADMIN')) {
+    define('ROLE_ADMIN', 1);           // Admin - Quản trị hệ thống toàn quyền
+    define('ROLE_SALES_STAFF', 2);     // Sales Staff - Nhân viên bán hàng
+    define('ROLE_WAREHOUSE_MANAGER', 3); // Warehouse Manager - Quản lý kho
+}
 
 // User status
 define('STATUS_ACTIVE', 1);

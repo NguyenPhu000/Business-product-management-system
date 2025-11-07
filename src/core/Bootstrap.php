@@ -13,9 +13,18 @@ class Bootstrap
     {
         $this->router = new Router();
         $this->loadEnv();
+        $this->loadConstants();
         $this->setTimezone();
         $this->startSession();
         $this->registerRoutes();
+    }
+    
+    /**
+     * Load system constants
+     */
+    private function loadConstants(): void
+    {
+        require_once __DIR__ . '/../../config/constants.php';
     }
     
     /**
