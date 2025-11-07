@@ -61,7 +61,6 @@ class BrandController extends Controller
 
         $name = trim($this->input('name', ''));
         $description = trim($this->input('description', ''));
-        $logoUrl = trim($this->input('logo_url', ''));
         $isActive = $this->input('is_active', 0);
 
         // Validate
@@ -78,11 +77,22 @@ class BrandController extends Controller
             return;
         }
 
+        // Xử lý upload logo
+        $logoUrl = null;
+        if (!empty($_FILES['logo_image']['name'])) {
+            $logoUrl = $this->handleLogoUpload();
+            if (!$logoUrl) {
+                AuthHelper::setFlash('error', 'Có lỗi xảy ra khi tải lên logo');
+                $this->redirect('/admin/brands/create');
+                return;
+            }
+        }
+
         // Tạo thương hiệu
         $data = [
             'name' => $name,
             'description' => $description ?: null,
-            'logo_url' => $logoUrl ?: null,
+            'logo_url' => $logoUrl,
             'is_active' => $isActive ? 1 : 0
         ];
 
@@ -137,7 +147,6 @@ class BrandController extends Controller
 
         $name = trim($this->input('name', ''));
         $description = trim($this->input('description', ''));
-        $logoUrl = trim($this->input('logo_url', ''));
         $isActive = $this->input('is_active', 0);
 
         // Validate
@@ -154,11 +163,24 @@ class BrandController extends Controller
             return;
         }
 
+        // Xử lý upload logo mới
+        $logoUrl = $brand['logo_url']; // Giữ logo cũ
+        if (!empty($_FILES['logo_image']['name'])) {
+            $newLogoUrl = $this->handleLogoUpload();
+            if ($newLogoUrl) {
+                // Xóa logo cũ nếu có
+                if ($logoUrl && file_exists(getcwd() . $logoUrl)) {
+                    @unlink(getcwd() . $logoUrl);
+                }
+                $logoUrl = $newLogoUrl;
+            }
+        }
+
         // Cập nhật thương hiệu
         $data = [
             'name' => $name,
             'description' => $description ?: null,
-            'logo_url' => $logoUrl ?: null,
+            'logo_url' => $logoUrl,
             'is_active' => $isActive ? 1 : 0
         ];
 
@@ -233,5 +255,60 @@ class BrandController extends Controller
         } else {
             $this->json(['success' => false, 'message' => 'Có lỗi xảy ra']);
         }
+    }
+
+    /**
+     * Xử lý upload logo thương hiệu
+     */
+    private function handleLogoUpload(): ?string
+    {
+        if (empty($_FILES['logo_image']['name'])) {
+            return null;
+        }
+
+        $file = $_FILES['logo_image'];
+        
+        // Kiểm tra lỗi upload
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        // Kiểm tra kích thước file (5MB)
+        $maxSize = 5 * 1024 * 1024;
+        if ($file['size'] > $maxSize) {
+            return null;
+        }
+
+        // Kiểm tra định dạng file
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            return null;
+        }
+
+        // Tạo tên file unique
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'brand_' . time() . '_' . uniqid() . '.' . $extension;
+        
+        // Đường dẫn lưu file
+        $uploadDir = getcwd() . '/assets/images/brands/';
+        
+        // Tạo thư mục nếu chưa tồn tại
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $uploadPath = $uploadDir . $filename;
+
+        // Di chuyển file
+        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+            // Trả về đường dẫn tương đối
+            return '/assets/images/brands/' . $filename;
+        }
+
+        return null;
     }
 }

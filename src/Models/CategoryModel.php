@@ -68,6 +68,43 @@ class CategoryModel extends BaseModel
     }
 
     /**
+     * Lấy danh sách danh mục dạng phẳng (flat) với level để hiển thị trong form
+     * Ví dụ: 
+     * - Điện Thoại (level 0)
+     *     - Tai Nghe (level 1)
+     * - Laptop (level 0)
+     */
+    public function getFlatCategoryTree(): array
+    {
+        $tree = $this->getCategoryTree();
+        $flat = [];
+        
+        foreach ($tree as $parent) {
+            // Thêm danh mục cha
+            $parent['level'] = 0;
+            $flat[] = $parent;
+            
+            // Thêm các danh mục con
+            if (!empty($parent['children'])) {
+                foreach ($parent['children'] as $child) {
+                    $child['level'] = 1;
+                    $flat[] = $child;
+                    
+                    // Nếu có con cấp 2 (thêm logic đệ quy nếu cần)
+                    if (!empty($child['children'])) {
+                        foreach ($child['children'] as $grandchild) {
+                            $grandchild['level'] = 2;
+                            $flat[] = $grandchild;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $flat;
+    }
+
+    /**
      * Kiểm tra slug đã tồn tại chưa
      */
     public function slugExists(string $slug, ?int $excludeId = null): bool
