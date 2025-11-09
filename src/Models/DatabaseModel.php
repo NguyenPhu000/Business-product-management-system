@@ -19,7 +19,7 @@ class DatabaseModel
 {
     protected static ?PDO $connection = null;
     protected string $table = '';
-    
+
     /**
      * Khởi tạo kết nối database (Singleton)
      */
@@ -29,7 +29,7 @@ class DatabaseModel
             try {
                 // Load cấu hình database
                 $config = require __DIR__ . '/../../config/database.php';
-                
+
                 $dsn = sprintf(
                     "%s:host=%s;port=%s;dbname=%s;charset=%s",
                     $config['driver'],
@@ -38,7 +38,7 @@ class DatabaseModel
                     $config['database'],
                     $config['charset']
                 );
-                
+
                 self::$connection = new PDO(
                     $dsn,
                     $config['username'],
@@ -49,16 +49,15 @@ class DatabaseModel
                         PDO::ATTR_EMULATE_PREPARES => false,
                     ]
                 );
-                
             } catch (PDOException $e) {
                 error_log("Database Connection Error: " . $e->getMessage());
                 throw new Exception("Không thể kết nối database: " . $e->getMessage());
             }
         }
-        
+
         return self::$connection;
     }
-    
+
     /**
      * Thực thi câu lệnh SELECT với prepared statement
      */
@@ -73,7 +72,7 @@ class DatabaseModel
             throw new Exception("Lỗi truy vấn: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Thực thi câu lệnh SELECT và trả về 1 bản ghi
      */
@@ -89,7 +88,7 @@ class DatabaseModel
             throw new Exception("Lỗi truy vấn: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Thực thi câu lệnh INSERT, UPDATE, DELETE
      */
@@ -103,7 +102,7 @@ class DatabaseModel
             throw new Exception("Lỗi thực thi: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Lấy ID của bản ghi vừa insert
      */
@@ -111,7 +110,7 @@ class DatabaseModel
     {
         return self::getConnection()->lastInsertId();
     }
-    
+
     /**
      * Bắt đầu transaction
      */
@@ -119,7 +118,7 @@ class DatabaseModel
     {
         return self::getConnection()->beginTransaction();
     }
-    
+
     /**
      * Commit transaction
      */
@@ -127,7 +126,7 @@ class DatabaseModel
     {
         return self::getConnection()->commit();
     }
-    
+
     /**
      * Rollback transaction
      */
@@ -135,7 +134,7 @@ class DatabaseModel
     {
         return self::getConnection()->rollBack();
     }
-    
+
     /**
      * Đóng kết nối
      */

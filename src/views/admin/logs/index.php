@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/assets/css/logs.css">
+
 <div class="page-header">
     <h2 class="page-title">Log hoạt động</h2>
 </div>
@@ -11,11 +13,11 @@
                 <select name="user_id" class="form-control">
                     <option value="">-- Tất cả --</option>
                     <?php if (!empty($users)): ?>
-                        <?php foreach ($users as $user): ?>
-                            <option value="<?= $user['id'] ?>" <?= ($currentUserId == $user['id']) ? 'selected' : '' ?>>
-                                <?= \Core\View::e($user['username']) ?> - <?= \Core\View::e($user['full_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <?php foreach ($users as $user): ?>
+                    <option value="<?= $user['id'] ?>" <?= ($currentUserId == $user['id']) ? 'selected' : '' ?>>
+                        <?= \Core\View::e($user['username']) ?> - <?= \Core\View::e($user['full_name']) ?>
+                    </option>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
             </div>
@@ -25,11 +27,11 @@
                 <select name="action" class="form-control">
                     <option value="">-- Tất cả --</option>
                     <?php if (!empty($actions)): ?>
-                        <?php foreach ($actions as $key => $label): ?>
-                            <option value="<?= $key ?>" <?= ($currentAction == $key) ? 'selected' : '' ?>>
-                                <?= $label ?>
-                            </option>
-                        <?php endforeach; ?>
+                    <?php foreach ($actions as $key => $label): ?>
+                    <option value="<?= $key ?>" <?= ($currentAction == $key) ? 'selected' : '' ?>>
+                        <?= $label ?>
+                    </option>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
             </div>
@@ -51,24 +53,32 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Vai trò</th>
                     <th>Người dùng</th>
                     <th>Hành động</th>
                     <th>Đối tượng</th>
                     <th>IP</th>
                     <th>Thời gian</th>
                     <?php if (\Helpers\AuthHelper::isAdmin()): ?>
-                        <th>Thao tác</th>
+                    <th>Thao tác</th>
                     <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php if (!empty($logs)): ?>
-                    <?php foreach ($logs as $log): ?>
-                        <tr>
-                            <td><?= $log['id'] ?></td>
-                            <td><?= \Core\View::e($log['username'] ?? 'Unknown') ?></td>
-                            <td>
-                                <?php
+                <?php foreach ($logs as $log): ?>
+                <tr>
+                    <td><?= $log['id'] ?></td>
+                    <td>
+                        <?php if (!empty($log['role_name'])): ?>
+                        <span class="badge badge-primary"><?= \Core\View::e($log['role_name']) ?></span>
+                        <?php else: ?>
+                        <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= \Core\View::e($log['username'] ?? '-') ?></td>
+                    <td>
+                        <?php
                                 $badgeClass = 'badge-info';
                                 $action = strtolower($log['action']);
 
@@ -84,105 +94,219 @@
                                     $badgeClass = 'badge-secondary';
                                 }
                                 ?>
-                                <span class="badge <?= $badgeClass ?>"><?= \Core\View::e($log['action']) ?></span>
-                            </td>
-                            <td>
-                                <?php if ($log['object_type']): ?>
-                                    <?= \Core\View::e($log['object_type']) ?>
-                                    <?php if ($log['object_id']): ?>
-                                        #<?= $log['object_id'] ?>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
-                            </td>
-                            <td><?= \Core\View::e($log['ip']) ?></td>
-                            <td><?= \Helpers\FormatHelper::datetime($log['created_at']) ?></td>
-                            <?php if (\Helpers\AuthHelper::isAdmin()): ?>
-                                <td>
-                                    <button onclick="editLog(<?= $log['id'] ?>, '<?= \Core\View::e($log['action']) ?>')" class="btn btn-warning btn-sm" title="Sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="deleteLog(<?= $log['id'] ?>)" class="btn btn-danger btn-sm" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
+                        <span class="badge <?= $badgeClass ?>"><?= \Core\View::e($log['action']) ?></span>
+                    </td>
+                    <td>
+                        <?php if ($log['object_type'] === 'user' && !empty($log['target_username'])): ?>
+                        <?= \Core\View::e($log['target_username']) ?>
+                        <?php elseif ($log['object_type'] === 'role'): ?>
+                        <span class="text-muted">-</span>
+                        <?php elseif ($log['object_type']): ?>
+                        <span class="text-muted">
+                            <?= \Core\View::e($log['object_type']) ?>
+                            <?php if ($log['object_id']): ?>
+                            #<?= $log['object_id'] ?>
                             <?php endif; ?>
-                        </tr>
-                    <?php endforeach; ?>
+                        </span>
+                        <?php else: ?>
+                        <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($log['ip']): ?>
+                        <code style="font-size: 13px; background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">
+                                        <?= \Core\View::e($log['ip']) ?>
+                                    </code>
+                        <?php else: ?>
+                        <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= \Helpers\FormatHelper::datetime($log['created_at']) ?></td>
+                    <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+                    <td>
+                        <button onclick="editLog(<?= $log['id'] ?>, '<?= \Core\View::e($log['action']) ?>')"
+                            class="btn btn-warning btn-sm" title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteLog(<?= $log['id'] ?>)" class="btn btn-danger btn-sm" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                <?php endforeach; ?>
                 <?php else: ?>
-                    <tr>
-                        <td colspan="<?= \Helpers\AuthHelper::isAdmin() ? '7' : '6' ?>" style="text-align: center;">Chưa có log nào</td>
-                    </tr>
+                <tr>
+                    <td colspan="<?= \Helpers\AuthHelper::isAdmin() ? '7' : '6' ?>" style="text-align: center;">Chưa có
+                        log nào</td>
+                </tr>
                 <?php endif; ?>
             </tbody>
         </table>
 
         <?php if (isset($pagination) && $pagination['totalPages'] > 1): ?>
-            <div class="pagination">
-                <?php for ($i = 1; $i <= $pagination['totalPages']; $i++): ?>
+        <!-- Phân trang hiện đại -->
+        <div class="modern-pagination-wrapper">
+            <div class="pagination-controls">
+                <!-- Nút First và Previous -->
+                <div class="pagination-nav-buttons">
+                    <a href="/admin/logs?page=1&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang đầu">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="/admin/logs?page=<?= max(1, $pagination['page'] - 1) ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang trước">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </div>
+
+                <!-- Hiển thị số trang -->
+                <div class="pagination-numbers">
+                    <?php
+                        // Hiển thị trang đầu
+                        if ($pagination['page'] > 3): ?>
+                    <a href="/admin/logs?page=1&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="page-number">1</a>
+                    <?php if ($pagination['page'] > 4): ?>
+                    <span class="page-dots">...</span>
+                    <?php endif;
+                        endif;
+
+                        // Hiển thị các trang gần current
+                        $start = max(1, $pagination['page'] - 2);
+                        $end = min($pagination['totalPages'], $pagination['page'] + 2);
+
+                        for ($i = $start; $i <= $end; $i++): ?>
                     <a href="/admin/logs?page=<?= $i ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
-                        class="<?= $i == $pagination['page'] ? 'active' : '' ?>">
+                        class="page-number <?= $i == $pagination['page'] ? 'active' : '' ?>">
                         <?= $i ?>
                     </a>
-                <?php endfor; ?>
+                    <?php endfor;
+
+                        // Hiển thị trang cuối
+                        if ($pagination['page'] < $pagination['totalPages'] - 2): ?>
+                    <?php if ($pagination['page'] < $pagination['totalPages'] - 3): ?>
+                    <span class="page-dots">...</span>
+                    <?php endif; ?>
+                    <a href="/admin/logs?page=<?= $pagination['totalPages'] ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="page-number">
+                        <?= $pagination['totalPages'] ?>
+                    </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Nút Next và Last -->
+                <div class="pagination-nav-buttons">
+                    <a href="/admin/logs?page=<?= min($pagination['totalPages'], $pagination['page'] + 1) ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                        title="Trang sau">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="/admin/logs?page=<?= $pagination['totalPages'] ?>&user_id=<?= $currentUserId ?? '' ?>&action=<?= $currentAction ?? '' ?>"
+                        class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                        title="Trang cuối">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+
+                <!-- Ô nhập trang -->
+                <div class="pagination-jump">
+                    <span class="jump-label">Đến trang:</span>
+                    <input type="number" id="jumpToPageLogs" class="jump-input" min="1"
+                        max="<?= $pagination['totalPages'] ?>" value="<?= $pagination['page'] ?>"
+                        placeholder="<?= $pagination['page'] ?>">
+                    <button onclick="jumpToPageLogs()" class="jump-btn" title="Chuyển trang">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
+
+            <!-- Thông tin phân trang -->
+            <div class="pagination-info-modern">
+                <span class="info-text">
+                    Trang <strong><?= $pagination['page'] ?></strong> /
+                    <strong><?= $pagination['totalPages'] ?></strong>
+                </span>
+            </div>
+        </div>
+
+        <script>
+        function jumpToPageLogs() {
+            const page = document.getElementById('jumpToPageLogs').value;
+            const maxPage = <?= $pagination['totalPages'] ?>;
+            const userId = '<?= $currentUserId ?? '' ?>';
+            const action = '<?= $currentAction ?? '' ?>';
+
+            if (page && page >= 1 && page <= maxPage) {
+                window.location.href = `/admin/logs?page=${page}&user_id=${userId}&action=${action}`;
+            } else {
+                alert('Vui lòng nhập số trang hợp lệ (1 - ' + maxPage + ')');
+            }
+        }
+
+        // Enter để jump
+        document.getElementById('jumpToPageLogs')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                jumpToPageLogs();
+            }
+        });
+        </script>
         <?php endif; ?>
     </div>
 </div>
 
 <script>
-    function editLog(logId, currentAction) {
-        const newAction = prompt('Nhập hành động mới:', currentAction);
-        if (!newAction || newAction === currentAction) {
-            return;
-        }
-
-        fetch('/admin/logs/update/' + logId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: newAction
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('Có lỗi xảy ra: ' + error);
-            });
+function editLog(logId, currentAction) {
+    const newAction = prompt('Nhập hành động mới:', currentAction);
+    if (!newAction || newAction === currentAction) {
+        return;
     }
 
-    function deleteLog(logId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa log này?')) {
-            return;
-        }
+    fetch('/admin/logs/update/' + logId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: newAction
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Có lỗi xảy ra: ' + error);
+        });
+}
 
-        fetch('/admin/logs/delete/' + logId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('Có lỗi xảy ra: ' + error);
-            });
+function deleteLog(logId) {
+    if (!confirm('Bạn có chắc chắn muốn xóa log này?')) {
+        return;
     }
+
+    fetch('/admin/logs/delete/' + logId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('Có lỗi xảy ra: ' + error);
+        });
+}
 </script>

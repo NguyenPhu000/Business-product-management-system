@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Business Product Management System</title>
-    <script src="https://kit.fontawesome.com/42a96a500e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/modern-login.css">
 </head>
 
@@ -36,8 +36,8 @@
             </div>
             <div class="inputForm">
                 <i class="fas fa-user"></i>
-                <input type="text" id="email" name="email" class="input"
-                    placeholder="Enter your username or email" required autofocus>
+                <input type="text" id="email" name="email" class="input" placeholder="Enter your username or email"
+                    required autofocus>
             </div>
 
             <div class="form-group">
@@ -45,8 +45,8 @@
             </div>
             <div class="inputForm">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="password" name="password" class="input"
-                    placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" class="input" placeholder="Enter your password"
+                    required>
                 <span class="password-toggle" onclick="togglePassword('password')">
                     <i class="fas fa-eye" id="password-icon"></i>
                 </span>

@@ -1,0 +1,284 @@
+/* ============================================
+   Modern Pagination Styles for Logs Page
+   ============================================ */
+
+/* Pagination Container */
+.modern-pagination-wrapper {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Navigation Buttons Container */
+.pagination-nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* Pagination Buttons (First, Prev, Next, Last) */
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.pagination-btn:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  color: white;
+}
+
+.pagination-btn.disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Page Numbers Container */
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Individual Page Number */
+.page-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #374151;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.page-number:hover:not(.active) {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.page-number.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  cursor: default;
+}
+
+/* Page Dots (...) */
+.page-dots {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  color: #9ca3af;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+/* Jump to Page Section */
+.pagination-jump {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.jump-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.jump-input {
+  width: 70px;
+  height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.jump-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.jump-input::-webkit-outer-spin-button,
+.jump-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.jump-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.jump-btn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.jump-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+}
+
+.jump-btn:active {
+  transform: translateY(0);
+}
+
+/* Pagination Info */
+.pagination-info-modern {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.info-text i {
+  color: #667eea;
+  font-size: 16px;
+}
+
+.info-text strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+  .modern-pagination-wrapper {
+    padding: 16px;
+  }
+
+  .pagination-controls {
+    gap: 10px;
+  }
+
+  .pagination-btn,
+  .page-number {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 14px;
+  }
+
+  .pagination-jump {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .jump-input {
+    width: 60px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .jump-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .info-text {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-numbers {
+    gap: 4px;
+  }
+
+  .page-number {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .pagination-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .pagination-nav-buttons {
+    gap: 6px;
+  }
+
+  .jump-label {
+    font-size: 13px;
+  }
+}

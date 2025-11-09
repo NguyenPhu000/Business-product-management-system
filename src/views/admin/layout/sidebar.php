@@ -7,12 +7,6 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
     str_starts_with($currentPath, '/admin/logs') ||
     str_starts_with($currentPath, '/admin/config') ||
     str_starts_with($currentPath, '/admin/password-reset');
-
-$isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
-    str_starts_with($currentPath, '/admin/brands') ||
-    str_starts_with($currentPath, '/admin/suppliers');
-
-$isProductMenuActive = str_starts_with($currentPath, '/admin/products');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -60,6 +54,7 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
                     </li>
 
                     <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+                        <!-- CHỈ ADMIN - Chủ tiệm KHÔNG hiển thị menu này -->
                         <li>
                             <a href="/admin/password-reset"
                                 class="<?= str_starts_with($currentPath, '/admin/password-reset') ? 'active' : '' ?>">
@@ -77,54 +72,6 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
                         </li>
                     <?php endif; ?>
                 </ul>
-            </li>
-        <?php endif; ?>
-
-        <!-- Menu Danh mục sản phẩm -->
-        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
-            <li class="menu-item-has-children <?= $isCategoryMenuActive ? 'active' : '' ?>">
-                <input type="checkbox" id="category-menu-toggle" class="menu-toggle"
-                    <?= $isCategoryMenuActive ? 'checked' : '' ?>>
-                <label for="category-menu-toggle" class="menu-label">
-                    <i class="fas fa-folder-tree"></i>
-                    <span>Danh mục sản phẩm</span>
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </label>
-                <ul class="submenu">
-                    <li>
-                        <a href="/admin/categories"
-                            class="<?= str_starts_with($currentPath, '/admin/categories') ? 'active' : '' ?>">
-                            <i class="fas fa-folder"></i>
-                            <span>Danh mục</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="/admin/brands"
-                            class="<?= str_starts_with($currentPath, '/admin/brands') ? 'active' : '' ?>">
-                            <i class="fas fa-tag"></i>
-                            <span>Thương hiệu</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="/admin/suppliers"
-                            class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
-                            <i class="fas fa-truck"></i>
-                            <span>Nhà cung cấp</span>
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        <?php endif; ?>
-
-        <!-- Menu Sản phẩm -->
-        <?php if (\Helpers\AuthHelper::isAdminOrOwner()): ?>
-            <li>
-                <a href="/admin/products" class="<?= $isProductMenuActive ? 'active' : '' ?>">
-                    <i class="fas fa-box"></i>
-                    <span>Sản phẩm</span>
-                </a>
             </li>
         <?php endif; ?>
     </ul>

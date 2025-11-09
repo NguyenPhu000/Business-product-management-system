@@ -27,7 +27,7 @@ class LogsController extends Controller
     public function index(): void
     {
         $page = (int) $this->input('page', 1);
-        $perPage = 20;
+        $perPage = 12; // Mỗi trang 12 bản ghi
         $userId = $this->input('user_id') ? (int) $this->input('user_id') : null;
         $action = $this->input('action', null);
 

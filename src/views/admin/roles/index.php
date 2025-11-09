@@ -1,8 +1,7 @@
+<link rel="stylesheet" href="/assets/css/roles.css">
+
 <div class="page-header">
     <h2 class="page-title">Quản lý vai trò</h2>
-    <a href="/admin/roles/create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Thêm vai trò
-    </a>
 </div>
 
 <div class="card">
@@ -26,14 +25,12 @@
                             <td><?= \Core\View::e($role['description']) ?></td>
                             <td><?= $role['user_count'] ?? 0 ?> người</td>
                             <td>
-                                <a href="/admin/roles/edit/<?= $role['id'] ?>" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </a>
-                                <?php if ($role['id'] != 1): // Không cho xóa Admin role 
-                                ?>
-                                    <button onclick="deleteRole(<?= $role['id'] ?>)" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i> Xóa
-                                    </button>
+                                <?php if (\Helpers\AuthHelper::isAdmin()): ?>
+                                    <a href="/admin/roles/edit/<?= $role['id'] ?>" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted">Không có quyền</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -47,30 +44,3 @@
         </table>
     </div>
 </div>
-
-<script>
-    function deleteRole(roleId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa vai trò này?')) {
-            return;
-        }
-
-        fetch('/admin/roles/delete/' + roleId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('Có lỗi xảy ra: ' + error);
-            });
-    }
-</script>

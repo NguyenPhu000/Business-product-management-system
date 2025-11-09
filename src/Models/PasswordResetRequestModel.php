@@ -46,17 +46,23 @@ class PasswordResetRequestModel extends BaseModel
     /**
      * Lấy tất cả yêu cầu (có phân trang) - hiển thị TẤT CẢ để audit
      */
-    public function getAllRequests(int $limit = 20, int $offset = 0): array
+    public function getAllRequests(int $page = 1, int $perPage = 12): array
     {
-        $sql = "SELECT r.*, u.username, u.email 
+        $offset = ($page - 1) * $perPage;
+
+        $sql = "SELECT r.*, 
+                u.username, u.email,
+                approver.username as approver_username,
+                approver.full_name as approver_full_name
                 FROM {$this->table} r
                 INNER JOIN users u ON r.user_id = u.id
+                LEFT JOIN users approver ON r.approved_by = approver.id
                 ORDER BY r.requested_at DESC
                 LIMIT :limit OFFSET :offset";
 
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -183,6 +189,26 @@ class PasswordResetRequestModel extends BaseModel
     }
 
     /**
+     * Lấy yêu cầu approved theo ID (vẫn còn hiệu lực: chưa đổi mật khẩu và trong 10 giây)
+     */
+    public function getApprovedRequestById(int $id): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE id = :id 
+                AND status = 'approved'
+                AND (new_password IS NULL OR new_password != 'changed')
+                AND approved_at >= DATE_SUB(NOW(), INTERVAL 10 SECOND)
+                LIMIT 1";
+
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
      * Xóa các request approved đã hết hạn (quá 10 GIÂY chưa đổi MK)
      */
     public function deleteExpiredApprovedRequests(int $userId): bool
@@ -255,5 +281,62 @@ class PasswordResetRequestModel extends BaseModel
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         return $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Lấy tất cả các yêu cầu đã bị cancelled (người dùng hủy)
+     */
+    public function getCancelledRequests(): array
+    {
+        $sql = "SELECT r.*, 
+                u.username, 
+                u.full_name,
+                approver.username as approver_username,
+                approver.full_name as approver_name
+                FROM {$this->table} r
+                LEFT JOIN users u ON r.user_id = u.id
+                LEFT JOIN users approver ON r.approved_by = approver.id
+                WHERE r.status = 'cancelled' 
+                ORDER BY r.requested_at DESC";
+
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Hủy yêu cầu pending của user (người dùng tự hủy)
+     */
+    public function cancelPendingRequest(int $userId): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET status = 'cancelled'
+                WHERE user_id = :user_id 
+                AND status = 'pending'";
+
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['user_id' => $userId]);
+
+        // Kiểm tra số row bị affected
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Xóa các request pending của user (dùng cho thao tác silent cancel)
+     */
+    public function deletePendingRequestByUser(int $userId): bool
+    {
+        $sql = "DELETE FROM {$this->table} 
+                WHERE user_id = :user_id 
+                AND status = 'pending'";
+
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['user_id' => $userId]);
+
+        return $stmt->rowCount() > 0;
     }
 }

@@ -17,44 +17,25 @@ $formAction = isset($user) ? "/admin/users/update/{$user['id']}" : "/admin/users
                 <div>
                     <div class="form-group">
                         <label for="username" class="form-label">Username *</label>
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            class="form-control"
-                            value="<?= \Core\View::e($old['username'] ?? $user['username'] ?? '') ?>"
-                            required>
+                        <input type="text" id="username" name="username" class="form-control"
+                            value="<?= \Core\View::e($old['username'] ?? $user['username'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="email" class="form-label">Email *</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="form-control"
-                            value="<?= \Core\View::e($old['email'] ?? $user['email'] ?? '') ?>"
-                            required>
+                        <input type="email" id="email" name="email" class="form-control"
+                            value="<?= \Core\View::e($old['email'] ?? $user['email'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="full_name" class="form-label">Họ tên *</label>
-                        <input
-                            type="text"
-                            id="full_name"
-                            name="full_name"
-                            class="form-control"
-                            value="<?= \Core\View::e($old['full_name'] ?? $user['full_name'] ?? '') ?>"
-                            required>
+                        <input type="text" id="full_name" name="full_name" class="form-control"
+                            value="<?= \Core\View::e($old['full_name'] ?? $user['full_name'] ?? '') ?>" required>
                     </div>
 
                     <div class="form-group">
                         <label for="phone" class="form-label">Số điện thoại</label>
-                        <input
-                            type="text"
-                            id="phone"
-                            name="phone"
-                            class="form-control"
+                        <input type="text" id="phone" name="phone" class="form-control"
                             value="<?= \Core\View::e($old['phone'] ?? $user['phone'] ?? '') ?>">
                     </div>
                 </div>
@@ -62,49 +43,44 @@ $formAction = isset($user) ? "/admin/users/update/{$user['id']}" : "/admin/users
                 <div>
                     <div class="form-group">
                         <label for="role_id" class="form-label">Vai trò *</label>
-                        <select id="role_id" name="role_id" class="form-control" required>
+                        <?php
+                        $currentUserId = \Helpers\AuthHelper::user()['id'] ?? null;
+                        $isEditingSelf = isset($user) && $currentUserId == $user['id'];
+                        ?>
+                        <select id="role_id" name="role_id" class="form-control" required
+                            <?= $isEditingSelf ? 'disabled' : '' ?>>
                             <option value="">-- Chọn vai trò --</option>
                             <?php if (isset($roles)): ?>
                                 <?php foreach ($roles as $role): ?>
-                                    <option
-                                        value="<?= $role['id'] ?>"
+                                    <option value="<?= $role['id'] ?>"
                                         <?= ($old['role_id'] ?? $user['role_id'] ?? '') == $role['id'] ? 'selected' : '' ?>>
                                         <?= \Core\View::e($role['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
+                        <?php if ($isEditingSelf): ?>
+                            <!-- Hidden input để submit giá trị role_id ban đầu -->
+                            <input type="hidden" name="role_id" value="<?= $user['role_id'] ?>">
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Bạn không thể thay đổi vai trò của chính mình
+                            </small>
+                        <?php endif; ?>
                     </div>
 
-                    <div class="form-group">
-                        <label for="status" class="form-label">Trạng thái *</label>
-                        <select id="status" name="status" class="form-control" required>
-                            <option value="1" <?= ($old['status'] ?? $user['status'] ?? 1) == 1 ? 'selected' : '' ?>>Hoạt động</option>
-                            <option value="0" <?= ($old['status'] ?? $user['status'] ?? 1) == 0 ? 'selected' : '' ?>>Không hoạt động</option>
-                        </select>
-                    </div>
+                    <!-- Trạng thái đã bị loại khỏi giao diện theo yêu cầu -->
 
                     <?php if (!isset($user)): ?>
                         <div class="form-group">
                             <label for="password" class="form-label">Mật khẩu *</label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="form-control"
-                                required
+                            <input type="password" id="password" name="password" class="form-control" required
                                 minlength="8">
                             <small style="color: #666;">Tối thiểu 8 ký tự</small>
                         </div>
                     <?php else: ?>
                         <div class="form-group">
                             <label for="new_password" class="form-label">Mật khẩu mới</label>
-                            <input
-                                type="password"
-                                id="new_password"
-                                name="new_password"
-                                class="form-control"
-                                minlength="8">
+                            <input type="password" id="new_password" name="new_password" class="form-control" minlength="8">
                             <small style="color: #666;">Để trống nếu không đổi mật khẩu</small>
                         </div>
                     <?php endif; ?>

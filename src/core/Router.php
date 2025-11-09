@@ -47,11 +47,6 @@ class Router
         // Loại bỏ query string
         $uri = parse_url($uri, PHP_URL_PATH);
         
-        // Debug logging (có thể xóa sau khi fix)
-        if (defined('APP_DEBUG') && APP_DEBUG) {
-            error_log("Router Debug - Method: {$method}, URI: {$uri}");
-        }
-        
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
                 continue;
@@ -63,16 +58,7 @@ class Router
             
             if (preg_match($pattern, $uri, $matches)) {
                 // Lọc chỉ lấy named parameters
-                $namedParams = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-                
-                // Chuyển named params thành positional params (array values)
-                $params = array_values($namedParams);
-                
-                // Debug logging
-                if (defined('APP_DEBUG') && APP_DEBUG) {
-                    $handlerStr = is_string($route['handler']) ? $route['handler'] : 'Closure';
-                    error_log("Router Debug - Matched route: {$route['path']}, Handler: {$handlerStr}, Params: " . json_encode($params));
-                }
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
                 
                 // Chạy middlewares
                 foreach ($route['middlewares'] as $middleware) {
@@ -89,9 +75,6 @@ class Router
         }
         
         // Route không tìm thấy
-        if (defined('APP_DEBUG') && APP_DEBUG) {
-            error_log("Router Debug - No route matched for Method: {$method}, URI: {$uri}");
-        }
         http_response_code(404);
         View::render('errors/404', [], null);
     }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * index.php - Entry point của ứng dụng
  * 

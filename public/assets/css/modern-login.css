@@ -213,7 +213,7 @@ form.login-card p {
   height: 56px;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 50px 0 20px; /* Space for password toggle icon on right */
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -302,23 +302,33 @@ form.login-card p {
 .password-toggle {
   position: absolute;
   right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   cursor: pointer;
   color: #a0aec0;
   flex-shrink: 0;
-  z-index: 1;
+  z-index: 10;
   padding: 8px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle i {
+  margin: 0;
 }
 
 .password-toggle:hover {
   color: #667eea;
   background: rgba(102, 126, 234, 0.08);
-  transform: scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .password-toggle:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 /* =========================================

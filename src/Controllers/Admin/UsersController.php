@@ -141,6 +141,15 @@ class UsersController extends Controller
             return;
         }
 
+        // Kiểm tra quyền hạn: 
+        // - Chỉ quyền CAO HƠN mới được sửa quyền THẤP HƠN
+        // - Quyền BẰNG NHAU không được sửa lẫn nhau (trừ sửa chính mình)
+        if (!AuthHelper::canManageRole($user['role_id']) && $user['id'] != AuthHelper::id()) {
+            AuthHelper::setFlash('error', 'Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
+            $this->redirect('/admin/users');
+            return;
+        }
+
         $roles = $this->roleModel->all();
 
         $data = [
@@ -167,6 +176,15 @@ class UsersController extends Controller
 
         if (!$user) {
             AuthHelper::setFlash('error', 'Không tìm thấy người dùng');
+            $this->redirect('/admin/users');
+            return;
+        }
+
+        // Kiểm tra quyền hạn: 
+        // - Chỉ quyền CAO HƠN mới được sửa quyền THẤP HƠN
+        // - Quyền BẰNG NHAU không được sửa lẫn nhau (trừ sửa chính mình)
+        if (!AuthHelper::canManageRole($user['role_id']) && $user['id'] != AuthHelper::id()) {
+            AuthHelper::setFlash('error', 'Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
             $this->redirect('/admin/users');
             return;
         }
@@ -202,14 +220,13 @@ class UsersController extends Controller
             return;
         }
 
-        // Cập nhật user
+        // Cập nhật user (không thay đổi trạng thái từ giao diện theo yêu cầu)
         $data = [
             'username' => $this->input('username'),
             'email' => $this->input('email'),
             'full_name' => $this->input('full_name'),
             'phone' => $this->input('phone'),
-            'role_id' => (int) $this->input('role_id'),
-            'status' => (int) $this->input('status', STATUS_ACTIVE)
+            'role_id' => (int) $this->input('role_id')
         ];
 
         // Nếu có đổi mật khẩu
@@ -246,9 +263,18 @@ class UsersController extends Controller
             return;
         }
 
-        // Không cho xóa chính mình
+        // Không cho xóa chính mình đang đăng nhập
         if ($userId == AuthHelper::id()) {
-            $this->error('Không thể xóa tài khoản của chính mình', 400);
+            $this->error('Không thể xóa tài khoản của chính mình đang đăng nhập', 400);
+            return;
+        }
+
+        // Kiểm tra quyền hạn: 
+        // - Chỉ quyền CAO HƠN mới được xóa quyền THẤP HƠN
+        // - Quyền BẰNG NHAU không được xóa lẫn nhau
+        // Quy tắc: Admin (1) > Chủ tiệm (5) > Sales Staff (2) = Warehouse Manager (3)
+        if (!AuthHelper::canManageRole($user['role_id'])) {
+            $this->error('Bạn không có quyền xóa người dùng này. Chỉ quyền cao hơn mới được xóa quyền thấp hơn hoặc bằng mình.', 403);
             return;
         }
 

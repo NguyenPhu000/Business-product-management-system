@@ -5,7 +5,7 @@ namespace Middlewares;
 use Helpers\AuthHelper;
 
 /**
- * RoleMiddleware - Kiểm tra quyền admin
+ * RoleMiddleware - Kiểm tra quyền admin hoặc chủ tiệm
  */
 class RoleMiddleware
 {
@@ -18,7 +18,7 @@ class RoleMiddleware
             exit;
         }
 
-        // Kiểm tra quyền quản lý (Admin hoặc Owner)
+        // Kiểm tra quyền admin hoặc chủ tiệm
         if (!AuthHelper::isAdminOrOwner()) {
             http_response_code(403);
             echo "
@@ -38,7 +38,6 @@ class RoleMiddleware
             <body>
                 <h1>403</h1>
                 <p>Bạn không có quyền truy cập trang này</p>
-                <p style='color: #999; font-size: 14px;'>Chức năng này chỉ dành cho Admin hoặc Chủ tiệm</p>
                 <a href='/admin/dashboard'>← Quay lại Dashboard</a>
             </body>
             </html>

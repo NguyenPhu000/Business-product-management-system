@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trạng thái yêu cầu - Business Product Management System</title>
-    <script src="https://kit.fontawesome.com/42a96a500e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/modern-login.css">
     <link rel="stylesheet" href="/assets/css/check-request-status.css">
 </head>
@@ -34,9 +34,15 @@
                         <li>Nhập lại email của bạn</li>
                         <li>Đặt mật khẩu mới</li>
                     </ol>
-                    <button onclick="location.reload()" class="btn-login" style="margin-top: 15px;">
-                        🔄 Kiểm tra lại trạng thái
-                    </button>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="location.reload()" class="btn-login" style="flex: 1; background: #17a2b8;">
+                            🔄 Kiểm tra lại trạng thái
+                        </button>
+                        <button onclick="cancelRequest(<?= $userId ?>)" class="btn-login"
+                            style="flex: 1; background: #dc3545;">
+                            ❌ Hủy yêu cầu
+                        </button>
+                    </div>
                 </div>
 
             <?php elseif ($status === 'approved'): ?>
@@ -86,9 +92,57 @@
     </div>
 
     <script>
+        // Debug: Kiểm tra userId
+        console.log('Status:', '<?= $status ?>');
+        console.log('UserId:', <?= isset($userId) ? $userId : 'null' ?>);
+        console.log('Email:', '<?= $email ?? '' ?>');
+
         // Xóa session storage
         sessionStorage.clear();
         localStorage.clear();
+
+        // Hàm hủy yêu cầu
+        function cancelRequest(userId) {
+            console.log('cancelRequest called with userId:', userId);
+
+            if (!userId) {
+                alert('❌ Lỗi: Không tìm thấy userId');
+                return;
+            }
+
+            if (!confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt lại mật khẩu?')) {
+                return;
+            }
+
+            console.log('Sending cancel request...');
+
+            fetch('/forgot-password/cancel-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        alert('✅ Đã hủy yêu cầu thành công!');
+                        window.location.href = '/admin/login';
+                    } else {
+                        alert('❌ Lỗi: ' + (data.message || 'Không thể hủy yêu cầu'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ Có lỗi xảy ra khi hủy yêu cầu');
+                });
+        }
 
         // Auto refresh nếu đang pending (mỗi 15 giây)
         <?php if ($status === 'pending'): ?>

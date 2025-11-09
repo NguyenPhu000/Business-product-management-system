@@ -31,8 +31,10 @@ class UserModel extends BaseModel
      */
     public function authenticate(string $emailOrUsername, string $password): ?array
     {
-        // Tìm user theo email hoặc username
-        $sql = "SELECT * FROM {$this->table} WHERE email = ? OR username = ? LIMIT 1";
+        // Tìm user theo email hoặc username (PHÂN BIỆT HOA THƯỜNG)
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE BINARY email = ? OR BINARY username = ? 
+                LIMIT 1";
         $user = $this->queryOne($sql, [$emailOrUsername, $emailOrUsername]);
 
         if ($user && password_verify($password, $user['password_hash'])) {

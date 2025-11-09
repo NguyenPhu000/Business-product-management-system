@@ -6,293 +6,247 @@ use Helpers\FormatHelper;
 $title = 'Quản lý yêu cầu đặt lại mật khẩu';
 ?>
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">
-            <i class="fas fa-key"></i> Yêu cầu đặt lại mật khẩu
-        </h1>
-        <div class="badge badge-warning" style="font-size: 16px; padding: 10px 20px;">
-            <i class="fas fa-clock"></i> <?= $pendingCount ?> yêu cầu đang chờ
+<link rel="stylesheet" href="/assets/css/password-reset.css">
+
+<!-- Container với data attributes cho JS -->
+<div id="password-reset-container"
+    data-pending-count="<?= $pendingCount ?>"
+    data-request-ids="<?= implode(',', array_column($requests, 'id')) ?>">
+
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 d-flex align-items-center">
+                <i class="fas fa-key"></i>
+                <span class="title-text">Yêu cầu đặt lại mật khẩu</span>
+                <!-- Badge moved next to title and styled via CSS -->
+                <span class="pending-badge"><i class="fas fa-clock"></i> <?= $pendingCount ?> yêu cầu đang chờ</span>
+            </h1>
+            <!-- kept right area for future controls (keeps layout) -->
+            <div class="header-controls"></div>
         </div>
-    </div>
 
-    <?php if ($error = AuthHelper::getFlash('error')): ?>
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="fas fa-exclamation-circle"></i> <?= $error ?>
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    <?php endif; ?>
-
-    <?php if ($success = AuthHelper::getFlash('success')): ?>
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle"></i> <?= $success ?>
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-    </div>
-    <?php endif; ?>
-
-    <div class="card">
-        <div class="card-body">
-            <?php if (empty($requests)): ?>
-            <div class="text-center py-5">
-                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Chưa có yêu cầu nào</p>
+        <?php if ($error = AuthHelper::getFlash('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle"></i> <?= $error ?>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
             </div>
-            <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Người dùng</th>
-                            <th>Email</th>
-                            <th>Thời gian yêu cầu</th>
-                            <th>Trạng thái</th>
-                            <th>Người phê duyệt</th>
-                            <th>Thời gian xử lý</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($requests as $request): ?>
-                        <tr id="request-<?= $request['id'] ?>">
-                            <td><?= $request['id'] ?></td>
-                            <td>
-                                <strong><?= htmlspecialchars($request['username']) ?></strong>
-                                <br>
-                                <small class="text-muted"><?= htmlspecialchars($request['email']) ?></small>
-                            </td>
-                            <td><?= htmlspecialchars($request['email']) ?></td>
-                            <td><?= FormatHelper::datetime($request['requested_at']) ?></td>
-                            <td>
-                                <?php if ($request['status'] === 'pending'): ?>
-                                <span class="badge badge-warning">
-                                    <i class="fas fa-clock"></i> Đang chờ
-                                </span>
-                                <?php elseif ($request['status'] === 'approved'): ?>
-                                <?php if ($request['new_password'] === 'changed'): ?>
-                                <span class="badge badge-secondary">
-                                    <i class="fas fa-check-double"></i> Đã hoàn tất
-                                </span>
-                                <?php else: ?>
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check"></i> Đã phê duyệt
-                                </span>
-                                <?php endif; ?>
-                                <?php else: ?>
-                                <span class="badge badge-danger">
-                                    <i class="fas fa-times"></i> Đã từ chối
-                                </span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($request['approved_by']): ?>
-                                <small>ID: <?= $request['approved_by'] ?></small>
-                                <?php else: ?>
-                                <span class="text-muted">-</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($request['approved_at']): ?>
-                                <?= FormatHelper::datetime($request['approved_at']) ?>
-                                <?php else: ?>
-                                <span class="text-muted">-</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($request['status'] === 'pending'): ?>
-                                <button class="btn btn-sm btn-success" onclick="approveRequest(<?= $request['id'] ?>)"
-                                    title="Phê duyệt">
-                                    <i class="fas fa-check"></i> Phê duyệt
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="rejectRequest(<?= $request['id'] ?>)"
-                                    title="Từ chối">
-                                    <i class="fas fa-times"></i> Từ chối
-                                </button>
-                                <?php else: ?>
-                                <span class="text-muted">Đã xử lý</span>
-                                <?php endif; ?>
+        <?php endif; ?>
 
-                                <!-- Nút xóa cho tất cả request (chỉ admin) -->
-                                <button class="btn btn-sm btn-danger" onclick="deleteRequest(<?= $request['id'] ?>)"
-                                    title="Xóa request">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+        <?php if ($success = AuthHelper::getFlash('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle"></i> <?= $success ?>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
             </div>
-            <?php endif; ?>
+        <?php endif; ?>
+
+        <div class="card">
+            <div class="card-body">
+                <?php if (empty($requests)): ?>
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có yêu cầu nào</p>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Người dùng</th>
+                                    <th>Email</th>
+                                    <th>Thời gian yêu cầu</th>
+                                    <th>Trạng thái</th>
+                                    <th>Người phê duyệt</th>
+                                    <th>Thời gian xử lý</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($requests as $request): ?>
+                                    <tr id="request-<?= $request['id'] ?>">
+                                        <td><?= $request['id'] ?></td>
+                                        <td>
+                                            <strong><?= htmlspecialchars($request['username']) ?></strong>
+                                            <br>
+                                            <small class="text-muted"><?= htmlspecialchars($request['email']) ?></small>
+                                        </td>
+                                        <td><?= htmlspecialchars($request['email']) ?></td>
+                                        <td><?= FormatHelper::datetime($request['requested_at']) ?></td>
+                                        <td>
+                                            <?php if ($request['status'] === 'pending'): ?>
+                                                <span class="badge badge-warning">
+                                                    <i class="fas fa-clock"></i> Đang chờ
+                                                </span>
+                                            <?php elseif ($request['status'] === 'approved'): ?>
+                                                <?php if ($request['new_password'] === 'changed'): ?>
+                                                    <span class="badge badge-secondary">
+                                                        <i class="fas fa-check-double"></i> Đã hoàn tất
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-check"></i> Đã phê duyệt
+                                                    </span>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times"></i> Đã từ chối
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($request['approver_username'])): ?>
+                                                <strong><?= htmlspecialchars($request['approver_username']) ?></strong>
+                                                <?php if (!empty($request['approver_full_name'])): ?>
+                                                    <br><small
+                                                        class="text-muted"><?= htmlspecialchars($request['approver_full_name']) ?></small>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($request['approved_at']): ?>
+                                                <?= FormatHelper::datetime($request['approved_at']) ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($request['status'] === 'pending'): ?>
+                                                <button class="btn btn-sm btn-success" onclick="approveRequest(<?= $request['id'] ?>)"
+                                                    title="Phê duyệt">
+                                                    <i class="fas fa-check"></i> Phê duyệt
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="rejectRequest(<?= $request['id'] ?>)"
+                                                    title="Từ chối">
+                                                    <i class="fas fa-times"></i> Từ chối
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="badge badge-secondary">Đã xử lý</span>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteRequest(<?= $request['id'] ?>)"
+                                                    title="Xóa">
+                                                    <i class="fas fa-trash"></i> Xóa
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
+
+        <?php if (!empty($requests) && $pagination['totalPages'] > 1): ?>
+            <!-- Phân trang hiện đại -->
+            <div class="modern-pagination-wrapper">
+                <div class="pagination-controls">
+                    <!-- Nút First và Previous -->
+                    <div class="pagination-nav-buttons">
+                        <a href="/admin/password-reset?page=1"
+                            class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang đầu">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="/admin/password-reset?page=<?= max(1, $pagination['page'] - 1) ?>"
+                            class="pagination-btn <?= $pagination['page'] == 1 ? 'disabled' : '' ?>" title="Trang trước">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </div>
+
+                    <!-- Hiển thị số trang -->
+                    <div class="pagination-numbers">
+                        <?php
+                        // Hiển thị trang đầu
+                        if ($pagination['page'] > 3): ?>
+                            <a href="/admin/password-reset?page=1" class="page-number">1</a>
+                            <?php if ($pagination['page'] > 4): ?>
+                                <span class="page-dots">...</span>
+                            <?php endif;
+                        endif;
+
+                        // Hiển thị các trang gần current
+                        $start = max(1, $pagination['page'] - 2);
+                        $end = min($pagination['totalPages'], $pagination['page'] + 2);
+
+                        for ($i = $start; $i <= $end; $i++): ?>
+                            <a href="/admin/password-reset?page=<?= $i ?>"
+                                class="page-number <?= $i == $pagination['page'] ? 'active' : '' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor;
+
+                        // Hiển thị trang cuối
+                        if ($pagination['page'] < $pagination['totalPages'] - 2): ?>
+                            <?php if ($pagination['page'] < $pagination['totalPages'] - 3): ?>
+                                <span class="page-dots">...</span>
+                            <?php endif; ?>
+                            <a href="/admin/password-reset?page=<?= $pagination['totalPages'] ?>" class="page-number">
+                                <?= $pagination['totalPages'] ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Nút Next và Last -->
+                    <div class="pagination-nav-buttons">
+                        <a href="/admin/password-reset?page=<?= min($pagination['totalPages'], $pagination['page'] + 1) ?>"
+                            class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                            title="Trang sau">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="/admin/password-reset?page=<?= $pagination['totalPages'] ?>"
+                            class="pagination-btn <?= $pagination['page'] == $pagination['totalPages'] ? 'disabled' : '' ?>"
+                            title="Trang cuối">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </div>
+
+                    <!-- Ô nhập trang -->
+                    <div class="pagination-jump">
+                        <span class="jump-label">Đến trang:</span>
+                        <input type="number" id="jumpToPage" class="jump-input" min="1" max="<?= $pagination['totalPages'] ?>"
+                            value="<?= $pagination['page'] ?>" placeholder="<?= $pagination['page'] ?>">
+                        <button onclick="jumpToPage()" class="jump-btn" title="Chuyển trang">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thông tin phân trang -->
+                <div class="pagination-info-modern">
+                    <span class="info-text">
+                        Trang <strong><?= $pagination['page'] ?></strong> /
+                        <strong><?= $pagination['totalPages'] ?></strong>
+                        • Tổng <strong><?= $pagination['totalRecords'] ?></strong> yêu cầu
+                    </span>
+                </div>
+            </div>
+
+            <script>
+                function jumpToPage() {
+                    const input = document.getElementById('jumpToPage');
+                    if (!input) return;
+
+                    const page = input.value;
+                    const maxPage = parseInt(input.max);
+
+                    if (page && page >= 1 && page <= maxPage) {
+                        window.location.href = '/admin/password-reset?page=' + page;
+                    } else {
+                        alert('Vui lòng nhập số trang hợp lệ (1 - ' + maxPage + ')');
+                    }
+                }
+
+                // Enter để jump
+                document.getElementById('jumpToPage')?.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        jumpToPage();
+                    }
+                });
+            </script>
+        <?php endif; ?>
     </div>
-</div>
+</div><!-- End password-reset-container -->
 
-<script>
-function approveRequest(id) {
-    if (!confirm(
-            'Bạn có chắc muốn phê duyệt yêu cầu này?\n\nSau khi phê duyệt, người dùng có thể vào trang "Quên mật khẩu" để tự đổi mật khẩu mới.'
-        )) {
-        return;
-    }
-
-    fetch(`/admin/password-reset/approve/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-
-                // Cập nhật trạng thái trong bảng
-                const row = document.getElementById(`request-${id}`);
-                if (row) {
-                    row.querySelector('td:nth-child(5)').innerHTML =
-                        '<span class="badge badge-success"><i class="fas fa-check"></i> Đã phê duyệt</span>';
-                    row.querySelector('td:nth-child(7)').textContent = 'Vừa xong';
-                    row.querySelector('td:nth-child(8)').innerHTML = '<span class="text-muted">Đã xử lý</span>';
-                }
-
-                // Cập nhật số lượng pending
-                updatePendingCount();
-            } else {
-                alert(data.message || 'Có lỗi xảy ra!');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi phê duyệt!');
-        });
-}
-
-function rejectRequest(id) {
-    if (!confirm('Bạn có chắc muốn từ chối yêu cầu này?')) {
-        return;
-    }
-
-    fetch(`/admin/password-reset/reject/${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-
-                // Cập nhật trạng thái trong bảng
-                const row = document.getElementById(`request-${id}`);
-                if (row) {
-                    row.querySelector('td:nth-child(5)').innerHTML =
-                        '<span class="badge badge-danger"><i class="fas fa-times"></i> Đã từ chối</span>';
-                    row.querySelector('td:nth-child(7)').textContent = 'Vừa xong';
-                    row.querySelector('td:nth-child(8)').innerHTML = '<span class="text-muted">Đã xử lý</span>';
-                }
-
-                // Cập nhật số lượng pending
-                updatePendingCount();
-            } else {
-                alert(data.message || 'Có lỗi xảy ra!');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi từ chối!');
-        });
-}
-
-// Xóa request
-function deleteRequest(id) {
-    if (!confirm('Bạn có chắc muốn XÓA VĨNH VIỄN request này?\n\nHành động này không thể hoàn tác!')) {
-        return;
-    }
-
-    fetch('/admin/password-reset/delete/' + id, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-
-                // Xóa hàng khỏi bảng
-                const row = document.getElementById(`request-${id}`);
-                if (row) {
-                    row.remove();
-                }
-
-                // Reload trang nếu không còn request nào
-                const tbody = document.querySelector('table tbody');
-                if (tbody && tbody.children.length === 0) {
-                    location.reload();
-                }
-
-                // Cập nhật số lượng pending
-                updatePendingCount();
-            } else {
-                alert(data.message || 'Có lỗi xảy ra!');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi xóa!');
-        });
-}
-
-// Auto-refresh: Kiểm tra yêu cầu mới mỗi 10 giây
-let lastPendingCount = <?= $pendingCount ?>;
-
-function updatePendingCount() {
-    fetch('/admin/password-reset/check-new')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const newCount = data.pendingCount;
-
-                // Cập nhật badge số lượng
-                const badge = document.querySelector('.badge-warning');
-                if (badge) {
-                    badge.innerHTML = `<i class="fas fa-clock"></i> ${newCount} yêu cầu đang chờ`;
-                }
-
-                // Nếu có yêu cầu mới, reload trang để hiển thị
-                if (newCount > lastPendingCount) {
-                    // Hiển thị thông báo
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-info alert-dismissible fade show';
-                    alertDiv.style.cssText =
-                        'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-                    alertDiv.innerHTML = `
-                        <i class="fas fa-bell"></i> Có ${newCount - lastPendingCount} yêu cầu mới!
-                        <button type="button" class="close" onclick="this.parentElement.remove()">&times;</button>
-                    `;
-                    document.body.appendChild(alertDiv);
-
-                    // Tự động ẩn sau 3 giây và reload
-                    setTimeout(() => {
-                        alertDiv.remove();
-                        location.reload();
-                    }, 3000);
-                }
-
-                lastPendingCount = newCount;
-            }
-        })
-        .catch(error => {
-            console.error('Error checking new requests:', error);
-        });
-}
-
-// Kiểm tra mỗi 5 giây
-setInterval(updatePendingCount, 5000);
-
-// Kiểm tra ngay khi trang load
-setTimeout(updatePendingCount, 1000);
-</script>
+<!-- Load external JS file -->
+<script src="/assets/js/admin-password-reset.js"></script>

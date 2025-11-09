@@ -78,9 +78,15 @@ class UserLogModel extends BaseModel
         $offset = ($page - 1) * $perPage;
         $params = [];
 
-        $sql = "SELECT ul.*, u.username, u.full_name, u.email 
+        $sql = "SELECT ul.*, 
+                u.username, u.full_name, u.email, u.role_id,
+                r.name as role_name,
+                target_user.username as target_username, 
+                target_user.full_name as target_full_name
                 FROM {$this->table} ul 
-                LEFT JOIN users u ON ul.user_id = u.id 
+                LEFT JOIN users u ON ul.user_id = u.id
+                LEFT JOIN roles r ON u.role_id = r.id
+                LEFT JOIN users target_user ON ul.object_type = 'user' AND ul.object_id = target_user.id
                 WHERE 1=1";
 
         if ($userId) {
