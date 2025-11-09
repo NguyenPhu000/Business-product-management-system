@@ -91,7 +91,12 @@ class Router
         
         if (is_string($handler)) {
             [$controller, $method] = explode('@', $handler);
-            $controller = "Controllers\\{$controller}";
+            
+            // Nếu controller đã có namespace đầy đủ (chứa \), giữ nguyên
+            // Ngược lại, thêm Controllers\ prefix cho backward compatibility
+            if (strpos($controller, '\\') === false) {
+                $controller = "Controllers\\{$controller}";
+            }
             
             if (class_exists($controller)) {
                 $instance = new $controller();
