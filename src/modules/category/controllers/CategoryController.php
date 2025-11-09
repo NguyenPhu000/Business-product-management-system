@@ -1,27 +1,314 @@
 <?php
 
-/**
- * CategoryController.php
- * 
- * Chức năng:
- * - CRUD danh mục sản phẩm
- * - Quản lý cây danh mục phân cấp (parent-child)
- * - Sắp xếp thứ tự danh mục
- * - Kích hoạt/vô hiệu hóa danh mục
- */
-
 namespace Modules\Category\Controllers;
 
 use Core\Controller;
+use Models\CategoryModel;
+use Helpers\AuthHelper;
+use Helpers\LogHelper;
 
+/**
+ * CategoryController - Quản lý danh mục sản phẩm (Refactored)
+ * 
+ * Note: CategoryService hiện tại rỗng, logic chủ yếu nằm trong CategoryModel
+ * Nếu cần business logic phức tạp hơn sau này, sẽ extract vào CategoryService
+ */
 class CategoryController extends Controller
 {
-    // TODO: Implement index() - Danh sách danh mục
-    // TODO: Implement tree() - Hiển thị cây danh mục
-    // TODO: Implement create() - Form thêm danh mục
-    // TODO: Implement store() - Lưu danh mục mới
-    // TODO: Implement edit($id) - Form sửa danh mục
-    // TODO: Implement update($id) - Cập nhật danh mục
-    // TODO: Implement delete($id) - Xóa danh mục
-    // TODO: Implement updateOrder() - Cập nhật thứ tự
+    private CategoryModel $categoryModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->categoryModel = new CategoryModel();
+    }
+
+    /**
+     * Hiển thị danh sách danh mục
+     */
+    public function index(): void
+    {
+        $categories = $this->categoryModel->getAllWithParent();
+        $categoryTree = $this->categoryModel->getCategoryTree();
+        
+        $this->view('admin/categories/index', [
+            'categories' => $categories,
+            'categoryTree' => $categoryTree,
+            'pageTitle' => 'Quản lý danh mục sản phẩm'
+        ]);
+    }
+
+    /**
+     * Hiển thị form tạo danh mục mới
+     */
+    public function create(): void
+    {
+        $parentCategories = $this->categoryModel->getParentCategories();
+        
+        $this->view('admin/categories/create', [
+            'parentCategories' => $parentCategories,
+            'pageTitle' => 'Thêm danh mục mới'
+        ]);
+    }
+
+    /**
+     * Xử lý tạo danh mục mới
+     */
+    public function store(): void
+    {
+        try {
+            $name = trim($this->input('name', ''));
+            $slug = trim($this->input('slug', ''));
+            $parentId = $this->input('parent_id', null);
+            $isActive = $this->input('is_active', 0);
+            $sortOrder = $this->input('sort_order', 0);
+
+            // Validate
+            if (empty($name)) {
+                throw new \Exception('Tên danh mục không được để trống');
+            }
+
+            // Tạo slug nếu chưa có
+            if (empty($slug)) {
+                $slug = $this->categoryModel->generateSlug($name);
+            } else {
+                // Kiểm tra slug đã tồn tại chưa
+                if ($this->categoryModel->slugExists($slug)) {
+                    throw new \Exception('Slug đã tồn tại, vui lòng chọn slug khác');
+                }
+            }
+
+            // Tạo danh mục
+            $data = [
+                'name' => $name,
+                'slug' => $slug,
+                'parent_id' => $parentId ?: null,
+                'is_active' => $isActive ? 1 : 0,
+                'sort_order' => (int) $sortOrder
+            ];
+
+            $categoryId = $this->categoryModel->create($data);
+
+            if (!$categoryId) {
+                throw new \Exception('Có lỗi xảy ra khi tạo danh mục');
+            }
+
+            // Ghi log
+            LogHelper::log('create', 'category', $categoryId, $data);
+            
+            AuthHelper::setFlash('success', 'Thêm danh mục thành công!');
+            $this->redirect('/admin/categories');
+
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
+            $this->redirect('/admin/categories/create');
+        }
+    }
+
+    /**
+     * Hiển thị form sửa danh mục
+     */
+    public function edit(int $id): void
+    {
+        $category = $this->categoryModel->find($id);
+
+        if (!$category) {
+            AuthHelper::setFlash('error', 'Danh mục không tồn tại');
+            $this->redirect('/admin/categories');
+            return;
+        }
+
+        $parentCategories = $this->categoryModel->getParentCategories();
+        
+        // Loại bỏ chính nó và các danh mục con khỏi danh sách parent
+        $parentCategories = array_filter($parentCategories, function($cat) use ($id) {
+            return $cat['id'] != $id;
+        });
+
+        $this->view('admin/categories/edit', [
+            'category' => $category,
+            'parentCategories' => $parentCategories,
+            'pageTitle' => 'Sửa danh mục: ' . $category['name']
+        ]);
+    }
+
+    /**
+     * Xử lý cập nhật danh mục
+     */
+    public function update(int $id): void
+    {
+        try {
+            $category = $this->categoryModel->find($id);
+
+            if (!$category) {
+                throw new \Exception('Danh mục không tồn tại');
+            }
+
+            $name = trim($this->input('name', ''));
+            $slug = trim($this->input('slug', ''));
+            $parentId = $this->input('parent_id', null);
+            $isActive = $this->input('is_active', 0);
+            $sortOrder = $this->input('sort_order', 0);
+
+            // Validate
+            if (empty($name)) {
+                throw new \Exception('Tên danh mục không được để trống');
+            }
+
+            // Kiểm tra slug trùng lặp
+            if (!empty($slug) && $this->categoryModel->slugExists($slug, $id)) {
+                throw new \Exception('Slug đã tồn tại, vui lòng chọn slug khác');
+            }
+
+            // Kiểm tra parent_id không được là chính nó hoặc danh mục con của nó
+            if ($parentId == $id) {
+                throw new \Exception('Không thể chọn chính nó làm danh mục cha');
+            }
+
+            if ($parentId && $this->categoryModel->isParentOf($id, $parentId)) {
+                throw new \Exception('Không thể chọn danh mục con làm danh mục cha');
+            }
+
+            // Cập nhật danh mục
+            $data = [
+                'name' => $name,
+                'slug' => $slug ?: $this->categoryModel->generateSlug($name),
+                'parent_id' => $parentId ?: null,
+                'is_active' => $isActive ? 1 : 0,
+                'sort_order' => (int) $sortOrder
+            ];
+
+            // Kiểm tra xem is_active có thay đổi không
+            $oldIsActive = $category['is_active'];
+            $newIsActive = $data['is_active'];
+            
+            // Cập nhật các field khác trước
+            $dataWithoutActive = $data;
+            unset($dataWithoutActive['is_active']);
+            
+            if (!empty($dataWithoutActive)) {
+                $this->categoryModel->update($id, $dataWithoutActive);
+            }
+            
+            // Nếu is_active thay đổi, dùng updateActiveStatus để cascade
+            $message = 'Cập nhật danh mục thành công!';
+            if ($oldIsActive != $newIsActive) {
+                $this->categoryModel->updateActiveStatus($id, $newIsActive);
+                
+                // Đếm số danh mục con bị ảnh hưởng
+                if ($newIsActive == 0) {
+                    $childCount = count($this->categoryModel->getAllChildrenIds($id));
+                    if ($childCount > 0) {
+                        $message = "Cập nhật danh mục thành công! Đã ẩn {$childCount} danh mục con.";
+                    }
+                }
+            }
+
+            // Ghi log
+            LogHelper::log('update', 'category', $id, $data);
+
+            AuthHelper::setFlash('success', $message);
+            $this->redirect('/admin/categories');
+
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
+            $this->redirect('/admin/categories/edit/' . $id);
+        }
+    }
+
+    /**
+     * Xóa danh mục
+     */
+    public function destroy(int $id): void
+    {
+        try {
+            $category = $this->categoryModel->find($id);
+
+            if (!$category) {
+                throw new \Exception('Danh mục không tồn tại');
+            }
+
+            // Kiểm tra có thể xóa không
+            $canDelete = $this->categoryModel->canDelete($id);
+
+            if (!$canDelete['can_delete']) {
+                $message = 'Không thể xóa danh mục này vì: ';
+                if ($canDelete['has_products']) {
+                    $message .= 'đang có sản phẩm ';
+                }
+                if ($canDelete['has_children']) {
+                    $message .= 'đang có danh mục con';
+                }
+                throw new \Exception($message);
+            }
+
+            // Xóa danh mục
+            $success = $this->categoryModel->delete($id);
+
+            if (!$success) {
+                throw new \Exception('Có lỗi xảy ra khi xóa danh mục');
+            }
+
+            // Ghi log
+            LogHelper::log('delete', 'category', $id, $category);
+            
+            AuthHelper::setFlash('success', 'Xóa danh mục thành công!');
+            $this->redirect('/admin/categories');
+
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
+            $this->redirect('/admin/categories');
+        }
+    }
+
+    /**
+     * Toggle trạng thái active (AJAX)
+     */
+    public function toggle(int $id): void
+    {
+        try {
+            $category = $this->categoryModel->find($id);
+
+            if (!$category) {
+                throw new \Exception('Danh mục không tồn tại');
+            }
+
+            $newStatus = $category['is_active'] ? 0 : 1;
+            
+            // Kiểm tra nếu muốn bật danh mục con nhưng cha đang ẩn
+            if ($newStatus == 1 && $category['parent_id']) {
+                $parent = $this->categoryModel->find($category['parent_id']);
+                if ($parent && $parent['is_active'] == 0) {
+                    throw new \Exception('Không thể bật danh mục này vì danh mục cha đang ẩn. Vui lòng bật danh mục cha trước!');
+                }
+            }
+            
+            // Sử dụng method mới để cập nhật cả danh mục con
+            $success = $this->categoryModel->updateActiveStatus($id, $newStatus);
+
+            if (!$success) {
+                throw new \Exception('Có lỗi xảy ra hoặc danh mục cha đang ẩn');
+            }
+
+            $message = $newStatus ? 'Đã bật danh mục' : 'Đã ẩn danh mục';
+            
+            // Nếu ẩn danh mục cha, đếm số danh mục con bị ảnh hưởng
+            if ($newStatus == 0) {
+                $childCount = count($this->categoryModel->getAllChildrenIds($id));
+                if ($childCount > 0) {
+                    $message .= " và {$childCount} danh mục con";
+                }
+            }
+            
+            LogHelper::log('toggle_active', 'category', $id, [
+                'is_active' => $newStatus,
+                'affected_children' => $newStatus == 0 ? $this->categoryModel->getAllChildrenIds($id) : []
+            ]);
+            
+            $this->json(['success' => true, 'is_active' => $newStatus, 'message' => $message]);
+
+        } catch (\Exception $e) {
+            $this->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }
