@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\Product\Models;
+
+use Core\BaseModel;
 
 /**
  * ProductCategoryModel - Quản lý quan hệ nhiều-nhiều giữa Product và Category

@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\Auth\Models;
+
+use Core\BaseModel;
 
 use core\Database;
 use PDO;

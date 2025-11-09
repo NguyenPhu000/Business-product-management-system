@@ -2,7 +2,7 @@
 
 namespace Modules\Auth\Services;
 
-use Models\RoleModel;
+use Modules\Auth\Models\RoleModel;
 use Helpers\AuthHelper;
 use Helpers\LogHelper;
 use Exception;

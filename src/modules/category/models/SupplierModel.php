@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\Category\Models;
+
+use Core\BaseModel;
 
 /**
  * SupplierModel - Quản lý nhà cung cấp

@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\System\Models;
+
+use Core\BaseModel;
 
 /**
  * SystemConfigModel - Quản lý cấu hình hệ thống

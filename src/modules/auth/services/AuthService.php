@@ -2,8 +2,8 @@
 
 namespace Modules\Auth\Services;
 
-use Models\UserModel;
-use Models\PasswordResetRequestModel;
+use Modules\Auth\Models\UserModel;
+use Modules\Auth\Models\PasswordResetRequestModel;
 use Helpers\AuthHelper;
 use Helpers\LogHelper;
 use Exception;

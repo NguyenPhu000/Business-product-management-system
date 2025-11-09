@@ -2,8 +2,8 @@
 
 namespace Modules\Product\Services;
 
-use Models\ProductModel;
-use Models\ProductCategoryModel;
+use Modules\Product\Models\ProductModel;
+use Modules\Product\Models\ProductCategoryModel;
 use Exception;
 
 /**

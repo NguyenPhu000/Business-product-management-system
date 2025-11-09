@@ -2,7 +2,7 @@
 
 namespace Helpers;
 
-use Models\UserLogModel;
+use Modules\System\Models\UserLogModel;
 
 /**
  * LogHelper - Ghi log hoạt động
@@ -10,7 +10,7 @@ use Models\UserLogModel;
 class LogHelper
 {
     private static ?UserLogModel $logModel = null;
-    
+
     /**
      * Khởi tạo log model
      */
@@ -21,7 +21,7 @@ class LogHelper
         }
         return self::$logModel;
     }
-    
+
     /**
      * Ghi log hoạt động
      */
@@ -31,16 +31,16 @@ class LogHelper
         if (!$userId) {
             return; // Không ghi log nếu chưa đăng nhập
         }
-        
+
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-        
+
         try {
             self::getModel()->log($userId, $action, $objectType, $objectId, $meta, $ip);
         } catch (\Exception $e) {
             error_log("Log Error: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Ghi log đăng nhập
      */
@@ -50,7 +50,7 @@ class LogHelper
             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
             'ip' => $_SERVER['REMOTE_ADDR'] ?? null
         ];
-        
+
         try {
             $model = self::getModel();
             $ip = $_SERVER['REMOTE_ADDR'] ?? null;
@@ -59,7 +59,7 @@ class LogHelper
             error_log("Log Error: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Ghi log đăng xuất
      */
@@ -73,7 +73,7 @@ class LogHelper
             error_log("Log Error: " . $e->getMessage());
         }
     }
-    
+
     /**
      * Ghi log tạo mới
      */
@@ -81,7 +81,7 @@ class LogHelper
     {
         self::log('create', $objectType, $objectId, $data);
     }
-    
+
     /**
      * Ghi log cập nhật
      */
@@ -89,7 +89,7 @@ class LogHelper
     {
         self::log('update', $objectType, $objectId, $changes);
     }
-    
+
     /**
      * Ghi log xóa
      */
@@ -97,7 +97,7 @@ class LogHelper
     {
         self::log('delete', $objectType, $objectId, $data);
     }
-    
+
     /**
      * Ghi log vào file
      */
@@ -107,11 +107,11 @@ class LogHelper
         if (!is_dir($logDir)) {
             mkdir($logDir, 0755, true);
         }
-        
+
         $logFile = $logDir . date('Y-m-d') . '.log';
         $timestamp = date('Y-m-d H:i:s');
         $logMessage = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
-        
+
         file_put_contents($logFile, $logMessage, FILE_APPEND);
     }
 }

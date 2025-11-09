@@ -2,7 +2,7 @@
 
 namespace Helpers;
 
-use Models\SystemConfigModel;
+use Modules\System\Models\SystemConfigModel;
 
 /**
  * ConfigHelper - Helper để lấy và set config từ database

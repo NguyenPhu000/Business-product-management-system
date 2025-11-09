@@ -2,10 +2,10 @@
 
 namespace Modules\Dashboard\Services;
 
-use Models\UserModel;
-use Models\UserLogModel;
-use Models\RoleModel;
-use Models\SystemConfigModel;
+use Modules\Auth\Models\UserModel;
+use Modules\System\Models\UserLogModel;
+use Modules\Auth\Models\RoleModel;
+use Modules\System\Models\SystemConfigModel;
 
 /**
  * DashboardService - Business logic cho Dashboard

@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\System\Models;
+
+use Core\BaseModel;
 
 /**
  * UserLogModel - Quản lý log hoạt động người dùng

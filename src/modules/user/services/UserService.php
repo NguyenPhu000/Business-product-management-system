@@ -2,8 +2,8 @@
 
 namespace Modules\User\Services;
 
-use Models\UserModel;
-use Models\RoleModel;
+use Modules\Auth\Models\UserModel;
+use Modules\Auth\Models\RoleModel;
 use Helpers\AuthHelper;
 use Helpers\LogHelper;
 use Exception;

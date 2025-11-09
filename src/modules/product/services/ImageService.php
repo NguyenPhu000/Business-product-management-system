@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Services;
 
-use Models\ProductImageModel;
+use Modules\Product\Models\ProductImageModel;
 use Exception;
 
 /**

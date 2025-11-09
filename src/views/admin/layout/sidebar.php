@@ -7,6 +7,10 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
     str_starts_with($currentPath, '/admin/logs') ||
     str_starts_with($currentPath, '/admin/config') ||
     str_starts_with($currentPath, '/admin/password-reset');
+$isProductMenuActive = str_starts_with($currentPath, '/admin/products');
+$isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
+    str_starts_with($currentPath, '/admin/brands') ||
+    str_starts_with($currentPath, '/admin/suppliers');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -74,5 +78,59 @@ $isCompanyMenuActive = str_starts_with($currentPath, '/admin/dashboard') ||
                 </ul>
             </li>
         <?php endif; ?>
+
+        <!-- Products Menu -->
+        <li class="menu-item-has-children <?= $isProductMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="product-menu-toggle" class="menu-toggle"
+                <?= $isProductMenuActive ? 'checked' : '' ?>>
+            <label for="product-menu-toggle" class="menu-label">
+                <i class="fas fa-box"></i>
+                <span>Quản lý sản phẩm</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/products"
+                        class="<?= str_starts_with($currentPath, '/admin/products') ? 'active' : '' ?>">
+                        <i class="fas fa-list"></i>
+                        <span>Danh sách sản phẩm</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Categories Menu (Categories, Brands, Suppliers) -->
+        <li class="menu-item-has-children <?= $isCategoryMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="category-menu-toggle" class="menu-toggle"
+                <?= $isCategoryMenuActive ? 'checked' : '' ?>>
+            <label for="category-menu-toggle" class="menu-label">
+                <i class="fas fa-tags"></i>
+                <span>Danh mục & Thương hiệu</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/categories"
+                        class="<?= str_starts_with($currentPath, '/admin/categories') ? 'active' : '' ?>">
+                        <i class="fas fa-folder"></i>
+                        <span>Danh mục sản phẩm</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/brands"
+                        class="<?= str_starts_with($currentPath, '/admin/brands') ? 'active' : '' ?>">
+                        <i class="fas fa-star"></i>
+                        <span>Thương hiệu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/suppliers"
+                        class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
+                        <i class="fas fa-truck"></i>
+                        <span>Nhà cung cấp</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 </aside>

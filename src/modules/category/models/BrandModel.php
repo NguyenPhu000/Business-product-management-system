@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\Category\Models;
+
+use Core\BaseModel;
 
 /**
  * BrandModel - Quản lý thương hiệu sản phẩm
@@ -26,7 +28,7 @@ class BrandModel extends BaseModel
                 LEFT JOIN products p ON b.id = p.brand_id 
                 GROUP BY b.id 
                 ORDER BY b.name ASC";
-        
+
         return $this->query($sql);
     }
 
@@ -40,7 +42,7 @@ class BrandModel extends BaseModel
                 LEFT JOIN products p ON b.id = p.brand_id 
                 WHERE b.id = ? 
                 GROUP BY b.id";
-        
+
         return $this->queryOne($sql, [$id]);
     }
 
@@ -51,12 +53,12 @@ class BrandModel extends BaseModel
     {
         $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE name = ?";
         $params = [$name];
-        
+
         if ($excludeId) {
             $sql .= " AND id != ?";
             $params[] = $excludeId;
         }
-        
+
         $result = $this->queryOne($sql, $params);
         return $result['total'] > 0;
     }
@@ -77,7 +79,7 @@ class BrandModel extends BaseModel
         $sql = "SELECT COUNT(*) as total 
                 FROM products 
                 WHERE brand_id = ?";
-        
+
         $result = $this->queryOne($sql, [$brandId]);
         return (int) ($result['total'] ?? 0);
     }
@@ -88,7 +90,7 @@ class BrandModel extends BaseModel
     public function canDelete(int $brandId): array
     {
         $hasProducts = $this->countProducts($brandId) > 0;
-        
+
         return [
             'can_delete' => !$hasProducts,
             'has_products' => $hasProducts,
@@ -118,11 +120,11 @@ class BrandModel extends BaseModel
     public function toggleActive(int $id): bool
     {
         $brand = $this->find($id);
-        
+
         if (!$brand) {
             return false;
         }
-        
+
         $newStatus = $brand['is_active'] ? 0 : 1;
         return $this->update($id, ['is_active' => $newStatus]);
     }
@@ -135,7 +137,7 @@ class BrandModel extends BaseModel
         $sql = "SELECT * FROM {$this->table} 
                 WHERE name LIKE ? OR description LIKE ? 
                 ORDER BY name ASC";
-        
+
         $searchTerm = "%{$keyword}%";
         return $this->query($sql, [$searchTerm, $searchTerm]);
     }
@@ -152,7 +154,7 @@ class BrandModel extends BaseModel
                 GROUP BY b.id 
                 ORDER BY product_count DESC 
                 LIMIT {$limit}";
-        
+
         return $this->query($sql);
     }
 }

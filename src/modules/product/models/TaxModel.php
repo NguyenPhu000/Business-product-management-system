@@ -1,6 +1,8 @@
 <?php
 
-namespace Models;
+namespace Modules\Product\Models;
+
+use Core\BaseModel;
 
 /**
  * TaxModel - Quản lý thuế VAT

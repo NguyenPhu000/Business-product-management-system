@@ -7,8 +7,8 @@ use Helpers\AuthHelper;
 use Helpers\LogHelper;
 use Modules\Product\Services\ProductService;
 use Modules\Product\Services\ImageService;
-use Models\CategoryModel;
-use Models\BrandModel;
+use Modules\Category\Models\CategoryModel;
+use Modules\Category\Models\BrandModel;
 use Exception;
 
 /**
@@ -24,7 +24,6 @@ class ProductController extends Controller
 
     public function __construct()
     {
-        parent::__construct();
         $this->productService = new ProductService();
         $this->imageService = new ImageService();
         $this->categoryModel = new CategoryModel();
@@ -96,7 +95,7 @@ class ProductController extends Controller
             // Xử lý upload hình ảnh (nếu có)
             if (!empty($_FILES['images']['name'][0])) {
                 $uploadedImages = $this->imageService->uploadImages($productId, $_FILES['images']);
-                
+
                 if (empty($uploadedImages)) {
                     AuthHelper::setFlash('warning', 'Sản phẩm đã được tạo nhưng không có hình ảnh nào được tải lên');
                 }
@@ -107,7 +106,6 @@ class ProductController extends Controller
 
             AuthHelper::setFlash('success', 'Thêm sản phẩm thành công!');
             $this->redirect('/admin/products');
-
         } catch (Exception $e) {
             error_log('Error creating product: ' . $e->getMessage());
             AuthHelper::setFlash('error', $e->getMessage());
@@ -133,8 +131,8 @@ class ProductController extends Controller
             $brands = $this->brandModel->all();
             $images = $this->imageService->getProductImages($id);
 
-            $assignedCategoryIds = !empty($product['category_ids']) 
-                ? explode(',', $product['category_ids']) 
+            $assignedCategoryIds = !empty($product['category_ids'])
+                ? explode(',', $product['category_ids'])
                 : [];
 
             $this->view('admin/products/edit', [
@@ -144,7 +142,6 @@ class ProductController extends Controller
                 'assignedCategoryIds' => $assignedCategoryIds,
                 'images' => $images
             ]);
-
         } catch (Exception $e) {
             error_log('Error loading product edit form: ' . $e->getMessage());
             AuthHelper::setFlash('error', 'Có lỗi xảy ra: ' . $e->getMessage());
@@ -171,11 +168,10 @@ class ProductController extends Controller
 
             AuthHelper::setFlash('success', 'Cập nhật sản phẩm thành công!');
             $this->redirect('/admin/products');
-
         } catch (Exception $e) {
             error_log('Error updating product: ' . $e->getMessage());
             AuthHelper::setFlash('error', $e->getMessage());
-            $this->redirect("/admin/products/{$id}/edit");
+            $this->redirect("/admin/products/edit/{$id}");
         }
     }
 
@@ -185,7 +181,7 @@ class ProductController extends Controller
     public function destroy(int $id): void
     {
         error_log("=== START DELETE PRODUCT ID: $id ===");
-        
+
         try {
             // Lấy thông tin sản phẩm để log
             $product = $this->productService->getProduct($id);
@@ -213,7 +209,6 @@ class ProductController extends Controller
 
             AuthHelper::setFlash('success', 'Xóa sản phẩm thành công!');
             error_log("=== END DELETE PRODUCT ID: $id (SUCCESS) ===");
-
         } catch (Exception $e) {
             error_log('ERROR deleting product: ' . $e->getMessage());
             error_log('Stack trace: ' . $e->getTraceAsString());
@@ -237,7 +232,6 @@ class ProductController extends Controller
 
             $message = $result['new_status'] == 1 ? 'Đã kích hoạt sản phẩm' : 'Đã ẩn sản phẩm';
             $this->json(['success' => true, 'message' => $message]);
-
         } catch (Exception $e) {
             error_log('Error toggling product status: ' . $e->getMessage());
             $this->json(['success' => false, 'message' => $e->getMessage()]);
@@ -251,7 +245,7 @@ class ProductController extends Controller
     {
         try {
             $imageId = (int) $this->input('image_id');
-            
+
             if (!$imageId) {
                 $this->json(['success' => false, 'message' => 'ID hình ảnh không hợp lệ']);
                 return;
@@ -259,7 +253,6 @@ class ProductController extends Controller
 
             $this->imageService->deleteImage($imageId);
             $this->json(['success' => true, 'message' => 'Đã xóa hình ảnh']);
-
         } catch (Exception $e) {
             error_log('Error deleting image: ' . $e->getMessage());
             $this->json(['success' => false, 'message' => $e->getMessage()]);
@@ -282,7 +275,6 @@ class ProductController extends Controller
 
             $this->imageService->setPrimaryImage($imageId, $productId);
             $this->json(['success' => true, 'message' => 'Đã đặt làm ảnh chính']);
-
         } catch (Exception $e) {
             error_log('Error setting primary image: ' . $e->getMessage());
             $this->json(['success' => false, 'message' => $e->getMessage()]);
