@@ -18,33 +18,33 @@ $router->get('/', function () {
 });
 
 // ============ AUTH ROUTES ============
-$router->get('/admin/login', 'Admin\AuthController@showLogin');
-$router->post('/admin/login', 'Admin\AuthController@login');
-$router->get('/admin/logout', 'Admin\AuthController@logout');
-$router->get('/forgot-password', 'Admin\AuthController@showForgotPassword');
-$router->post('/forgot-password', 'Admin\AuthController@forgotPassword');
-$router->post('/forgot-password/cancel-request', 'Admin\AuthController@cancelRequest');
-$router->get('/reset-password-form', 'Admin\AuthController@showResetPasswordForm');
-$router->get('/forgot-password/check-approval/{userId}', 'Admin\AuthController@checkApproval');
-$router->post('/check-request-status', 'Admin\AuthController@checkRequestStatus');
+$router->get('/admin/login', 'Modules\Auth\Controllers\AuthController@showLogin');
+$router->post('/admin/login', 'Modules\Auth\Controllers\AuthController@login');
+$router->get('/admin/logout', 'Modules\Auth\Controllers\AuthController@logout');
+$router->get('/forgot-password', 'Modules\Auth\Controllers\AuthController@showForgotPassword');
+$router->post('/forgot-password', 'Modules\Auth\Controllers\AuthController@forgotPassword');
+$router->post('/forgot-password/cancel-request', 'Modules\Auth\Controllers\AuthController@cancelRequest');
+$router->get('/reset-password-form', 'Modules\Auth\Controllers\AuthController@showResetPasswordForm');
+$router->get('/forgot-password/check-approval/{userId}', 'Modules\Auth\Controllers\AuthController@checkApproval');
+$router->post('/check-request-status', 'Modules\Auth\Controllers\AuthController@checkRequestStatus');
 
 // ============ ADMIN ROUTES (Protected) ============
 
 // Dashboard
-$router->get('/admin/dashboard', 'Admin\HomeController@index', [AuthMiddleware::class]);
+$router->get('/admin/dashboard', 'Modules\Dashboard\Controllers\DashboardController@index', [AuthMiddleware::class]);
 
 // Users Management
-$router->get('/admin/users', 'Admin\UsersController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/users/create', 'Admin\UsersController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/store', 'Admin\UsersController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/users/edit/{id}', 'Admin\UsersController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/update/{id}', 'Admin\UsersController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/delete/{id}', 'Admin\UsersController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users', 'Modules\User\Controllers\UsersController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users/create', 'Modules\User\Controllers\UsersController@create', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/store', 'Modules\User\Controllers\UsersController@store', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users/edit/{id}', 'Modules\User\Controllers\UsersController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/update/{id}', 'Modules\User\Controllers\UsersController@update', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/delete/{id}', 'Modules\User\Controllers\UsersController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
 
 // Roles Management
-$router->get('/admin/roles', 'Admin\RolesController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/roles/edit/{id}', 'Admin\RolesController@edit', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->post('/admin/roles/update/{id}', 'Admin\RolesController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/roles', 'Modules\Auth\Controllers\RolesController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/roles/edit/{id}', 'Modules\Auth\Controllers\RolesController@edit', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/roles/update/{id}', 'Modules\Auth\Controllers\RolesController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // Logs Management
 $router->get('/admin/logs', 'Admin\LogsController@index', [AuthMiddleware::class, RoleMiddleware::class]);
@@ -59,12 +59,12 @@ $router->post('/admin/config/update', 'Admin\ConfigController@update', [AuthMidd
 $router->post('/admin/config/delete', 'Admin\ConfigController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // Password Reset Management (CHỈ ADMIN - Chủ tiệm KHÔNG được vào)
-$router->get('/admin/password-reset', 'Admin\PasswordResetController@index', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->get('/admin/password-reset/check-new', 'Admin\PasswordResetController@checkNew', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->get('/admin/password-reset/check-cancelled', 'Admin\PasswordResetController@checkCancelled', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->post('/admin/password-reset/approve/{id}', 'Admin\PasswordResetController@approve', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->post('/admin/password-reset/reject/{id}', 'Admin\PasswordResetController@reject', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
-$router->post('/admin/password-reset/delete/{id}', 'Admin\PasswordResetController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/password-reset', 'Modules\Auth\Controllers\PasswordResetController@index', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/password-reset/check-new', 'Modules\Auth\Controllers\PasswordResetController@checkNew', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/password-reset/check-cancelled', 'Modules\Auth\Controllers\PasswordResetController@checkCancelled', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/approve/{id}', 'Modules\Auth\Controllers\PasswordResetController@approve', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/reject/{id}', 'Modules\Auth\Controllers\PasswordResetController@reject', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/delete/{id}', 'Modules\Auth\Controllers\PasswordResetController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // ============ PRODUCT ROUTES (Refactored - Using Modules Structure) ============
 $router->get('/admin/products', 'Modules\Product\Controllers\ProductController@index', [AuthMiddleware::class]);

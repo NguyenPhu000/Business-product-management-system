@@ -3,26 +3,22 @@
 namespace Modules\Auth\Controllers;
 
 use Core\Controller;
-use Models\UserModel;
-use Models\PasswordResetRequestModel;
+use Modules\Auth\Services\AuthService;
 use Helpers\AuthHelper;
-use Helpers\LogHelper;
 
 /**
- * AuthController - Xử lý đăng nhập/đăng xuất (Refactored)
+ * AuthController - Xử lý routing cho Authentication
  * 
- * Note: AuthService hiện tại rỗng, logic chủ yếu nằm trong UserModel và AuthHelper
+ * Chức năng: Nhận request, gọi service, trả về view/response
+ * Note: Tất cả business logic đã được di chuyển sang AuthService
  */
 class AuthController extends Controller
 {
-    private UserModel $userModel;
-    private PasswordResetRequestModel $resetRequestModel;
+    private AuthService $authService;
 
     public function __construct()
     {
-        parent::__construct();
-        $this->userModel = new UserModel();
-        $this->resetRequestModel = new PasswordResetRequestModel();
+        $this->authService = new AuthService();
     }
 
     /**
@@ -48,37 +44,11 @@ class AuthController extends Controller
             $password = $this->input('password', '');
             $remember = $this->input('remember', false);
 
-            // Validate
-            if (empty($email) || empty($password)) {
-                throw new \Exception('Vui lòng nhập đầy đủ thông tin');
-            }
-
-            // Xác thực
-            $user = $this->userModel->authenticate($email, $password);
-
-            if (!$user) {
-                throw new \Exception('Email hoặc mật khẩu không đúng');
-            }
-
-            // Kiểm tra trạng thái tài khoản
-            if ($user['status'] != STATUS_ACTIVE) {
-                throw new \Exception('Tài khoản của bạn đã bị vô hiệu hóa');
-            }
-
-            // Đăng nhập thành công
-            AuthHelper::login($user);
-
-            // Ghi log
-            LogHelper::logLogin($user['id']);
-
-            // Set cookie remember me nếu cần
-            if ($remember) {
-                // TODO: Implement remember me token
-            }
+            // Gọi service xử lý login
+            $this->authService->authenticate($email, $password, $remember);
 
             AuthHelper::setFlash('success', 'Đăng nhập thành công!');
             $this->redirect('/admin/dashboard');
-
         } catch (\Exception $e) {
             AuthHelper::setFlash('error', $e->getMessage());
             $this->redirect('/admin/login');
@@ -92,11 +62,8 @@ class AuthController extends Controller
     {
         $userId = AuthHelper::id();
 
-        if ($userId) {
-            LogHelper::logLogout($userId);
-        }
-
-        AuthHelper::logout();
+        // Gọi service xử lý logout
+        $this->authService->logout($userId);
 
         // Thêm cache control headers để ngăn back button
         header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -122,21 +89,17 @@ class AuthController extends Controller
         $emailParam = $this->input('email', '');
 
         if (!empty($approvedParam) && (string)$approvedParam === '1' && !empty($emailParam)) {
-            $user = $this->userModel->findByEmail($emailParam);
-            if ($user) {
-                $userId = $user['id'];
-                $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($userId);
-                if ($approvedRequest) {
-                    $_SESSION['reset_email'] = $emailParam;
-                    $_SESSION['reset_user_id'] = $userId;
-                    $_SESSION['reset_request_id'] = $approvedRequest['id'];
+            $result = $this->authService->checkResetPasswordApproval($emailParam);
+            if ($result) {
+                $_SESSION['reset_email'] = $emailParam;
+                $_SESSION['reset_user_id'] = $result['user']['id'];
+                $_SESSION['reset_request_id'] = $result['request']['id'];
 
-                    unset($_SESSION['waiting_approval_email']);
-                    unset($_SESSION['waiting_approval_user_id']);
+                unset($_SESSION['waiting_approval_email']);
+                unset($_SESSION['waiting_approval_user_id']);
 
-                    $this->redirect('/reset-password-form');
-                    return;
-                }
+                $this->redirect('/reset-password-form');
+                return;
             }
         }
 
@@ -145,11 +108,11 @@ class AuthController extends Controller
             $userId = (int)$_SESSION['waiting_approval_user_id'];
             $email = $_SESSION['waiting_approval_email'] ?? '';
 
-            $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($userId);
-            if ($approvedRequest) {
+            $status = $this->authService->checkRequestStatus($userId);
+            if ($status['status'] === 'approved') {
                 $_SESSION['reset_email'] = $email;
                 $_SESSION['reset_user_id'] = $userId;
-                $_SESSION['reset_request_id'] = $approvedRequest['id'];
+                $_SESSION['reset_request_id'] = $status['request']['id'];
 
                 unset($_SESSION['waiting_approval_email']);
                 unset($_SESSION['waiting_approval_user_id']);
@@ -173,21 +136,17 @@ class AuthController extends Controller
                 $email = $this->input('email', '');
 
                 if (!empty($email)) {
-                    $user = $this->userModel->findByEmail($email);
+                    $result = $this->authService->checkResetPasswordApproval($email);
+                    if ($result) {
+                        $_SESSION['reset_email'] = $email;
+                        $_SESSION['reset_user_id'] = $result['user']['id'];
+                        $_SESSION['reset_request_id'] = $result['request']['id'];
 
-                    if ($user) {
-                        $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($user['id']);
-                        if ($approvedRequest) {
-                            $_SESSION['reset_email'] = $email;
-                            $_SESSION['reset_user_id'] = $user['id'];
-                            $_SESSION['reset_request_id'] = $approvedRequest['id'];
+                        unset($_SESSION['waiting_approval_email']);
+                        unset($_SESSION['waiting_approval_user_id']);
 
-                            unset($_SESSION['waiting_approval_email']);
-                            unset($_SESSION['waiting_approval_user_id']);
-
-                            $this->redirect('/reset-password-form');
-                            return;
-                        }
+                        $this->redirect('/reset-password-form');
+                        return;
                     }
                 }
 
@@ -200,137 +159,48 @@ class AuthController extends Controller
             $newPassword = $this->input('new_password', '');
             $confirmPassword = $this->input('confirm_password', '');
 
-            if (empty($email)) {
-                throw new \Exception('Vui lòng nhập email');
-            }
+            // Gọi service xử lý forgot password
+            $result = $this->authService->handleForgotPassword($email, $newPassword, $confirmPassword);
 
-            $user = $this->userModel->findByEmail($email);
-
-            if (!$user) {
-                throw new \Exception('Email không tồn tại trong hệ thống');
-            }
-
-            // Kiểm tra đã được approve chưa
-            $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($user['id']);
-            if ($approvedRequest && empty($newPassword)) {
-                $_SESSION['reset_email'] = $email;
-                $_SESSION['reset_user_id'] = $user['id'];
-                $_SESSION['reset_request_id'] = $approvedRequest['id'];
-
-                unset($_SESSION['waiting_approval_email']);
-                unset($_SESSION['waiting_approval_user_id']);
-
-                $this->redirect('/reset-password-form');
-                return;
-            }
-
-            // Kiểm tra role
-            $userWithRole = $this->userModel->findWithRole($user['id']);
-
-            // Admin tự đổi
-            if ($userWithRole && isset($userWithRole['name']) && strtolower($userWithRole['name']) === 'admin') {
-                if (empty($newPassword)) {
+            // Xử lý kết quả dựa theo action
+            switch ($result['action']) {
+                case 'redirect_to_form':
                     $_SESSION['reset_email'] = $email;
-                    $_SESSION['reset_user_id'] = $user['id'];
-                    $_SESSION['is_admin'] = true;
+                    $_SESSION['reset_user_id'] = $result['user']['id'];
+                    if (isset($result['request'])) {
+                        $_SESSION['reset_request_id'] = $result['request']['id'];
+                    }
+                    if (isset($result['is_admin'])) {
+                        $_SESSION['is_admin'] = true;
+                    }
+
+                    unset($_SESSION['waiting_approval_email']);
+                    unset($_SESSION['waiting_approval_user_id']);
+
                     $this->redirect('/reset-password-form');
-                    return;
-                }
+                    break;
 
-                // Validate password
-                if (strlen($newPassword) < 6) {
-                    throw new \Exception('Mật khẩu phải có ít nhất 6 ký tự');
-                }
+                case 'password_changed':
+                    unset($_SESSION['reset_email']);
+                    unset($_SESSION['reset_user_id']);
+                    unset($_SESSION['reset_request_id']);
+                    unset($_SESSION['is_admin']);
 
-                if ($newPassword !== $confirmPassword) {
-                    throw new \Exception('Mật khẩu xác nhận không khớp');
-                }
+                    AuthHelper::setFlash('success', 'Đổi mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
+                    $this->redirect('/admin/login');
+                    break;
 
-                // Update password
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $this->userModel->updateUser($user['id'], [
-                    'password_hash' => $hashedPassword
-                ]);
+                case 'create_request':
+                    $_SESSION['waiting_approval_email'] = $email;
+                    $_SESSION['waiting_approval_user_id'] = $result['user']['id'];
 
-                LogHelper::log('reset_password', 'user', $user['id'], [
-                    'email' => $email,
-                    'type' => 'admin_self_reset',
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-                ]);
+                    AuthHelper::setFlash('success', 'Yêu cầu đã được gửi thành công! Đang chờ admin phê duyệt...');
+                    $this->redirect('/forgot-password');
+                    break;
 
-                unset($_SESSION['reset_email']);
-                unset($_SESSION['reset_user_id']);
-                unset($_SESSION['is_admin']);
-
-                AuthHelper::setFlash('success', 'Đổi mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
-                $this->redirect('/admin/login');
-                return;
+                default:
+                    throw new \Exception('Hành động không hợp lệ');
             }
-
-            // User thường đã approve
-            if (!empty($newPassword)) {
-                if (strlen($newPassword) < 6) {
-                    throw new \Exception('Mật khẩu phải có ít nhất 6 ký tự');
-                }
-
-                if ($newPassword !== $confirmPassword) {
-                    throw new \Exception('Mật khẩu xác nhận không khớp');
-                }
-
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                $this->userModel->updateUser($user['id'], [
-                    'password_hash' => $hashedPassword
-                ]);
-
-                if (isset($_SESSION['reset_request_id'])) {
-                    $this->resetRequestModel->markPasswordChanged($_SESSION['reset_request_id']);
-                }
-
-                LogHelper::log('reset_password', 'user', $user['id'], [
-                    'email' => $email,
-                    'type' => 'user_reset_after_approval',
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-                ]);
-
-                unset($_SESSION['reset_email']);
-                unset($_SESSION['reset_user_id']);
-                unset($_SESSION['reset_request_id']);
-
-                AuthHelper::setFlash('success', 'Đổi mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
-                $this->redirect('/admin/login');
-                return;
-            }
-
-            // User thường tạo request
-            $this->resetRequestModel->deleteExpiredApprovedRequests($user['id']);
-
-            if ($this->resetRequestModel->hasPendingRequest($user['id'])) {
-                AuthHelper::setFlash('warning', 'Bạn đã có yêu cầu đang chờ xét duyệt!');
-                $this->redirect('/forgot-password');
-                return;
-            }
-
-            $this->resetRequestModel->deleteRejectedRequests($user['id']);
-
-            $requestId = $this->resetRequestModel->createRequest($user['id'], $email);
-
-            if ($requestId) {
-                LogHelper::log('request_reset_password', 'user', $user['id'], [
-                    'email' => $email,
-                    'request_id' => $requestId,
-                    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
-                ]);
-
-                AuthHelper::setFlash('success', 'Yêu cầu đã được gửi thành công! Đang chờ admin phê duyệt...');
-            } else {
-                throw new \Exception('Có lỗi xảy ra. Vui lòng thử lại!');
-            }
-
-            $_SESSION['waiting_approval_email'] = $email;
-            $_SESSION['waiting_approval_user_id'] = $user['id'];
-
-            $this->redirect('/forgot-password');
-
         } catch (\Exception $e) {
             AuthHelper::setFlash('error', $e->getMessage());
             $this->redirect('/forgot-password');
@@ -344,7 +214,7 @@ class AuthController extends Controller
     {
         $requestId = (int)$this->input('request_id', 0);
         if ($requestId > 0) {
-            $approvedRequest = $this->resetRequestModel->getApprovedRequestById($requestId);
+            $approvedRequest = $this->authService->getApprovedRequest($requestId);
             if ($approvedRequest) {
                 $_SESSION['reset_email'] = $approvedRequest['email'];
                 $_SESSION['reset_user_id'] = $approvedRequest['user_id'];
@@ -383,15 +253,15 @@ class AuthController extends Controller
 
         $userId = (int)$userId;
 
-        $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($userId);
-        if ($approvedRequest) {
-            echo json_encode(['status' => 'approved', 'request_id' => $approvedRequest['id']]);
+        $status = $this->authService->checkRequestStatus($userId);
+
+        if ($status['status'] === 'approved') {
+            echo json_encode(['status' => 'approved', 'request_id' => $status['request']['id']]);
             exit;
         }
 
-        $rejectedRequest = $this->resetRequestModel->getRejectedRequestByUserId($userId);
-        if ($rejectedRequest) {
-            echo json_encode(['status' => 'rejected', 'request_id' => $rejectedRequest['id']]);
+        if ($status['status'] === 'rejected') {
+            echo json_encode(['status' => 'rejected', 'request_id' => $status['request']['id']]);
             exit;
         }
 
@@ -411,7 +281,7 @@ class AuthController extends Controller
                 throw new \Exception('Vui lòng nhập email');
             }
 
-            $user = $this->userModel->findByEmail($email);
+            $user = $this->authService->findUserByEmail($email);
 
             if (!$user) {
                 throw new \Exception('Email không tồn tại trong hệ thống');
@@ -423,45 +293,15 @@ class AuthController extends Controller
                 throw new \Exception('Không tìm thấy thông tin user');
             }
 
-            // Kiểm tra pending
-            if ($this->resetRequestModel->hasPendingRequest($userId)) {
-                $this->view('auth/check-request-status', [
-                    'status' => 'pending',
-                    'email' => $email,
-                    'userId' => $userId
-                ], null);
-                return;
-            }
+            // Gọi service kiểm tra status
+            $status = $this->authService->checkRequestStatus($userId);
 
-            // Kiểm tra approved
-            $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($userId);
-            if ($approvedRequest) {
-                $this->view('auth/check-request-status', [
-                    'status' => 'approved',
-                    'email' => $email,
-                    'userId' => $userId
-                ], null);
-                return;
-            }
-
-            // Kiểm tra rejected
-            $rejectedRequest = $this->resetRequestModel->getRejectedRequestByUserId($userId);
-            if ($rejectedRequest) {
-                $this->view('auth/check-request-status', [
-                    'status' => 'rejected',
-                    'email' => $email,
-                    'userId' => $userId
-                ], null);
-                return;
-            }
-
-            // Không có yêu cầu nào
+            // Render view theo status
             $this->view('auth/check-request-status', [
-                'status' => 'none',
+                'status' => $status['status'],
                 'email' => $email,
-                'userId' => null
+                'userId' => $userId
             ], null);
-
         } catch (\Exception $e) {
             AuthHelper::setFlash('error', $e->getMessage());
             $this->redirect('/admin/login');
@@ -482,24 +322,14 @@ class AuthController extends Controller
                 throw new \Exception('User ID is required');
             }
 
-            if ($silent) {
-                $deleted = $this->resetRequestModel->deletePendingRequestByUser((int)$userId);
-                if ($deleted) {
-                    $this->json(['success' => true, 'message' => 'Yêu cầu đã được hủy (silent)']);
-                } else {
-                    throw new \Exception('Không tìm thấy yêu cầu pending hoặc không thể xóa');
-                }
-                return;
-            }
-
-            $result = $this->resetRequestModel->cancelPendingRequest($userId);
+            $result = $this->authService->cancelResetRequest((int)$userId, $silent);
 
             if ($result) {
-                $this->json(['success' => true, 'message' => 'Yêu cầu đã được hủy thành công']);
+                $message = $silent ? 'Yêu cầu đã được hủy (silent)' : 'Yêu cầu đã được hủy thành công';
+                $this->json(['success' => true, 'message' => $message]);
             } else {
                 throw new \Exception('Không tìm thấy yêu cầu pending hoặc không thể hủy');
             }
-
         } catch (\Exception $e) {
             $this->json(['success' => false, 'message' => $e->getMessage()]);
         }

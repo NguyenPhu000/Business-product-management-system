@@ -3,23 +3,22 @@
 namespace Modules\User\Controllers;
 
 use Core\Controller;
-use Models\UserModel;
-use Models\RoleModel;
+use Modules\User\Services\UserService;
 use Helpers\AuthHelper;
-use Helpers\LogHelper;
 
 /**
- * UsersController - Quản lý người dùng
+ * UsersController - Xử lý routing cho quản lý người dùng
+ * 
+ * Chức năng: Nhận request, gọi UserService, trả về view/response
+ * Note: Tất cả business logic đã được di chuyển sang UserService
  */
 class UsersController extends Controller
 {
-    private UserModel $userModel;
-    private RoleModel $roleModel;
+    private UserService $userService;
 
     public function __construct()
     {
-        $this->userModel = new UserModel();
-        $this->roleModel = new RoleModel();
+        $this->userService = new UserService();
     }
 
     /**
@@ -30,21 +29,13 @@ class UsersController extends Controller
         $page = (int) $this->input('page', 1);
         $perPage = 10;
 
-        $result = $this->userModel->paginate($page, $perPage);
-        $users = [];
-
-        foreach ($result['data'] as $user) {
-            $users[] = $this->userModel->findWithRole($user['id']);
-        }
+        // Gọi service lấy danh sách users
+        $result = $this->userService->getAllUsers($page, $perPage);
 
         $data = [
             'title' => 'Quản lý người dùng',
-            'users' => $users,
-            'pagination' => [
-                'page' => $result['page'],
-                'totalPages' => $result['totalPages'],
-                'total' => $result['total']
-            ]
+            'users' => $result['users'],
+            'pagination' => $result['pagination']
         ];
 
         $this->view('admin/users/index', $data);
@@ -55,7 +46,7 @@ class UsersController extends Controller
      */
     public function create(): void
     {
-        $roles = $this->roleModel->all();
+        $roles = $this->userService->getAllRoles();
 
         $data = [
             'title' => 'Thêm người dùng mới',
@@ -76,56 +67,28 @@ class UsersController extends Controller
             return;
         }
 
-        // Validate
-        $errors = $this->validate([
-            'username' => 'required|min:3|max:50',
-            'email' => 'required|email',
-            'password' => 'required|min:8',
-            'full_name' => 'required',
-            'role_id' => 'required|numeric'
-        ]);
+        try {
+            // Thu thập dữ liệu từ form
+            $data = [
+                'username' => $this->input('username'),
+                'email' => $this->input('email'),
+                'password' => $this->input('password'),
+                'full_name' => $this->input('full_name'),
+                'phone' => $this->input('phone'),
+                'role_id' => $this->input('role_id'),
+                'status' => $this->input('status', STATUS_ACTIVE)
+            ];
 
-        if (!empty($errors)) {
-            AuthHelper::setFlash('error', implode('<br>', $errors));
+            // Gọi service tạo user
+            $this->userService->createUser($data);
+
+            AuthHelper::setFlash('success', 'Thêm người dùng thành công');
+            $this->redirect('/admin/users');
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
             AuthHelper::setFlash('old', $this->all());
             $this->redirect('/admin/users/create');
-            return;
         }
-
-        // Kiểm tra email đã tồn tại
-        if ($this->userModel->emailExists($this->input('email'))) {
-            AuthHelper::setFlash('error', 'Email đã tồn tại trong hệ thống');
-            AuthHelper::setFlash('old', $this->all());
-            $this->redirect('/admin/users/create');
-            return;
-        }
-
-        // Kiểm tra username đã tồn tại
-        if ($this->userModel->usernameExists($this->input('username'))) {
-            AuthHelper::setFlash('error', 'Username đã tồn tại trong hệ thống');
-            AuthHelper::setFlash('old', $this->all());
-            $this->redirect('/admin/users/create');
-            return;
-        }
-
-        // Tạo user
-        $data = [
-            'username' => $this->input('username'),
-            'email' => $this->input('email'),
-            'password' => $this->input('password'),
-            'full_name' => $this->input('full_name'),
-            'phone' => $this->input('phone'),
-            'role_id' => (int) $this->input('role_id'),
-            'status' => (int) $this->input('status', STATUS_ACTIVE)
-        ];
-
-        $userId = $this->userModel->createUser($data);
-
-        // Ghi log
-        LogHelper::logCreate('user', $userId, $data);
-
-        AuthHelper::setFlash('success', 'Thêm người dùng thành công');
-        $this->redirect('/admin/users');
     }
 
     /**
@@ -133,32 +96,38 @@ class UsersController extends Controller
      */
     public function edit(string $id): void
     {
-        $user = $this->userModel->findWithRole((int) $id);
+        try {
+            $userId = (int) $id;
+            $currentUserId = AuthHelper::id();
 
-        if (!$user) {
-            AuthHelper::setFlash('error', 'Không tìm thấy người dùng');
+            // Kiểm tra quyền quản lý user
+            if (!$this->userService->canManageUser($userId, $currentUserId)) {
+                AuthHelper::setFlash('error', 'Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
+                $this->redirect('/admin/users');
+                return;
+            }
+
+            $user = $this->userService->getUserById($userId);
+
+            if (!$user) {
+                AuthHelper::setFlash('error', 'Không tìm thấy người dùng');
+                $this->redirect('/admin/users');
+                return;
+            }
+
+            $roles = $this->userService->getAllRoles();
+
+            $data = [
+                'title' => 'Sửa người dùng',
+                'user' => $user,
+                'roles' => $roles
+            ];
+
+            $this->view('admin/users/form', $data);
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
             $this->redirect('/admin/users');
-            return;
         }
-
-        // Kiểm tra quyền hạn: 
-        // - Chỉ quyền CAO HƠN mới được sửa quyền THẤP HƠN
-        // - Quyền BẰNG NHAU không được sửa lẫn nhau (trừ sửa chính mình)
-        if (!AuthHelper::canManageRole($user['role_id']) && $user['id'] != AuthHelper::id()) {
-            AuthHelper::setFlash('error', 'Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
-            $this->redirect('/admin/users');
-            return;
-        }
-
-        $roles = $this->roleModel->all();
-
-        $data = [
-            'title' => 'Sửa người dùng',
-            'user' => $user,
-            'roles' => $roles
-        ];
-
-        $this->view('admin/users/form', $data);
     }
 
     /**
@@ -171,83 +140,29 @@ class UsersController extends Controller
             return;
         }
 
-        $userId = (int) $id;
-        $user = $this->userModel->find($userId);
+        try {
+            $userId = (int) $id;
 
-        if (!$user) {
-            AuthHelper::setFlash('error', 'Không tìm thấy người dùng');
+            // Thu thập dữ liệu từ form
+            $data = [
+                'username' => $this->input('username'),
+                'email' => $this->input('email'),
+                'full_name' => $this->input('full_name'),
+                'phone' => $this->input('phone'),
+                'role_id' => $this->input('role_id'),
+                'new_password' => $this->input('new_password')
+            ];
+
+            // Gọi service cập nhật user
+            $this->userService->updateUser($userId, $data);
+
+            AuthHelper::setFlash('success', 'Cập nhật người dùng thành công');
             $this->redirect('/admin/users');
-            return;
-        }
-
-        // Kiểm tra quyền hạn: 
-        // - Chỉ quyền CAO HƠN mới được sửa quyền THẤP HƠN
-        // - Quyền BẰNG NHAU không được sửa lẫn nhau (trừ sửa chính mình)
-        if (!AuthHelper::canManageRole($user['role_id']) && $user['id'] != AuthHelper::id()) {
-            AuthHelper::setFlash('error', 'Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
-            $this->redirect('/admin/users');
-            return;
-        }
-
-        // Validate
-        $errors = $this->validate([
-            'username' => 'required|min:3|max:50',
-            'email' => 'required|email',
-            'full_name' => 'required',
-            'role_id' => 'required|numeric'
-        ]);
-
-        if (!empty($errors)) {
-            AuthHelper::setFlash('error', implode('<br>', $errors));
+        } catch (\Exception $e) {
+            AuthHelper::setFlash('error', $e->getMessage());
             AuthHelper::setFlash('old', $this->all());
             $this->redirect("/admin/users/edit/{$id}");
-            return;
         }
-
-        // Kiểm tra email đã tồn tại (trừ user hiện tại)
-        if ($this->userModel->emailExists($this->input('email'), $userId)) {
-            AuthHelper::setFlash('error', 'Email đã tồn tại trong hệ thống');
-            AuthHelper::setFlash('old', $this->all());
-            $this->redirect("/admin/users/edit/{$id}");
-            return;
-        }
-
-        // Kiểm tra username đã tồn tại (trừ user hiện tại)
-        if ($this->userModel->usernameExists($this->input('username'), $userId)) {
-            AuthHelper::setFlash('error', 'Username đã tồn tại trong hệ thống');
-            AuthHelper::setFlash('old', $this->all());
-            $this->redirect("/admin/users/edit/{$id}");
-            return;
-        }
-
-        // Cập nhật user (không thay đổi trạng thái từ giao diện theo yêu cầu)
-        $data = [
-            'username' => $this->input('username'),
-            'email' => $this->input('email'),
-            'full_name' => $this->input('full_name'),
-            'phone' => $this->input('phone'),
-            'role_id' => (int) $this->input('role_id')
-        ];
-
-        // Nếu có đổi mật khẩu
-        $newPassword = $this->input('new_password');
-        if (!empty($newPassword)) {
-            if (strlen($newPassword) < 8) {
-                AuthHelper::setFlash('error', 'Mật khẩu mới phải có ít nhất 8 ký tự');
-                AuthHelper::setFlash('old', $this->all());
-                $this->redirect("/admin/users/edit/{$id}");
-                return;
-            }
-            $data['password'] = $newPassword;
-        }
-
-        $this->userModel->updateUser($userId, $data);
-
-        // Ghi log
-        LogHelper::logUpdate('user', $userId, $data);
-
-        AuthHelper::setFlash('success', 'Cập nhật người dùng thành công');
-        $this->redirect('/admin/users');
     }
 
     /**
@@ -255,35 +170,17 @@ class UsersController extends Controller
      */
     public function delete(string $id): void
     {
-        $userId = (int) $id;
-        $user = $this->userModel->find($userId);
+        try {
+            $userId = (int) $id;
 
-        if (!$user) {
-            $this->error('Không tìm thấy người dùng', 404);
-            return;
+            // Gọi service xóa user
+            $this->userService->deleteUser($userId);
+
+            $this->success(null, 'Xóa người dùng thành công');
+        } catch (\Exception $e) {
+            $code = ($e->getMessage() === 'Không tìm thấy người dùng') ? 404 : (($e->getMessage() === 'Không thể xóa tài khoản của chính mình đang đăng nhập') ? 400 : 403);
+
+            $this->error($e->getMessage(), $code);
         }
-
-        // Không cho xóa chính mình đang đăng nhập
-        if ($userId == AuthHelper::id()) {
-            $this->error('Không thể xóa tài khoản của chính mình đang đăng nhập', 400);
-            return;
-        }
-
-        // Kiểm tra quyền hạn: 
-        // - Chỉ quyền CAO HƠN mới được xóa quyền THẤP HƠN
-        // - Quyền BẰNG NHAU không được xóa lẫn nhau
-        // Quy tắc: Admin (1) > Chủ tiệm (5) > Sales Staff (2) = Warehouse Manager (3)
-        if (!AuthHelper::canManageRole($user['role_id'])) {
-            $this->error('Bạn không có quyền xóa người dùng này. Chỉ quyền cao hơn mới được xóa quyền thấp hơn hoặc bằng mình.', 403);
-            return;
-        }
-
-        // Xóa user
-        $this->userModel->delete($userId);
-
-        // Ghi log
-        LogHelper::logDelete('user', $userId, $user);
-
-        $this->success(null, 'Xóa người dùng thành công');
     }
 }
