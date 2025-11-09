@@ -14,7 +14,8 @@
             "Models\\": "src/Models/",
             "Controllers\\": "src/Controllers/",
             "Middlewares\\": "src/Middlewares/",
-            "Helpers\\": "src/Helpers/"
+            "Helpers\\": "src/Helpers/",
+            "Modules\\": "src/modules/"
         },
         "files": [
             "config/constants.php"
