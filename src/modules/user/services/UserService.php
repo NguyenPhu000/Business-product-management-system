@@ -65,13 +65,22 @@ class UserService
     }
 
     /**
-     * Lấy tất cả roles
+     * Lấy tất cả roles mà user hiện tại có thể gán cho người khác
+     * Quy tắc: Chỉ được gán role có level THẤP HƠN hoặc BẰNG mình
      * 
      * @return array
      */
     public function getAllRoles(): array
     {
-        return $this->roleModel->all();
+        $allRoles = $this->roleModel->all();
+        $currentRoleLevel = AuthHelper::getRoleLevel(AuthHelper::user()['role_id'] ?? 0);
+
+        // Lọc các role mà user hiện tại có thể gán
+        return array_filter($allRoles, function ($role) use ($currentRoleLevel) {
+            $targetRoleLevel = AuthHelper::getRoleLevel($role['id']);
+            // Chỉ hiển thị các role có level thấp hơn hoặc bằng mình
+            return $targetRoleLevel <= $currentRoleLevel;
+        });
     }
 
     /**
@@ -87,6 +96,15 @@ class UserService
         $errors = $this->validateUserData($data, true);
         if (!empty($errors)) {
             throw new Exception(implode('<br>', $errors));
+        }
+
+        // Kiểm tra quyền tạo user với role được chọn
+        // Quy tắc: Chỉ được tạo user có role level thấp hơn hoặc bằng mình
+        $currentRoleLevel = AuthHelper::getRoleLevel(AuthHelper::user()['role_id'] ?? 0);
+        $targetRoleLevel = AuthHelper::getRoleLevel((int)$data['role_id']);
+
+        if ($targetRoleLevel > $currentRoleLevel) {
+            throw new Exception('Bạn không có quyền tạo người dùng với vai trò này. Chỉ được tạo người dùng có quyền ngang hoặc thấp hơn bạn.');
         }
 
         // Kiểm tra email đã tồn tại
@@ -138,6 +156,15 @@ class UserService
         // Kiểm tra quyền hạn
         if (!AuthHelper::canManageRole($user['role_id']) && $user['id'] != AuthHelper::id()) {
             throw new Exception('Bạn không có quyền sửa người dùng này. Chỉ quyền cao hơn mới được quản lý quyền thấp hơn hoặc bằng mình.');
+        }
+
+        // Kiểm tra quyền thay đổi role
+        // Quy tắc: Chỉ được đổi sang role có level thấp hơn hoặc bằng mình
+        $currentRoleLevel = AuthHelper::getRoleLevel(AuthHelper::user()['role_id'] ?? 0);
+        $targetRoleLevel = AuthHelper::getRoleLevel((int)$data['role_id']);
+
+        if ($targetRoleLevel > $currentRoleLevel) {
+            throw new Exception('Bạn không có quyền thay đổi vai trò này. Chỉ được đổi sang vai trò ngang hoặc thấp hơn bạn.');
         }
 
         // Validate

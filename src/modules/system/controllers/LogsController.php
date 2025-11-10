@@ -69,31 +69,9 @@ class LogsController extends Controller
     }
 
     /**
-     * Cập nhật log
-     */
-    public function update(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect('/admin/logs');
-            return;
-        }
-
-        try {
-            $jsonData = json_decode(file_get_contents('php://input'), true);
-            $logId = (int)($jsonData['id'] ?? 0);
-            $action = $jsonData['action'] ?? '';
-
-            $this->logsService->updateLog($logId, $action);
-            $this->success(null, 'Cập nhật log thành công');
-        } catch (Exception $e) {
-            $this->error($e->getMessage(), 400);
-        }
-    }
-
-    /**
      * Xóa log
      */
-    public function delete(): void
+    public function delete($id = null): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/admin/logs');
@@ -101,8 +79,11 @@ class LogsController extends Controller
         }
 
         try {
-            $jsonData = json_decode(file_get_contents('php://input'), true);
-            $logId = (int)($jsonData['id'] ?? 0);
+            $logId = (int)$id;
+
+            if ($logId <= 0) {
+                throw new Exception('ID log không hợp lệ');
+            }
 
             $this->logsService->deleteLog($logId);
             $this->success(null, 'Xóa log thành công');

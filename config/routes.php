@@ -49,7 +49,6 @@ $router->post('/admin/roles/update/{id}', 'Modules\Auth\Controllers\RolesControl
 // Logs Management
 $router->get('/admin/logs', 'Modules\System\Controllers\LogsController@index', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->post('/admin/logs/cleanup', 'Modules\System\Controllers\LogsController@cleanup', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/logs/update/{id}', 'Modules\System\Controllers\LogsController@update', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->post('/admin/logs/delete/{id}', 'Modules\System\Controllers\LogsController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
 
 // System Config (CHỈ ADMIN - Chủ tiệm KHÔNG được vào)
@@ -64,6 +63,7 @@ $router->get('/admin/password-reset/check-new', 'Modules\Auth\Controllers\Passwo
 $router->get('/admin/password-reset/check-cancelled', 'Modules\Auth\Controllers\PasswordResetController@checkCancelled', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 $router->post('/admin/password-reset/approve/{id}', 'Modules\Auth\Controllers\PasswordResetController@approve', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 $router->post('/admin/password-reset/reject/{id}', 'Modules\Auth\Controllers\PasswordResetController@reject', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/mark-completed/{id}', 'Modules\Auth\Controllers\PasswordResetController@markCompleted', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 $router->post('/admin/password-reset/delete/{id}', 'Modules\Auth\Controllers\PasswordResetController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // ============ PRODUCT ROUTES (Refactored - Using Modules Structure) ============
