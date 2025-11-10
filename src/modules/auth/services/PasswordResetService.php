@@ -202,6 +202,44 @@ class PasswordResetService
     }
 
     /**
+     * Đánh dấu request đã hoàn tất
+     * 
+     * @param int $requestId
+     * @return bool
+     * @throws Exception
+     */
+    public function markCompleted(int $requestId): bool
+    {
+        // Kiểm tra quyền admin
+        if (!AuthHelper::isAdmin()) {
+            throw new Exception('Bạn không có quyền thực hiện!');
+        }
+
+        $request = $this->resetRequestModel->getRequestById($requestId);
+
+        if (!$request) {
+            throw new Exception('Không tìm thấy yêu cầu!');
+        }
+
+        if ($request['status'] !== 'approved') {
+            throw new Exception('Chỉ có thể đánh dấu hoàn tất cho request đã phê duyệt!');
+        }
+
+        // Cập nhật trường new_password thành 'changed' để đánh dấu đã hoàn tất
+        $result = $this->resetRequestModel->markAsCompleted($requestId);
+
+        // Ghi log
+        if ($result) {
+            LogHelper::log('mark_completed', 'password_reset_request', $requestId, [
+                'user_id' => $request['user_id'],
+                'email' => $request['email']
+            ]);
+        }
+
+        return $result;
+    }
+
+    /**
      * Kiểm tra quyền admin
      * 
      * @return bool

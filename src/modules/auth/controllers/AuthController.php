@@ -31,6 +31,30 @@ class AuthController extends Controller
             $this->redirect('/admin/dashboard');
         }
 
+        // Kiểm tra nếu user đã vào trang reset form nhưng quay lại mà chưa đổi MK
+        // Tự động đánh dấu request đã hoàn tất
+        if (isset($_SESSION['viewing_reset_form']) && $_SESSION['viewing_reset_form'] === true) {
+            if (isset($_SESSION['reset_request_id'])) {
+                $requestId = (int)$_SESSION['reset_request_id'];
+
+                // Gọi service để đánh dấu hoàn tất
+                try {
+                    $this->authService->autoMarkRequestCompleted($requestId);
+                } catch (\Exception $e) {
+                    // Log error nhưng không hiển thị cho user
+                    error_log("Auto mark completed error: " . $e->getMessage());
+                }
+            }
+
+            // Xóa TẤT CẢ các session liên quan đến reset password
+            unset($_SESSION['viewing_reset_form']);
+            unset($_SESSION['reset_email']);
+            unset($_SESSION['reset_user_id']);
+            unset($_SESSION['reset_request_id']);
+            unset($_SESSION['waiting_approval_email']);
+            unset($_SESSION['waiting_approval_user_id']);
+        }
+
         $this->view('auth/login', [], null);
     }
 
@@ -181,10 +205,16 @@ class AuthController extends Controller
                     break;
 
                 case 'password_changed':
+                    // Xóa tất cả session liên quan đến reset password
                     unset($_SESSION['reset_email']);
                     unset($_SESSION['reset_user_id']);
                     unset($_SESSION['reset_request_id']);
                     unset($_SESSION['is_admin']);
+                    unset($_SESSION['viewing_reset_form']); // Xóa flag này luôn
+
+                    // Nếu trước đó user có session chờ phê duyệt, xóa luôn
+                    unset($_SESSION['waiting_approval_email']);
+                    unset($_SESSION['waiting_approval_user_id']);
 
                     AuthHelper::setFlash('success', 'Đổi mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
                     $this->redirect('/admin/login');
@@ -219,6 +249,7 @@ class AuthController extends Controller
                 $_SESSION['reset_email'] = $approvedRequest['email'];
                 $_SESSION['reset_user_id'] = $approvedRequest['user_id'];
                 $_SESSION['reset_request_id'] = $approvedRequest['id'];
+                $_SESSION['viewing_reset_form'] = true; // Đánh dấu đang xem form
 
                 $this->view('auth/reset-password-form', ['email' => $approvedRequest['email']], null);
                 return;
@@ -236,6 +267,7 @@ class AuthController extends Controller
         }
 
         $email = $_SESSION['reset_email'];
+        $_SESSION['viewing_reset_form'] = true; // Đánh dấu đang xem form
         $this->view('auth/reset-password-form', ['email' => $email], null);
     }
 

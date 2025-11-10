@@ -51,25 +51,40 @@ function approveRequest(id) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        alert(
-          data.message +
-            "\n\nTrang sẽ tự động tải lại sau 10 giây để cập nhật trạng thái."
-        );
+        alert(data.message);
 
-        // Cập nhật trạng thái trong bảng
+        // Cập nhật trạng thái trong bảng thành "Đã phê duyệt"
         const row = document.getElementById(`request-${id}`);
         if (row) {
           row.querySelector("td:nth-child(5)").innerHTML =
             '<span class="badge badge-success"><i class="fas fa-check"></i> Đã phê duyệt</span>';
           row.querySelector("td:nth-child(7)").textContent = "Vừa xong";
           row.querySelector("td:nth-child(8)").innerHTML =
-            '<span class="text-muted">Đã xử lý</span>';
-        }
+            '<span class="badge badge-secondary">Đã xử lý</span>';
 
-        // Reload trang sau 10 giây để cập nhật trạng thái "Đã hoàn tất"
-        setTimeout(() => {
-          location.reload();
-        }, 10000);
+          // Sau 1 giây, tự động đánh dấu hoàn tất trong database
+          setTimeout(() => {
+            fetch(`/admin/password-reset/mark-completed/${id}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((markData) => {
+                if (markData.success) {
+                  console.log("Đã tự động đánh dấu hoàn tất sau 1 giây");
+                  // Reload để cập nhật UI
+                  location.reload();
+                } else {
+                  console.error("Lỗi khi đánh dấu hoàn tất:", markData.message);
+                }
+              })
+              .catch((error) => {
+                console.error("Lỗi khi gọi API mark-completed:", error);
+              });
+          }, 1000);
+        }
 
         // Cập nhật số lượng pending
         updatePendingCount();
@@ -82,7 +97,6 @@ function approveRequest(id) {
       alert("Có lỗi xảy ra khi phê duyệt!");
     });
 }
-
 /**
  * Từ chối yêu cầu
  */
@@ -106,7 +120,7 @@ function rejectRequest(id) {
         const row = document.getElementById(`request-${id}`);
         if (row) {
           row.querySelector("td:nth-child(5)").innerHTML =
-            '<span class="badge badge-danger"><i class="fas fa-times"></i> Đã từ chối - Sẽ xóa sau 10s</span>';
+            '<span class="badge badge-danger"><i class="fas fa-times"></i> Đã từ chối</span>';
           row.querySelector("td:nth-child(7)").textContent = "Vừa xong";
           row.querySelector("td:nth-child(8)").innerHTML =
             '<span class="text-muted">Đang xử lý...</span>';
@@ -206,7 +220,7 @@ function checkCancelledRequests() {
           if (row) {
             // Cập nhật trạng thái
             row.querySelector("td:nth-child(5)").innerHTML =
-              '<span class="badge badge-warning"><i class="fas fa-ban"></i> Đã hủy - Sẽ xóa sau 10s</span>';
+              '<span class="badge badge-warning"><i class="fas fa-ban"></i> Đã hủy</span>';
             row.querySelector("td:nth-child(8)").innerHTML =
               '<span class="text-muted">Người dùng đã hủy yêu cầu</span>';
 
@@ -222,7 +236,7 @@ function checkCancelledRequests() {
           "position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 350px;";
         alertDiv.innerHTML = `
                     <i class="fas fa-exclamation-triangle"></i> ${data.cancelledIds.length} yêu cầu đã bị hủy bởi người dùng!
-                    <br><small>Sẽ tự động xóa sau 10 giây...</small>
+                    <br><small></small>
                     <button type="button" class="close" onclick="this.parentElement.remove()">&times;</button>
                 `;
         document.body.appendChild(alertDiv);
