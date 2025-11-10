@@ -124,13 +124,13 @@ class StockTransactionService
     public function getTransactionHistory(array $filters = [], int $page = 1, int $perPage = 50): array
     {
         $offset = ($page - 1) * $perPage;
-        
+
         // Lấy data
         $data = $this->transactionModel->getTransactionsWithFilter($filters, $perPage, $offset);
-        
+
         // Đếm tổng số
         $total = $this->transactionModel->countTransactions($filters);
-        
+
         return [
             'data' => $data,
             'pagination' => [
@@ -167,7 +167,7 @@ class StockTransactionService
 
         foreach ($stats as $stat) {
             $transactionCount += (int) $stat['transaction_count'];
-            
+
             switch ($stat['type']) {
                 case InventoryTransactionModel::TYPE_IMPORT:
                     $totalImport = (int) $stat['total_increase'];
@@ -207,8 +207,8 @@ class StockTransactionService
      * @return array Danh sách giao dịch
      */
     public function getVariantTransactionHistory(
-        int $variantId, 
-        ?string $warehouse = null, 
+        int $variantId,
+        ?string $warehouse = null,
         int $limit = 100
     ): array {
         return $this->transactionModel->getVariantHistory($variantId, $warehouse, $limit);
@@ -268,8 +268,8 @@ class StockTransactionService
      * @return array Thống kê
      */
     public function getStatsByDateRange(
-        string $fromDate, 
-        string $toDate, 
+        string $fromDate,
+        string $toDate,
         ?string $warehouse = null
     ): array {
         return $this->transactionModel->getTransactionStats($warehouse, $fromDate, $toDate);

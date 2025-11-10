@@ -60,9 +60,9 @@ class InventoryService
      * @throws Exception
      */
     public function importStock(
-        int $variantId, 
-        int $quantity, 
-        int $userId, 
+        int $variantId,
+        int $quantity,
+        int $userId,
         string $warehouse = 'default',
         array $reference = [],
         ?string $note = null
@@ -78,7 +78,7 @@ class InventoryService
 
             // Cập nhật tồn kho
             $success = $this->inventoryModel->updateStock($variantId, $quantity, $warehouse);
-            
+
             if (!$success) {
                 throw new Exception("Không thể cập nhật tồn kho");
             }
@@ -107,7 +107,6 @@ class InventoryService
                 'transaction_id' => $transactionId,
                 'message' => "Nhập kho thành công: +{$quantity}"
             ];
-
         } catch (Exception $e) {
             $this->inventoryModel->rollback();
             throw new Exception("Lỗi nhập kho: " . $e->getMessage());
@@ -147,9 +146,9 @@ class InventoryService
             if (!$stockCheck['available']) {
                 throw new Exception(
                     "Không đủ hàng để xuất. " .
-                    "Tồn kho hiện tại: {$stockCheck['current_stock']}, " .
-                    "Cần: {$quantity}, " .
-                    "Thiếu: {$stockCheck['shortage']}"
+                        "Tồn kho hiện tại: {$stockCheck['current_stock']}, " .
+                        "Cần: {$quantity}, " .
+                        "Thiếu: {$stockCheck['shortage']}"
                 );
             }
         }
@@ -160,7 +159,7 @@ class InventoryService
 
             // Cập nhật tồn kho (số âm = xuất)
             $success = $this->inventoryModel->updateStock($variantId, -$quantity, $warehouse);
-            
+
             if (!$success) {
                 throw new Exception("Không thể cập nhật tồn kho");
             }
@@ -189,7 +188,6 @@ class InventoryService
                 'transaction_id' => $transactionId,
                 'message' => "Xuất kho thành công: -{$quantity}"
             ];
-
         } catch (Exception $e) {
             $this->inventoryModel->rollback();
             throw new Exception("Lỗi xuất kho: " . $e->getMessage());
@@ -235,7 +233,7 @@ class InventoryService
 
             // Set tồn kho mới
             $success = $this->inventoryModel->setStock($variantId, $newQuantity, $warehouse);
-            
+
             if (!$success) {
                 throw new Exception("Không thể cập nhật tồn kho");
             }
@@ -263,7 +261,6 @@ class InventoryService
                 'transaction_id' => $transactionId,
                 'message' => "Điều chỉnh tồn kho: {$oldQuantity} → {$newQuantity} (" . ($difference >= 0 ? "+{$difference}" : $difference) . ")"
             ];
-
         } catch (Exception $e) {
             $this->inventoryModel->rollback();
             throw new Exception("Lỗi điều chỉnh tồn kho: " . $e->getMessage());
@@ -304,8 +301,8 @@ class InventoryService
         if (!$stockCheck['available']) {
             throw new Exception(
                 "Kho nguồn không đủ hàng. " .
-                "Tồn kho: {$stockCheck['current_stock']}, " .
-                "Cần chuyển: {$quantity}"
+                    "Tồn kho: {$stockCheck['current_stock']}, " .
+                    "Cần chuyển: {$quantity}"
             );
         }
 
@@ -315,13 +312,13 @@ class InventoryService
 
             // Xuất từ kho nguồn
             $this->inventoryModel->updateStock($variantId, -$quantity, $fromWarehouse);
-            
+
             // Nhập vào kho đích
             $this->inventoryModel->updateStock($variantId, $quantity, $toWarehouse);
 
             // Ghi nhận 2 transactions
             $noteText = $note ?? "Chuyển kho: {$fromWarehouse} → {$toWarehouse}";
-            
+
             $this->transactionModel->recordTransaction([
                 'product_variant_id' => $variantId,
                 'warehouse' => $fromWarehouse,
@@ -357,7 +354,6 @@ class InventoryService
                 'to_stock' => $toStock['quantity'] ?? 0,
                 'message' => "Chuyển kho thành công: {$quantity} từ {$fromWarehouse} sang {$toWarehouse}"
             ];
-
         } catch (Exception $e) {
             $this->inventoryModel->rollback();
             throw new Exception("Lỗi chuyển kho: " . $e->getMessage());
@@ -376,7 +372,7 @@ class InventoryService
         if ($warehouse !== null) {
             // Lấy tồn kho 1 warehouse
             $stock = $this->inventoryModel->getVariantStock($variantId, $warehouse);
-            
+
             if (!$stock) {
                 return [
                     'variant_id' => $variantId,
@@ -417,12 +413,12 @@ class InventoryService
     public function getStockList(array $filters = [], int $page = 1, int $perPage = 50): array
     {
         $offset = ($page - 1) * $perPage;
-        
+
         $data = $this->inventoryModel->getInventoryListWithDetails($filters, $perPage, $offset);
 
         // TODO: Implement count method for total records
         $total = count($data); // Placeholder
-        
+
         return [
             'data' => $data,
             'pagination' => [
