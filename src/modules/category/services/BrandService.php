@@ -141,16 +141,13 @@ class BrandService
             throw new Exception('Tên thương hiệu đã tồn tại');
         }
 
-        // Xử lý upload logo mới
+        // Xử lý upload logo mới (base64)
         $logoUrl = $brand['logo_url']; // Giữ logo cũ
         if (!empty($_FILES['logo_image']['name'])) {
-            $newLogoUrl = $this->handleLogoUpload();
-            if ($newLogoUrl) {
-                // Xóa logo cũ nếu có
-                if ($logoUrl && file_exists(getcwd() . $logoUrl)) {
-                    @unlink(getcwd() . $logoUrl);
-                }
-                $logoUrl = $newLogoUrl;
+            $newLogoBase64 = $this->handleLogoUpload();
+            if ($newLogoBase64) {
+                // Logo mới được lưu dưới dạng base64, không cần xóa file cũ
+                $logoUrl = $newLogoBase64;
             }
         }
 
@@ -203,10 +200,7 @@ class BrandService
             throw new Exception('Có lỗi xảy ra khi xóa thương hiệu');
         }
 
-        // Xóa logo nếu có
-        if ($brand['logo_url'] && file_exists(getcwd() . $brand['logo_url'])) {
-            @unlink(getcwd() . $brand['logo_url']);
-        }
+        // Logo được lưu dưới dạng base64, không cần xóa file
 
         // Ghi log
         LogHelper::log('delete', 'brand', $id, $brand);
@@ -241,9 +235,9 @@ class BrandService
     }
 
     /**
-     * Xử lý upload logo thương hiệu
+     * Xử lý upload logo thương hiệu và convert sang base64
      * 
-     * @return string|null URL của logo hoặc null nếu thất bại
+     * @return string|null Base64 của logo hoặc null nếu thất bại
      */
     private function handleLogoUpload(): ?string
     {
@@ -261,39 +255,28 @@ class BrandService
         // Kiểm tra kích thước file (5MB)
         $maxSize = 5 * 1024 * 1024;
         if ($file['size'] > $maxSize) {
-            return null;
+            throw new Exception('Kích thước file quá lớn (tối đa 5MB)');
         }
 
         // Kiểm tra định dạng file
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
 
         if (!in_array($mimeType, $allowedTypes)) {
+            throw new Exception('Định dạng file không hợp lệ. Chỉ chấp nhận: JPG, PNG, GIF, WEBP');
+        }
+
+        // Đọc nội dung file và convert sang base64
+        $imageData = file_get_contents($file['tmp_name']);
+        if ($imageData === false) {
             return null;
         }
 
-        // Tạo tên file unique
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'brand_' . time() . '_' . uniqid() . '.' . $extension;
+        // Tạo base64 string với data URI scheme
+        $base64 = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
 
-        // Đường dẫn lưu file
-        $uploadDir = getcwd() . '/assets/images/brands/';
-
-        // Tạo thư mục nếu chưa tồn tại
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        $uploadPath = $uploadDir . $filename;
-
-        // Di chuyển file
-        if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            // Trả về đường dẫn tương đối
-            return '/assets/images/brands/' . $filename;
-        }
-
-        return null;
+        return $base64;
     }
 }
