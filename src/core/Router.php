@@ -76,7 +76,7 @@ class Router
 
         // Route không tìm thấy
         http_response_code(404);
-        View::render('errors/404', [], null);
+        View::render('errors/404', null, []);
     }
 
     /**
