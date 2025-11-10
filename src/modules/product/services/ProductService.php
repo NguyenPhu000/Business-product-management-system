@@ -4,6 +4,7 @@ namespace Modules\Product\Services;
 
 use Modules\Product\Models\ProductModel;
 use Modules\Product\Models\ProductCategoryModel;
+use Modules\Category\Models\CategoryModel;
 use Exception;
 
 /**
@@ -13,11 +14,13 @@ class ProductService
 {
     private ProductModel $productModel;
     private ProductCategoryModel $productCategoryModel;
+    private CategoryModel $categoryModel;
 
     public function __construct()
     {
         $this->productModel = new ProductModel();
         $this->productCategoryModel = new ProductCategoryModel();
+        $this->categoryModel = new CategoryModel();
     }
 
     /**
@@ -235,6 +238,12 @@ class ProductService
         // Kiểm tra category_ids
         if (empty($data['category_ids']) || !is_array($data['category_ids'])) {
             $errors['category_ids'] = 'Vui lòng chọn ít nhất một danh mục';
+        } else {
+            // Validate: Chỉ được chọn 1 danh mục cha và các con của nó
+            $categoryValidation = $this->validateCategorySelection($data['category_ids']);
+            if (!$categoryValidation['valid']) {
+                $errors['category_ids'] = $categoryValidation['message'];
+            }
         }
 
         return $errors;
@@ -250,6 +259,86 @@ class ProductService
     private function checkSkuExists(string $sku, ?int $excludeId = null): bool
     {
         return $this->productModel->skuExists($sku, $excludeId);
+    }
+
+    /**
+     * Validate lựa chọn danh mục: chỉ cho phép chọn 1 danh mục cha và các con của nó
+     * 
+     * @param array $categoryIds Mảng ID danh mục đã chọn
+     * @return array ['valid' => bool, 'message' => string]
+     */
+    private function validateCategorySelection(array $categoryIds): array
+    {
+        // Lấy thông tin tất cả các category đã chọn
+        $selectedCategories = [];
+        foreach ($categoryIds as $categoryId) {
+            $category = $this->categoryModel->find((int) $categoryId);
+            if ($category) {
+                $selectedCategories[] = $category;
+            }
+        }
+
+        // Lọc các danh mục cha (parent_id = null hoặc 0)
+        $parentCategories = array_filter($selectedCategories, function($cat) {
+            return empty($cat['parent_id']) || $cat['parent_id'] == 0;
+        });
+
+        // Kiểm tra: chỉ được chọn tối đa 1 danh mục cha
+        if (count($parentCategories) > 1) {
+            return [
+                'valid' => false,
+                'message' => 'Không được chọn nhiều hơn 1 danh mục cha! Vui lòng chỉ chọn 1 danh mục cha và các danh mục con của nó.'
+            ];
+        }
+
+        // Nếu có chọn danh mục cha
+        if (count($parentCategories) === 1) {
+            $parentCategory = reset($parentCategories);
+            $parentId = $parentCategory['id'];
+
+            // Kiểm tra tất cả các danh mục con phải thuộc parent này
+            $childCategories = array_filter($selectedCategories, function($cat) {
+                return !empty($cat['parent_id']) && $cat['parent_id'] != 0;
+            });
+
+            foreach ($childCategories as $childCategory) {
+                if ($childCategory['parent_id'] != $parentId) {
+                    return [
+                        'valid' => false,
+                        'message' => 'Các danh mục con phải thuộc về cùng một danh mục cha! Danh mục "' . 
+                                     htmlspecialchars($childCategory['name']) . '" không thuộc danh mục cha "' . 
+                                     htmlspecialchars($parentCategory['name']) . '".'
+                    ];
+                }
+            }
+        } else {
+            // Nếu không chọn danh mục cha nào, chỉ chọn danh mục con
+            // Kiểm tra tất cả danh mục con phải có cùng parent_id
+            $childCategories = array_filter($selectedCategories, function($cat) {
+                return !empty($cat['parent_id']) && $cat['parent_id'] != 0;
+            });
+
+            if (count($childCategories) > 0) {
+                // Lấy parent_id của danh mục con đầu tiên
+                $firstChild = reset($childCategories);
+                $expectedParentId = $firstChild['parent_id'];
+
+                // Kiểm tra tất cả các danh mục con khác có cùng parent_id không
+                foreach ($childCategories as $childCategory) {
+                    if ($childCategory['parent_id'] != $expectedParentId) {
+                        return [
+                            'valid' => false,
+                            'message' => 'Các danh mục con phải thuộc về cùng một danh mục cha!'
+                        ];
+                    }
+                }
+            }
+        }
+
+        return [
+            'valid' => true,
+            'message' => ''
+        ];
     }
 
     /**
