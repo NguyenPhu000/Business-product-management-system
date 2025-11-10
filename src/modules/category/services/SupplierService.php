@@ -72,9 +72,20 @@ class SupplierService
             throw new Exception('Email đã tồn tại');
         }
 
-        // Kiểm tra phone đã tồn tại
+        // Kiểm tra phone bắt buộc và hợp lệ
         $phone = !empty($data['phone']) ? trim($data['phone']) : '';
-        if (!empty($phone) && $this->supplierModel->phoneExists($phone)) {
+        
+        // Số điện thoại là bắt buộc
+        if (empty($phone)) {
+            throw new Exception('Số điện thoại không được để trống');
+        }
+        
+        // Chỉ chấp nhận chữ số với tùy chọn + ở đầu, độ dài 7-15 chữ số
+        if (!preg_match('/^\+?\d{7,15}$/', $phone)) {
+            throw new Exception('Số điện thoại không hợp lệ. Chỉ chứa chữ số và có thể bắt đầu bằng dấu +, độ dài 7-15 ký tự.');
+        }
+
+        if ($this->supplierModel->phoneExists($phone)) {
             throw new Exception('Số điện thoại đã tồn tại');
         }
 
@@ -82,7 +93,7 @@ class SupplierService
         $supplierData = [
             'name' => trim($data['name']),
             'contact' => !empty($data['contact']) ? trim($data['contact']) : null,
-            'phone' => $phone ?: null,
+            'phone' => $phone, // phone là bắt buộc nên không cần check ?: null
             'email' => $email ?: null,
             'address' => !empty($data['address']) ? trim($data['address']) : null,
             'is_active' => isset($data['is_active']) ? (int)$data['is_active'] : 0
@@ -127,9 +138,20 @@ class SupplierService
             throw new Exception('Email đã tồn tại');
         }
 
-        // Kiểm tra phone trùng lặp
+        // Kiểm tra phone bắt buộc, hợp lệ và trùng lặp
         $phone = !empty($data['phone']) ? trim($data['phone']) : '';
-        if (!empty($phone) && $this->supplierModel->phoneExists($phone, $id)) {
+        
+        // Số điện thoại là bắt buộc
+        if (empty($phone)) {
+            throw new Exception('Số điện thoại không được để trống');
+        }
+        
+        // Chỉ chấp nhận chữ số với tùy chọn + ở đầu, độ dài 7-15 chữ số
+        if (!preg_match('/^\+?\d{7,15}$/', $phone)) {
+            throw new Exception('Số điện thoại không hợp lệ. Chỉ chứa chữ số và có thể bắt đầu bằng dấu +, độ dài 7-15 ký tự.');
+        }
+
+        if ($this->supplierModel->phoneExists($phone, $id)) {
             throw new Exception('Số điện thoại đã tồn tại');
         }
 
@@ -137,7 +159,7 @@ class SupplierService
         $supplierData = [
             'name' => trim($data['name']),
             'contact' => !empty($data['contact']) ? trim($data['contact']) : null,
-            'phone' => $phone ?: null,
+            'phone' => $phone, // phone là bắt buộc nên không cần check ?: null
             'email' => $email ?: null,
             'address' => !empty($data['address']) ? trim($data['address']) : null,
             'is_active' => isset($data['is_active']) ? (int)$data['is_active'] : 0

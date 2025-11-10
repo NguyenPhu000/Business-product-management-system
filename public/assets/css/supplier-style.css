@@ -114,3 +114,69 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Inline validation tooltip (small bubble near input) */
+.validation-tooltip {
+    position: absolute;
+    z-index: 2000;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #222;
+    max-width: 340px;
+}
+.validation-tooltip .vt-icon {
+    color: #ff7a00; /* orange */
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.validation-tooltip::after {
+    /* small downward pointing arrow centered */
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #fff;
+    top: 100%;
+    left: calc(50% - 8px);
+    filter: drop-shadow(0 -1px 0 rgba(0,0,0,0.04));
+}
+.validation-tooltip .vt-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Right positioned tooltip variant */
+.validation-tooltip-right {
+    max-width: 360px;
+    padding: 10px 14px;
+}
+.validation-tooltip-right::after {
+    /* left-pointing arrow */
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid #fff;
+    left: -8px;
+    top: calc(50% - 8px);
+    filter: drop-shadow(0 -1px 0 rgba(0,0,0,0.03));
+}
+
+/* slightly larger icon for right tooltip */
+.validation-tooltip-right .vt-icon { font-size: 1.25rem; color: #ff7a00; }
