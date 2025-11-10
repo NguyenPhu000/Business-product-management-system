@@ -46,7 +46,7 @@ class InventoryModel extends BaseModel
                 INNER JOIN product_variants pv ON i.product_variant_id = pv.id
                 WHERE pv.product_id = ?
                 GROUP BY i.warehouse";
-        
+
         return $this->query($sql, [$productId]);
     }
 
@@ -132,7 +132,7 @@ class InventoryModel extends BaseModel
                 ON DUPLICATE KEY UPDATE 
                     quantity = quantity + VALUES(quantity),
                     last_updated = NOW()";
-        
+
         return $this->execute($sql, [$variantId, $warehouse, $quantityChange]);
     }
 
@@ -152,7 +152,7 @@ class InventoryModel extends BaseModel
                 ON DUPLICATE KEY UPDATE 
                     quantity = ?,
                     last_updated = NOW()";
-        
+
         return $this->execute($sql, [$variantId, $warehouse, $newQuantity, $newQuantity]);
     }
 
@@ -181,7 +181,7 @@ class InventoryModel extends BaseModel
                 WHERE i.quantity <= i.min_threshold AND i.quantity > 0
                 ORDER BY (i.quantity - i.min_threshold) ASC, i.last_updated DESC
                 LIMIT ?";
-        
+
         return $this->query($sql, [$limit]);
     }
 
@@ -208,7 +208,7 @@ class InventoryModel extends BaseModel
                 WHERE i.quantity = 0
                 ORDER BY i.last_updated DESC
                 LIMIT ?";
-        
+
         return $this->query($sql, [$limit]);
     }
 
@@ -254,7 +254,7 @@ class InventoryModel extends BaseModel
         $sql = "UPDATE {$this->table} 
                 SET min_threshold = ?, last_updated = NOW()
                 WHERE product_variant_id = ? AND warehouse = ?";
-        
+
         return $this->execute($sql, [$minThreshold, $variantId, $warehouse]);
     }
 }
