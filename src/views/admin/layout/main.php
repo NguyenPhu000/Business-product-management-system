@@ -9,7 +9,7 @@
     <meta http-equiv="Expires" content="0">
     <title><?= $title ?? 'Admin' ?> - Business Product Management System</title>
     <link rel="stylesheet" href="/assets/css/admin-style.css">
-    <script src="https://kit.fontawesome.com/42a96a500e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>

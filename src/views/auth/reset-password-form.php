@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đặt lại mật khẩu - Business Product Management System</title>
-    <script src="https://kit.fontawesome.com/42a96a500e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/modern-login.css">
     <link rel="stylesheet" href="/assets/css/reset-password.css">
 </head>
@@ -22,24 +22,24 @@
             </div>
 
             <?php if ($error = \Helpers\AuthHelper::getFlash('error')): ?>
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                <?= $error ?>
-            </div>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <?= $error ?>
+                </div>
             <?php endif; ?>
 
             <?php if ($success = \Helpers\AuthHelper::getFlash('success')): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                <?= $success ?>
-            </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <?= $success ?>
+                </div>
             <?php endif; ?>
 
             <?php if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']): ?>
-            <div class="success-box">
-                <h3><i class="fas fa-check-circle"></i> Yêu cầu đã được phê duyệt</h3>
-                <p>Email: <strong><?= htmlspecialchars($email) ?></strong></p>
-            </div>
+                <div class="success-box">
+                    <h3><i class="fas fa-check-circle"></i> Yêu cầu đã được phê duyệt</h3>
+                    <p>Email: <strong><?= htmlspecialchars($email) ?></strong></p>
+                </div>
             <?php endif; ?>
 
             <form action="/forgot-password" method="POST" class="login-form">
@@ -49,7 +49,6 @@
                     <label for="new_password">Mật khẩu mới</label>
                 </div>
                 <div class="inputForm">
-                    <i class="fas fa-lock"></i>
                     <input type="password" id="new_password" name="new_password" class="input"
                         placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)" required minlength="6" autofocus>
                     <span class="password-toggle" onclick="togglePassword('new_password')">
@@ -61,7 +60,6 @@
                     <label for="confirm_password">Xác nhận mật khẩu</label>
                 </div>
                 <div class="inputForm">
-                    <i class="fas fa-lock"></i>
                     <input type="password" id="confirm_password" name="confirm_password" class="input"
                         placeholder="Nhập lại mật khẩu mới" required minlength="6">
                     <span class="password-toggle" onclick="togglePassword('confirm_password')">
@@ -84,22 +82,22 @@
 
     <script src="/assets/js/modern-login.js"></script>
     <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const password = document.getElementById('new_password').value;
-        const confirm = document.getElementById('confirm_password').value;
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.getElementById('new_password').value;
+            const confirm = document.getElementById('confirm_password').value;
 
-        if (password !== confirm) {
-            e.preventDefault();
-            alert('Mật khẩu xác nhận không khớp!');
-            return false;
-        }
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp!');
+                return false;
+            }
 
-        if (password.length < 6) {
-            e.preventDefault();
-            alert('Mật khẩu phải có ít nhất 6 ký tự!');
-            return false;
-        }
-    });
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Mật khẩu phải có ít nhất 6 ký tự!');
+                return false;
+            }
+        });
     </script>
 </body>
 

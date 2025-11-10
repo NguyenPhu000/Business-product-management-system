@@ -9,7 +9,7 @@ class Router
 {
     private array $routes = [];
     private array $middlewares = [];
-    
+
     /**
      * Đăng ký route GET
      */
@@ -17,7 +17,7 @@ class Router
     {
         $this->addRoute('GET', $path, $handler, $middlewares);
     }
-    
+
     /**
      * Đăng ký route POST
      */
@@ -25,7 +25,7 @@ class Router
     {
         $this->addRoute('POST', $path, $handler, $middlewares);
     }
-    
+
     /**
      * Thêm route vào danh sách
      */
@@ -38,7 +38,7 @@ class Router
             'middlewares' => $middlewares
         ];
     }
-    
+
     /**
      * Xử lý request
      */
@@ -46,34 +46,20 @@ class Router
     {
         // Loại bỏ query string
         $uri = parse_url($uri, PHP_URL_PATH);
-        
-        // Debug logging (có thể xóa sau khi fix)
-        if (defined('APP_DEBUG') && APP_DEBUG) {
-            error_log("Router Debug - Method: {$method}, URI: {$uri}");
-        }
-        
+
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
                 continue;
             }
-            
+
             // Chuyển path pattern thành regex
             $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $route['path']);
             $pattern = '#^' . $pattern . '$#';
-            
+
             if (preg_match($pattern, $uri, $matches)) {
                 // Lọc chỉ lấy named parameters
-                $namedParams = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-                
-                // Chuyển named params thành positional params (array values)
-                $params = array_values($namedParams);
-                
-                // Debug logging
-                if (defined('APP_DEBUG') && APP_DEBUG) {
-                    $handlerStr = is_string($route['handler']) ? $route['handler'] : 'Closure';
-                    error_log("Router Debug - Matched route: {$route['path']}, Handler: {$handlerStr}, Params: " . json_encode($params));
-                }
-                
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+
                 // Chạy middlewares
                 foreach ($route['middlewares'] as $middleware) {
                     $middlewareInstance = new $middleware();
@@ -81,21 +67,18 @@ class Router
                         return;
                     }
                 }
-                
+
                 // Gọi controller
                 $this->callHandler($route['handler'], $params);
                 return;
             }
         }
-        
+
         // Route không tìm thấy
-        if (defined('APP_DEBUG') && APP_DEBUG) {
-            error_log("Router Debug - No route matched for Method: {$method}, URI: {$uri}");
-        }
         http_response_code(404);
         View::render('errors/404', [], null);
     }
-    
+
     /**
      * Gọi controller handler
      */
@@ -105,20 +88,29 @@ class Router
             call_user_func_array($handler, $params);
             return;
         }
-        
+
         if (is_string($handler)) {
             [$controller, $method] = explode('@', $handler);
-            $controller = "Controllers\\{$controller}";
-            
+
+            // Nếu controller đã có namespace đầy đủ (chứa \), giữ nguyên
+            // Ngược lại, thêm Controllers\ prefix cho backward compatibility
+            if (strpos($controller, '\\') === false) {
+                $controller = "Controllers\\{$controller}";
+            }
+
             if (class_exists($controller)) {
                 $instance = new $controller();
                 if (method_exists($instance, $method)) {
                     call_user_func_array([$instance, $method], $params);
                     return;
+                } else {
+                    throw new \Exception("Method '{$method}' không tồn tại trong class '{$controller}'");
                 }
+            } else {
+                throw new \Exception("Class '{$controller}' không tồn tại. Handler: {$handler}");
             }
         }
-        
-        throw new \Exception("Handler không hợp lệ");
+
+        throw new \Exception("Handler không hợp lệ: " . print_r($handler, true));
     }
 }

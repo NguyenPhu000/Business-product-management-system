@@ -9,6 +9,7 @@
 
 use Middlewares\AuthMiddleware;
 use Middlewares\RoleMiddleware;
+use Middlewares\AdminOnlyMiddleware;
 
 // Redirect root to admin login
 $router->get('/', function () {
@@ -17,144 +18,91 @@ $router->get('/', function () {
 });
 
 // ============ AUTH ROUTES ============
-$router->get('/admin/login', 'Admin\AuthController@showLogin');
-$router->post('/admin/login', 'Admin\AuthController@login');
-$router->get('/admin/logout', 'Admin\AuthController@logout');
-$router->get('/forgot-password', 'Admin\AuthController@showForgotPassword');
-$router->post('/forgot-password', 'Admin\AuthController@forgotPassword');
-$router->get('/reset-password-form', 'Admin\AuthController@showResetPasswordForm');
-$router->get('/forgot-password/check-approval/{userId}', 'Admin\AuthController@checkApproval');
-$router->post('/check-request-status', 'Admin\AuthController@checkRequestStatus');
+$router->get('/admin/login', 'Modules\Auth\Controllers\AuthController@showLogin');
+$router->post('/admin/login', 'Modules\Auth\Controllers\AuthController@login');
+$router->get('/admin/logout', 'Modules\Auth\Controllers\AuthController@logout');
+$router->get('/forgot-password', 'Modules\Auth\Controllers\AuthController@showForgotPassword');
+$router->post('/forgot-password', 'Modules\Auth\Controllers\AuthController@forgotPassword');
+$router->post('/forgot-password/cancel-request', 'Modules\Auth\Controllers\AuthController@cancelRequest');
+$router->get('/reset-password-form', 'Modules\Auth\Controllers\AuthController@showResetPasswordForm');
+$router->get('/forgot-password/check-approval/{userId}', 'Modules\Auth\Controllers\AuthController@checkApproval');
+$router->post('/check-request-status', 'Modules\Auth\Controllers\AuthController@checkRequestStatus');
 
 // ============ ADMIN ROUTES (Protected) ============
 
 // Dashboard
-$router->get('/admin/dashboard', 'Admin\HomeController@index', [AuthMiddleware::class]);
+$router->get('/admin/dashboard', 'Modules\Dashboard\Controllers\DashboardController@index', [AuthMiddleware::class]);
 
 // Users Management
-$router->get('/admin/users', 'Admin\UsersController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/users/create', 'Admin\UsersController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/store', 'Admin\UsersController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/users/edit/{id}', 'Admin\UsersController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/update/{id}', 'Admin\UsersController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/users/delete/{id}', 'Admin\UsersController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users', 'Modules\User\Controllers\UsersController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users/create', 'Modules\User\Controllers\UsersController@create', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/store', 'Modules\User\Controllers\UsersController@store', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/users/edit/{id}', 'Modules\User\Controllers\UsersController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/update/{id}', 'Modules\User\Controllers\UsersController@update', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/users/delete/{id}', 'Modules\User\Controllers\UsersController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
 
 // Roles Management
-$router->get('/admin/roles', 'Admin\RolesController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/roles/create', 'Admin\RolesController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/store', 'Admin\RolesController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/roles/edit/{id}', 'Admin\RolesController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/update/{id}', 'Admin\RolesController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/roles/delete/{id}', 'Admin\RolesController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/roles', 'Modules\Auth\Controllers\RolesController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/roles/edit/{id}', 'Modules\Auth\Controllers\RolesController@edit', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/roles/update/{id}', 'Modules\Auth\Controllers\RolesController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
 // Logs Management
-$router->get('/admin/logs', 'Admin\LogsController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/logs/cleanup', 'Admin\LogsController@cleanup', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/logs/update/{id}', 'Admin\LogsController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/logs/delete/{id}', 'Admin\LogsController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/logs', 'Modules\System\Controllers\LogsController@index', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/logs/cleanup', 'Modules\System\Controllers\LogsController@cleanup', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/logs/update/{id}', 'Modules\System\Controllers\LogsController@update', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/logs/delete/{id}', 'Modules\System\Controllers\LogsController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
 
-// System Config
-$router->get('/admin/config', 'Admin\ConfigController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/store', 'Admin\ConfigController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/update', 'Admin\ConfigController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/config/delete', 'Admin\ConfigController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+// System Config (CHỈ ADMIN - Chủ tiệm KHÔNG được vào)
+$router->get('/admin/config', 'Modules\System\Controllers\ConfigController@index', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/store', 'Modules\System\Controllers\ConfigController@store', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/update', 'Modules\System\Controllers\ConfigController@update', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/config/delete', 'Modules\System\Controllers\ConfigController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
-// Password Reset Management
-$router->get('/admin/password-reset', 'Admin\PasswordResetController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/password-reset/check-new', 'Admin\PasswordResetController@checkNew', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/password-reset/approve/{id}', 'Admin\PasswordResetController@approve', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/password-reset/reject/{id}', 'Admin\PasswordResetController@reject', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/password-reset/delete/{id}', 'Admin\PasswordResetController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
+// Password Reset Management (CHỈ ADMIN - Chủ tiệm KHÔNG được vào)
+$router->get('/admin/password-reset', 'Modules\Auth\Controllers\PasswordResetController@index', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/password-reset/check-new', 'Modules\Auth\Controllers\PasswordResetController@checkNew', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->get('/admin/password-reset/check-cancelled', 'Modules\Auth\Controllers\PasswordResetController@checkCancelled', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/approve/{id}', 'Modules\Auth\Controllers\PasswordResetController@approve', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/reject/{id}', 'Modules\Auth\Controllers\PasswordResetController@reject', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
+$router->post('/admin/password-reset/delete/{id}', 'Modules\Auth\Controllers\PasswordResetController@delete', [AuthMiddleware::class, AdminOnlyMiddleware::class]);
 
-// ============ CATEGORY MANAGEMENT ROUTES ============
+// ============ PRODUCT ROUTES (Refactored - Using Modules Structure) ============
+$router->get('/admin/products', 'Modules\Product\Controllers\ProductController@index', [AuthMiddleware::class]);
+$router->get('/admin/products/create', 'Modules\Product\Controllers\ProductController@create', [AuthMiddleware::class]);
+$router->post('/admin/products/store', 'Modules\Product\Controllers\ProductController@store', [AuthMiddleware::class]);
+$router->get('/admin/products/edit/{id}', 'Modules\Product\Controllers\ProductController@edit', [AuthMiddleware::class]);
+$router->post('/admin/products/update/{id}', 'Modules\Product\Controllers\ProductController@update', [AuthMiddleware::class]);
+$router->post('/admin/products/delete/{id}', 'Modules\Product\Controllers\ProductController@destroy', [AuthMiddleware::class]);
+$router->post('/admin/products/toggle/{id}', 'Modules\Product\Controllers\ProductController@toggle', [AuthMiddleware::class]);
+$router->post('/admin/products/delete-image', 'Modules\Product\Controllers\ProductController@deleteImage', [AuthMiddleware::class]);
+$router->post('/admin/products/set-primary-image', 'Modules\Product\Controllers\ProductController@setPrimaryImage', [AuthMiddleware::class]);
 
-// Categories
-$router->get('/admin/categories', 'Admin\CategoryController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/categories/create', 'Admin\CategoryController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/store', 'Admin\CategoryController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/categories/edit/{id}', 'Admin\CategoryController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/update/{id}', 'Admin\CategoryController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/delete/{id}', 'Admin\CategoryController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/toggle-active/{id}', 'Admin\CategoryController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
+// ============ CATEGORY ROUTES (Categories, Brands, Suppliers) ============
 
-// Brands
-$router->get('/admin/brands', 'Admin\BrandController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/brands/create', 'Admin\BrandController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/store', 'Admin\BrandController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/brands/edit/{id}', 'Admin\BrandController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/update/{id}', 'Admin\BrandController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/delete/{id}', 'Admin\BrandController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/toggle-active/{id}', 'Admin\BrandController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
+// Categories Management
+$router->get('/admin/categories', 'Modules\Category\Controllers\CategoryController@index', [AuthMiddleware::class]);
+$router->get('/admin/categories/create', 'Modules\Category\Controllers\CategoryController@create', [AuthMiddleware::class]);
+$router->post('/admin/categories/store', 'Modules\Category\Controllers\CategoryController@store', [AuthMiddleware::class]);
+$router->get('/admin/categories/edit/{id}', 'Modules\Category\Controllers\CategoryController@edit', [AuthMiddleware::class]);
+$router->post('/admin/categories/update/{id}', 'Modules\Category\Controllers\CategoryController@update', [AuthMiddleware::class]);
+$router->post('/admin/categories/delete/{id}', 'Modules\Category\Controllers\CategoryController@destroy', [AuthMiddleware::class]);
+$router->post('/admin/categories/toggle/{id}', 'Modules\Category\Controllers\CategoryController@toggle', [AuthMiddleware::class]);
 
-// Suppliers
-$router->get('/admin/suppliers', 'Admin\SupplierController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/create', 'Admin\SupplierController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/store', 'Admin\SupplierController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/edit/{id}', 'Admin\SupplierController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/update/{id}', 'Admin\SupplierController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/delete/{id}', 'Admin\SupplierController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/detail/{id}', 'Admin\SupplierController@detail', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/toggle-active/{id}', 'Admin\SupplierController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
+// Brands Management
+$router->get('/admin/brands', 'Modules\Category\Controllers\BrandController@index', [AuthMiddleware::class]);
+$router->get('/admin/brands/create', 'Modules\Category\Controllers\BrandController@create', [AuthMiddleware::class]);
+$router->post('/admin/brands/store', 'Modules\Category\Controllers\BrandController@store', [AuthMiddleware::class]);
+$router->get('/admin/brands/edit/{id}', 'Modules\Category\Controllers\BrandController@edit', [AuthMiddleware::class]);
+$router->post('/admin/brands/update/{id}', 'Modules\Category\Controllers\BrandController@update', [AuthMiddleware::class]);
+$router->post('/admin/brands/delete/{id}', 'Modules\Category\Controllers\BrandController@destroy', [AuthMiddleware::class]);
+$router->post('/admin/brands/toggle/{id}', 'Modules\Category\Controllers\BrandController@toggle', [AuthMiddleware::class]);
 
-// ============ CATEGORY MANAGEMENT (Protected) ============
-
-// Categories - Quản lý danh mục sản phẩm
-$router->get('/admin/categories', 'Admin\CategoryController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/categories/create', 'Admin\CategoryController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/store', 'Admin\CategoryController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/categories/edit/{id}', 'Admin\CategoryController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/update/{id}', 'Admin\CategoryController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/delete/{id}', 'Admin\CategoryController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/categories/toggle-active/{id}', 'Admin\CategoryController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// ============ BRAND MANAGEMENT (Protected) ============
-
-// Brands - Quản lý thương hiệu
-$router->get('/admin/brands', 'Admin\BrandController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/brands/create', 'Admin\BrandController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/store', 'Admin\BrandController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/brands/edit/{id}', 'Admin\BrandController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/update/{id}', 'Admin\BrandController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/delete/{id}', 'Admin\BrandController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/brands/toggle-active/{id}', 'Admin\BrandController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// ============ SUPPLIER MANAGEMENT (Protected) ============
-
-// Suppliers - Quản lý nhà cung cấp
-$router->get('/admin/suppliers', 'Admin\SupplierController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/create', 'Admin\SupplierController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/store', 'Admin\SupplierController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/edit/{id}', 'Admin\SupplierController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/update/{id}', 'Admin\SupplierController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/delete/{id}', 'Admin\SupplierController@delete', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/suppliers/detail/{id}', 'Admin\SupplierController@detail', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/suppliers/toggle-active/{id}', 'Admin\SupplierController@toggleActive', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// ============ PRODUCT MANAGEMENT (Protected) ============
-
-// Product CRUD
-$router->get('/admin/products', 'Admin\ProductController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/products/create', 'Admin\ProductController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/store', 'Admin\ProductController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/products/{id}/edit', 'Admin\ProductController@edit', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/{id}/update', 'Admin\ProductController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/{id}/delete', 'Admin\ProductController@destroy', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/{id}/toggle', 'Admin\ProductController@toggle', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// Product Images
-$router->post('/admin/products/delete-image', 'Admin\ProductController@deleteImage', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/set-primary-image', 'Admin\ProductController@setPrimaryImage', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// Product Variants - Quản lý biến thể
-$router->get('/admin/products/{id}/variants', 'Admin\ProductVariantController@index', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->get('/admin/products/{id}/variants/create', 'Admin\ProductVariantController@create', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/{id}/variants/store', 'Admin\ProductVariantController@store', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/{productId}/variants/{variantId}/delete', 'Admin\ProductVariantController@destroy', [AuthMiddleware::class, RoleMiddleware::class]);
-
-// ============ PRODUCT-CATEGORY MANAGEMENT (Protected) ============
-
-// Product-Category Relations - Gán sản phẩm vào nhiều danh mục
-$router->get('/admin/products/manage-categories/{productId}', 'Admin\ProductCategoryController@manage', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/manage-categories/{productId}', 'Admin\ProductCategoryController@update', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/add-to-category', 'Admin\ProductCategoryController@addToCategory', [AuthMiddleware::class, RoleMiddleware::class]);
-$router->post('/admin/products/remove-from-category', 'Admin\ProductCategoryController@removeFromCategory', [AuthMiddleware::class, RoleMiddleware::class]);
+// Suppliers Management
+$router->get('/admin/suppliers', 'Modules\Category\Controllers\SupplierController@index', [AuthMiddleware::class]);
+$router->get('/admin/suppliers/create', 'Modules\Category\Controllers\SupplierController@create', [AuthMiddleware::class]);
+$router->post('/admin/suppliers/store', 'Modules\Category\Controllers\SupplierController@store', [AuthMiddleware::class]);
+$router->get('/admin/suppliers/detail/{id}', 'Modules\Category\Controllers\SupplierController@detail', [AuthMiddleware::class]);
+$router->get('/admin/suppliers/edit/{id}', 'Modules\Category\Controllers\SupplierController@edit', [AuthMiddleware::class]);
+$router->post('/admin/suppliers/update/{id}', 'Modules\Category\Controllers\SupplierController@update', [AuthMiddleware::class]);
+$router->post('/admin/suppliers/delete/{id}', 'Modules\Category\Controllers\SupplierController@destroy', [AuthMiddleware::class]);
+$router->post('/admin/suppliers/toggle/{id}', 'Modules\Category\Controllers\SupplierController@toggle', [AuthMiddleware::class]);

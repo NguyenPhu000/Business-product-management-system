@@ -5,7 +5,7 @@ namespace Middlewares;
 use Helpers\AuthHelper;
 
 /**
- * RoleMiddleware - Kiểm tra quyền admin
+ * RoleMiddleware - Kiểm tra quyền admin hoặc chủ tiệm
  */
 class RoleMiddleware
 {
@@ -17,9 +17,9 @@ class RoleMiddleware
             header('Location: /admin/login');
             exit;
         }
-        
-        // Kiểm tra quyền admin
-        if (!AuthHelper::isAdmin()) {
+
+        // Kiểm tra quyền admin hoặc chủ tiệm
+        if (!AuthHelper::isAdminOrOwner()) {
             http_response_code(403);
             echo "
             <!DOCTYPE html>
@@ -44,7 +44,7 @@ class RoleMiddleware
             ";
             exit;
         }
-        
+
         return true;
     }
 }
