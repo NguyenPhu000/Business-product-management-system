@@ -36,15 +36,12 @@ class InventoryController extends Controller
         // Lấy bộ lọc
         $filters = [
             'warehouse' => $this->input('warehouse'),
-            'stock_status' => $this->input('stock_status'), // 'low', 'out', 'all'
+            'stock_status' => $this->input('stock_status'),
             'search' => $this->input('search')
         ];
 
         try {
-            // Gọi service để lấy danh sách tồn kho
             $result = $this->inventoryService->getStockList($filters, $page, $perPage);
-            
-            // Lấy thống kê tổng quan
             $stats = $this->inventoryService->getLowStockAlerts();
 
             $this->view('admin/inventory/stock_list', [
@@ -55,15 +52,14 @@ class InventoryController extends Controller
                 'stats' => $stats,
                 'currentPage' => 'inventory'
             ]);
-
         } catch (Exception $e) {
-            LogHelper::error('Inventory List Error: ' . $e->getMessage());
+            error_log('[Inventory] List Error: ' . $e->getMessage());
             $this->redirect('/admin/dashboard?error=' . urlencode('Lỗi tải danh sách tồn kho'));
         }
     }
 
     /**
-     * Route 2: GET /admin/inventory/detail/{variantId}
+     * Route 2: GET /admin/inventory/detail
      * Hiển thị chi tiết tồn kho của 1 variant
      */
     public function detail(): void
@@ -77,10 +73,7 @@ class InventoryController extends Controller
         }
 
         try {
-            // Lấy thông tin tồn kho
             $stockInfo = $this->inventoryService->getStockInfo($variantId, $warehouse);
-            
-            // Lấy lịch sử giao dịch
             $history = $this->transactionService->getVariantTransactionHistory($variantId, $warehouse, 50);
 
             $this->view('admin/inventory/stock_detail', [
@@ -91,9 +84,8 @@ class InventoryController extends Controller
                 'warehouse' => $warehouse,
                 'currentPage' => 'inventory'
             ]);
-
         } catch (Exception $e) {
-            LogHelper::error('Inventory Detail Error: ' . $e->getMessage());
+            error_log('[Inventory] Detail Error: ' . $e->getMessage());
             $this->redirect('/admin/inventory?error=' . urlencode('Lỗi tải chi tiết tồn kho'));
         }
     }
@@ -116,9 +108,8 @@ class InventoryController extends Controller
                 'totalAlerts' => $alerts['total_alerts'],
                 'currentPage' => 'inventory'
             ]);
-
         } catch (Exception $e) {
-            LogHelper::error('Low Stock Error: ' . $e->getMessage());
+            error_log('[Inventory] Low Stock Error: ' . $e->getMessage());
             $this->redirect('/admin/inventory?error=' . urlencode('Lỗi tải cảnh báo'));
         }
     }
@@ -147,9 +138,8 @@ class InventoryController extends Controller
                 'warehouse' => $warehouse,
                 'currentPage' => 'inventory'
             ]);
-
         } catch (Exception $e) {
-            LogHelper::error('Adjust Form Error: ' . $e->getMessage());
+            error_log('[Inventory] Adjust Form Error: ' . $e->getMessage());
             $this->redirect('/admin/inventory?error=' . urlencode('Lỗi tải form điều chỉnh'));
         }
     }
@@ -160,31 +150,24 @@ class InventoryController extends Controller
      */
     public function adjust(): void
     {
-        // Validate request method
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+            $this->error('Method not allowed', 405);
             return;
         }
 
-        // Lấy dữ liệu từ request
         $variantId = (int) $this->input('variant_id');
         $newQuantity = (int) $this->input('new_quantity');
         $warehouse = $this->input('warehouse', 'default');
         $reason = trim($this->input('reason', ''));
 
-        // Validation
         if (!$variantId || $newQuantity < 0 || empty($reason)) {
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Dữ liệu không hợp lệ. Vui lòng điền đầy đủ thông tin.'
-            ], 400);
+            $this->error('Dữ liệu không hợp lệ. Vui lòng điền đầy đủ thông tin.', 400);
             return;
         }
 
         try {
-            $userId = AuthHelper::getCurrentUserId();
-            
-            // Gọi service để điều chỉnh
+            $userId = AuthHelper::id();
+
             $result = $this->inventoryService->adjustStock(
                 $variantId,
                 $newQuantity,
@@ -194,24 +177,17 @@ class InventoryController extends Controller
             );
 
             // Log activity
-            LogHelper::info("Điều chỉnh tồn kho: Variant #{$variantId}, {$result['old_stock']} → {$result['new_stock']}", [
-                'user_id' => $userId,
-                'warehouse' => $warehouse,
-                'reason' => $reason
-            ]);
+            LogHelper::log(
+                "Điều chỉnh tồn kho: {$result['old_stock']} → {$result['new_stock']}",
+                'inventory',
+                $variantId,
+                ['warehouse' => $warehouse, 'reason' => $reason]
+            );
 
-            $this->jsonResponse([
-                'success' => true,
-                'message' => $result['message'],
-                'data' => $result
-            ]);
-
+            $this->success($result, $result['message']);
         } catch (Exception $e) {
-            LogHelper::error('Adjust Stock Error: ' . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Lỗi điều chỉnh tồn kho: ' . $e->getMessage()
-            ], 500);
+            error_log('[Inventory] Adjust Error: ' . $e->getMessage());
+            $this->error('Lỗi điều chỉnh tồn kho: ' . $e->getMessage(), 500);
         }
     }
 
@@ -224,10 +200,9 @@ class InventoryController extends Controller
         $page = (int) ($this->input('page') ?? 1);
         $perPage = 50;
 
-        // Lấy bộ lọc
         $filters = [
             'warehouse' => $this->input('warehouse'),
-            'type' => $this->input('type'), // import, export, adjust
+            'type' => $this->input('type'),
             'from_date' => $this->input('from_date'),
             'to_date' => $this->input('to_date'),
             'search' => $this->input('search')
@@ -243,9 +218,8 @@ class InventoryController extends Controller
                 'filters' => $filters,
                 'currentPage' => 'inventory'
             ]);
-
         } catch (Exception $e) {
-            LogHelper::error('History Error: ' . $e->getMessage());
+            error_log('[Inventory] History Error: ' . $e->getMessage());
             $this->redirect('/admin/inventory?error=' . urlencode('Lỗi tải lịch sử'));
         }
     }
@@ -257,7 +231,7 @@ class InventoryController extends Controller
     public function import(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+            $this->error('Method not allowed', 405);
             return;
         }
 
@@ -268,18 +242,14 @@ class InventoryController extends Controller
         $referenceId = (int) $this->input('reference_id');
         $note = trim($this->input('note', ''));
 
-        // Validation
         if (!$variantId || $quantity <= 0) {
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Dữ liệu không hợp lệ'
-            ], 400);
+            $this->error('Dữ liệu không hợp lệ', 400);
             return;
         }
 
         try {
-            $userId = AuthHelper::getCurrentUserId();
-            
+            $userId = AuthHelper::id();
+
             $result = $this->inventoryService->importStock(
                 $variantId,
                 $quantity,
@@ -289,23 +259,17 @@ class InventoryController extends Controller
                 $note
             );
 
-            LogHelper::info("Nhập kho: Variant #{$variantId}, +{$quantity}", [
-                'user_id' => $userId,
-                'warehouse' => $warehouse
-            ]);
+            LogHelper::log(
+                "Nhập kho: +{$quantity}",
+                'inventory',
+                $variantId,
+                ['warehouse' => $warehouse]
+            );
 
-            $this->jsonResponse([
-                'success' => true,
-                'message' => $result['message'],
-                'data' => $result
-            ]);
-
+            $this->success($result, $result['message']);
         } catch (Exception $e) {
-            LogHelper::error('Import Stock Error: ' . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Lỗi nhập kho: ' . $e->getMessage()
-            ], 500);
+            error_log('[Inventory] Import Error: ' . $e->getMessage());
+            $this->error('Lỗi nhập kho: ' . $e->getMessage(), 500);
         }
     }
 
@@ -316,7 +280,7 @@ class InventoryController extends Controller
     public function export(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+            $this->error('Method not allowed', 405);
             return;
         }
 
@@ -327,18 +291,14 @@ class InventoryController extends Controller
         $referenceId = (int) $this->input('reference_id');
         $note = trim($this->input('note', ''));
 
-        // Validation
         if (!$variantId || $quantity <= 0) {
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Dữ liệu không hợp lệ'
-            ], 400);
+            $this->error('Dữ liệu không hợp lệ', 400);
             return;
         }
 
         try {
-            $userId = AuthHelper::getCurrentUserId();
-            
+            $userId = AuthHelper::id();
+
             $result = $this->inventoryService->exportStock(
                 $variantId,
                 $quantity,
@@ -348,23 +308,17 @@ class InventoryController extends Controller
                 $note
             );
 
-            LogHelper::info("Xuất kho: Variant #{$variantId}, -{$quantity}", [
-                'user_id' => $userId,
-                'warehouse' => $warehouse
-            ]);
+            LogHelper::log(
+                "Xuất kho: -{$quantity}",
+                'inventory',
+                $variantId,
+                ['warehouse' => $warehouse]
+            );
 
-            $this->jsonResponse([
-                'success' => true,
-                'message' => $result['message'],
-                'data' => $result
-            ]);
-
+            $this->success($result, $result['message']);
         } catch (Exception $e) {
-            LogHelper::error('Export Stock Error: ' . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Lỗi xuất kho: ' . $e->getMessage()
-            ], 500);
+            error_log('[Inventory] Export Error: ' . $e->getMessage());
+            $this->error('Lỗi xuất kho: ' . $e->getMessage(), 500);
         }
     }
 
@@ -375,7 +329,7 @@ class InventoryController extends Controller
     public function transfer(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+            $this->error('Method not allowed', 405);
             return;
         }
 
@@ -385,18 +339,14 @@ class InventoryController extends Controller
         $toWarehouse = $this->input('to_warehouse');
         $note = trim($this->input('note', ''));
 
-        // Validation
         if (!$variantId || $quantity <= 0 || !$fromWarehouse || !$toWarehouse) {
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Dữ liệu không hợp lệ'
-            ], 400);
+            $this->error('Dữ liệu không hợp lệ', 400);
             return;
         }
 
         try {
-            $userId = AuthHelper::getCurrentUserId();
-            
+            $userId = AuthHelper::id();
+
             $result = $this->inventoryService->transferStock(
                 $variantId,
                 $quantity,
@@ -406,22 +356,16 @@ class InventoryController extends Controller
                 $note
             );
 
-            LogHelper::info("Chuyển kho: Variant #{$variantId}, {$quantity} từ {$fromWarehouse} → {$toWarehouse}", [
-                'user_id' => $userId
-            ]);
+            LogHelper::log(
+                "Chuyển kho: {$fromWarehouse} → {$toWarehouse}, SL: {$quantity}",
+                'inventory',
+                $variantId
+            );
 
-            $this->jsonResponse([
-                'success' => true,
-                'message' => $result['message'],
-                'data' => $result
-            ]);
-
+            $this->success($result, $result['message']);
         } catch (Exception $e) {
-            LogHelper::error('Transfer Stock Error: ' . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Lỗi chuyển kho: ' . $e->getMessage()
-            ], 500);
+            error_log('[Inventory] Transfer Error: ' . $e->getMessage());
+            $this->error('Lỗi chuyển kho: ' . $e->getMessage(), 500);
         }
     }
 
@@ -432,7 +376,7 @@ class InventoryController extends Controller
     public function updateThreshold(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
+            $this->error('Method not allowed', 405);
             return;
         }
 
@@ -441,10 +385,7 @@ class InventoryController extends Controller
         $warehouse = $this->input('warehouse', 'default');
 
         if (!$variantId || $minThreshold < 0) {
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Dữ liệu không hợp lệ'
-            ], 400);
+            $this->error('Dữ liệu không hợp lệ', 400);
             return;
         }
 
@@ -452,22 +393,20 @@ class InventoryController extends Controller
             $result = $this->inventoryService->updateThresholds($variantId, $minThreshold, $warehouse);
 
             if ($result) {
-                LogHelper::info("Cập nhật ngưỡng: Variant #{$variantId}, threshold={$minThreshold}");
-                
-                $this->jsonResponse([
-                    'success' => true,
-                    'message' => 'Cập nhật ngưỡng cảnh báo thành công'
-                ]);
+                LogHelper::log(
+                    "Cập nhật ngưỡng cảnh báo: {$minThreshold}",
+                    'inventory',
+                    $variantId,
+                    ['warehouse' => $warehouse]
+                );
+
+                $this->success(null, 'Cập nhật ngưỡng cảnh báo thành công');
             } else {
                 throw new Exception('Không thể cập nhật ngưỡng');
             }
-
         } catch (Exception $e) {
-            LogHelper::error('Update Threshold Error: ' . $e->getMessage());
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Lỗi cập nhật ngưỡng: ' . $e->getMessage()
-            ], 500);
+            error_log('[Inventory] Update Threshold Error: ' . $e->getMessage());
+            $this->error('Lỗi cập nhật ngưỡng: ' . $e->getMessage(), 500);
         }
     }
 
@@ -487,35 +426,14 @@ class InventoryController extends Controller
         try {
             $csv = $this->transactionService->exportToCSV($filters);
 
-            // Set headers để download CSV
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="inventory_report_' . date('Y-m-d') . '.csv"');
-            
+
             echo $csv;
             exit;
-
         } catch (Exception $e) {
-            LogHelper::error('Export Report Error: ' . $e->getMessage());
+            error_log('[Inventory] Export Report Error: ' . $e->getMessage());
             $this->redirect('/admin/inventory/history?error=' . urlencode('Lỗi xuất báo cáo'));
         }
-    }
-
-    /**
-     * Helper: Get input từ $_GET hoặc $_POST
-     */
-    private function input(string $key, $default = null)
-    {
-        return $_POST[$key] ?? $_GET[$key] ?? $default;
-    }
-
-    /**
-     * Helper: Trả về JSON response
-     */
-    private function jsonResponse(array $data, int $statusCode = 200): void
-    {
-        http_response_code($statusCode);
-        header('Content-Type: application/json');
-        echo json_encode($data);
-        exit;
     }
 }
