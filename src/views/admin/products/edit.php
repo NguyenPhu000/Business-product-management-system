@@ -346,6 +346,103 @@
             </form>
         </div>
     </div>
+
+    <!-- Variants Section -->
+    <?php if (!empty($product['variants'])): ?>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-layer-group"></i> Biến thể sản phẩm (<?= count($product['variants']) ?>)
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="50">#</th>
+                            <th width="150">SKU Biến thể</th>
+                            <th>Thuộc tính</th>
+                            <th width="100">Giá nhập</th>
+                            <th width="100">Giá bán</th>
+                            <th width="120" class="text-center">Tồn kho</th>
+                            <th width="100" class="text-center">Trạng thái</th>
+                            <th width="150" class="text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($product['variants'] as $index => $variant): ?>
+                            <tr>
+                                <td class="text-center"><?= $index + 1 ?></td>
+                                <td><code><?= htmlspecialchars($variant['sku']) ?></code></td>
+                                <td>
+                                    <?php 
+                                    $attributes = json_decode($variant['attributes'], true);
+                                    if ($attributes):
+                                        foreach ($attributes as $key => $value): 
+                                    ?>
+                                        <span class="badge bg-secondary me-1">
+                                            <?= htmlspecialchars($key) ?>: <?= htmlspecialchars($value) ?>
+                                        </span>
+                                    <?php 
+                                        endforeach;
+                                    else:
+                                    ?>
+                                        <span class="text-muted">Mặc định</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end">
+                                    <?= number_format($variant['unit_cost'], 0, ',', '.') ?> đ
+                                </td>
+                                <td class="text-end">
+                                    <strong><?= number_format($variant['price'], 0, ',', '.') ?> đ</strong>
+                                </td>
+                                <td class="text-center">
+                                    <?php 
+                                    $stock = $variant['total_stock'] ?? 0;
+                                    $class = $stock > 10 ? 'success' : ($stock > 0 ? 'warning' : 'danger');
+                                    ?>
+                                    <a href="/admin/inventory/detail/<?= $variant['id'] ?>" 
+                                       class="text-decoration-none" 
+                                       title="Xem chi tiết tồn kho">
+                                        <span class="badge bg-<?= $class ?>">
+                                            <i class="fas fa-box"></i> <?= number_format($stock) ?>
+                                        </span>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <?php if ($variant['is_active'] == 1): ?>
+                                        <span class="badge bg-success">Kích hoạt</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Vô hiệu</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" 
+                                           class="btn btn-sm btn-warning" 
+                                           title="Điều chỉnh tồn kho">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="/admin/inventory/detail/<?= $variant['id'] ?>" 
+                                           class="btn btn-sm btn-info" 
+                                           title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle"></i> 
+                <strong>Lưu ý:</strong> Để quản lý tồn kho cho từng variant, click vào số lượng hoặc nút điều chỉnh.
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <!-- JavaScript -->

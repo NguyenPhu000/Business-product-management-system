@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Form điều chỉnh tồn kho
  * Path: src/views/admin/inventory/adjust_stock.php
@@ -109,7 +110,7 @@
         <div class="card-body">
             <form method="POST" action="/admin/inventory/adjust" id="adjustForm">
                 <input type="hidden" name="variant_id" value="<?= $variant['id'] ?>">
-                
+
                 <div class="row mb-4">
                     <!-- Warehouse -->
                     <div class="col-lg-4 mb-3">
@@ -119,10 +120,10 @@
                         <select class="form-select form-select-lg" id="warehouse" name="warehouse" required>
                             <option value="">-- Chọn kho --</option>
                             <?php foreach ($inventory as $inv): ?>
-                                <option value="<?= htmlspecialchars($inv['warehouse']) ?>" 
+                                <option value="<?= htmlspecialchars($inv['warehouse']) ?>"
                                     data-current="<?= $inv['quantity'] ?>"
                                     data-threshold="<?= $inv['min_threshold'] ?>">
-                                    <?= htmlspecialchars($inv['warehouse']) ?> 
+                                    <?= htmlspecialchars($inv['warehouse']) ?>
                                     (Hiện: <?= number_format($inv['quantity']) ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -147,10 +148,10 @@
                         <label for="quantity" class="form-label mb-2 fw-semibold">
                             <i class="bi bi-123"></i> Số lượng thay đổi <span class="text-danger">*</span>
                         </label>
-                        <input type="number" 
-                            class="form-control form-control-lg" 
-                            id="quantity" 
-                            name="quantity" 
+                        <input type="number"
+                            class="form-control form-control-lg"
+                            id="quantity"
+                            name="quantity"
                             placeholder="Nhập số lượng..."
                             min="1"
                             required>
@@ -163,10 +164,10 @@
                     <label for="note" class="form-label mb-2 fw-semibold">
                         <i class="bi bi-chat-left-text"></i> Ghi chú <span class="text-danger">*</span>
                     </label>
-                    <textarea class="form-control" 
-                        id="note" 
-                        name="note" 
-                        rows="3" 
+                    <textarea class="form-control"
+                        id="note"
+                        name="note"
+                        rows="3"
                         placeholder="Lý do điều chỉnh: sai sót, hư hỏng, mất mát, kiểm kho..."
                         required></textarea>
                 </div>
@@ -304,7 +305,8 @@
 </script>
 
 <style>
-    .form-select-lg, .form-control-lg {
+    .form-select-lg,
+    .form-control-lg {
         font-size: 1rem;
         padding: 0.75rem;
     }
@@ -314,11 +316,26 @@
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    .card.border-success { border-width: 2px !important; }
-    .card.border-warning { border-width: 2px !important; }
-    .card.border-danger { border-width: 2px !important; }
+    .card.border-success {
+        border-width: 2px !important;
+    }
+
+    .card.border-warning {
+        border-width: 2px !important;
+    }
+
+    .card.border-danger {
+        border-width: 2px !important;
+    }
 </style>

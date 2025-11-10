@@ -63,11 +63,12 @@
                                 <th width="50">#</th>
                                 <th width="150">SKU Biến thể</th>
                                 <th>Thuộc tính</th>
-                                <th width="120">Giá nhập</th>
-                                <th width="120">Giá bán</th>
+                                <th width="100">Giá nhập</th>
+                                <th width="100">Giá bán</th>
+                                <th width="120">Tồn kho</th>
                                 <th width="120">Barcode</th>
                                 <th width="100">Trạng thái</th>
-                                <th width="150">Hành động</th>
+                                <th width="180">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -97,6 +98,21 @@
                                     <td class="text-end">
                                         <strong><?= number_format($variant['price'], 0, ',', '.') ?> đ</strong>
                                     </td>
+                                    <td class="text-center">
+                                        <?php if (!empty($variant['total_stock'])): ?>
+                                            <?php 
+                                            $stock = $variant['total_stock'];
+                                            $class = $stock > 10 ? 'success' : ($stock > 0 ? 'warning' : 'danger');
+                                            ?>
+                                            <a href="/admin/inventory/detail/<?= $variant['id'] ?>" class="text-decoration-none">
+                                                <span class="badge bg-<?= $class ?>">
+                                                    <i class="fas fa-box"></i> <?= number_format($stock) ?>
+                                                </span>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted">0</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?= $variant['barcode'] ? htmlspecialchars($variant['barcode']) : '<span class="text-muted">-</span>' ?>
                                     </td>
@@ -108,12 +124,20 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <button type="button" 
-                                                class="btn btn-sm btn-danger btn-delete" 
-                                                data-id="<?= $variant['id'] ?>"
-                                                data-sku="<?= htmlspecialchars($variant['sku']) ?>">
-                                            <i class="bi bi-trash3"></i> Xóa
-                                        </button>
+                                        <div class="btn-group" role="group">
+                                            <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" 
+                                               class="btn btn-sm btn-warning" 
+                                               title="Điều chỉnh tồn kho">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger btn-delete" 
+                                                    data-id="<?= $variant['id'] ?>"
+                                                    data-sku="<?= htmlspecialchars($variant['sku']) ?>"
+                                                    title="Xóa variant">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

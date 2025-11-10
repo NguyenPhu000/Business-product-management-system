@@ -119,7 +119,8 @@ class ProductController extends Controller
     public function edit(int $id): void
     {
         try {
-            $product = $this->productService->getProductWithCategories($id);
+            // Lấy sản phẩm kèm thông tin inventory
+            $product = $this->productService->getProductWithInventory($id);
 
             if (!$product) {
                 AuthHelper::setFlash('error', 'Không tìm thấy sản phẩm');

@@ -4,7 +4,9 @@ namespace Modules\Product\Services;
 
 use Modules\Product\Models\ProductModel;
 use Modules\Product\Models\ProductCategoryModel;
+use Modules\Product\Models\VariantModel;
 use Modules\Category\Models\CategoryModel;
+use Modules\Inventory\Services\InventoryService;
 use Exception;
 
 /**
@@ -15,12 +17,16 @@ class ProductService
     private ProductModel $productModel;
     private ProductCategoryModel $productCategoryModel;
     private CategoryModel $categoryModel;
+    private VariantModel $variantModel;
+    private InventoryService $inventoryService;
 
     public function __construct()
     {
         $this->productModel = new ProductModel();
         $this->productCategoryModel = new ProductCategoryModel();
         $this->categoryModel = new CategoryModel();
+        $this->variantModel = new VariantModel();
+        $this->inventoryService = new InventoryService();
     }
 
     /**
@@ -56,6 +62,41 @@ class ProductService
     public function getProductWithCategories(int $id): ?array
     {
         return $this->productModel->getWithCategories($id);
+    }
+
+    /**
+     * Lấy sản phẩm kèm thông tin tồn kho
+     * 
+     * @param int $id ID sản phẩm
+     * @return array|null Thông tin sản phẩm + inventory
+     */
+    public function getProductWithInventory(int $id): ?array
+    {
+        $product = $this->productModel->getWithCategories($id);
+        if (!$product) {
+            return null;
+        }
+
+        // Lấy danh sách variants
+        $variants = $this->variantModel->getByProductId($id);
+        
+        // Lấy thông tin tồn kho cho từng variant
+        foreach ($variants as &$variant) {
+            try {
+                $inventory = $this->inventoryService->getStockInfo($variant['id']);
+                $variant['inventory'] = $inventory;
+                $variant['total_stock'] = !empty($inventory) ? array_sum(array_column($inventory, 'quantity')) : 0;
+            } catch (Exception $e) {
+                // Nếu lỗi, set default
+                $variant['inventory'] = [];
+                $variant['total_stock'] = 0;
+                error_log("Error loading inventory for variant {$variant['id']}: " . $e->getMessage());
+            }
+        }
+        
+        $product['variants'] = $variants;
+
+        return $product;
     }
 
     /**
