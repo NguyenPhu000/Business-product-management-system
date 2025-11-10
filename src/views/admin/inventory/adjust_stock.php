@@ -13,7 +13,7 @@
             <i class="fas fa-edit text-warning"></i> Điều Chỉnh Tồn Kho
         </h2>
         <div class="d-flex gap-2">
-            <a href="/admin/inventory/detail/<?= $variant['id'] ?>" class="btn btn-secondary">
+            <a href="/admin/inventory/detail/<?= $variantId ?>" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
@@ -68,7 +68,7 @@
                             </tr>
                             <tr>
                                 <th>Giá nhập:</th>
-                                <td><?= number_format($variant['cost'] ?? 0) ?> đ</td>
+                                <td><?= number_format($variant['unit_cost'] ?? 0) ?> đ</td>
                             </tr>
                             <tr>
                                 <th>Đơn vị:</th>
@@ -109,29 +109,12 @@
         </div>
         <div class="card-body">
             <form method="POST" action="/admin/inventory/adjust" id="adjustForm">
-                <input type="hidden" name="variant_id" value="<?= $variant['id'] ?>">
+                <input type="hidden" name="variant_id" value="<?= $variantId ?>">
+                <input type="hidden" name="warehouse" value="Kho chính">
 
                 <div class="row mb-4">
-                    <!-- Warehouse -->
-                    <div class="col-lg-4 mb-3">
-                        <label for="warehouse" class="form-label mb-2 fw-semibold">
-                            <i class="bi bi-building"></i> Kho hàng <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select form-select-lg" id="warehouse" name="warehouse" required>
-                            <option value="">-- Chọn kho --</option>
-                            <?php foreach ($inventory as $inv): ?>
-                                <option value="<?= htmlspecialchars($inv['warehouse']) ?>"
-                                    data-current="<?= $inv['quantity'] ?>"
-                                    data-threshold="<?= $inv['min_threshold'] ?>">
-                                    <?= htmlspecialchars($inv['warehouse']) ?>
-                                    (Hiện: <?= number_format($inv['quantity']) ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
                     <!-- Type -->
-                    <div class="col-lg-4 mb-3">
+                    <div class="col-lg-6 mb-3">
                         <label for="type" class="form-label mb-2 fw-semibold">
                             <i class="bi bi-arrow-left-right"></i> Loại điều chỉnh <span class="text-danger">*</span>
                         </label>
@@ -144,7 +127,7 @@
                     </div>
 
                     <!-- Quantity Change -->
-                    <div class="col-lg-4 mb-3">
+                    <div class="col-lg-6 mb-3">
                         <label for="quantity" class="form-label mb-2 fw-semibold">
                             <i class="bi bi-123"></i> Số lượng thay đổi <span class="text-danger">*</span>
                         </label>
@@ -202,9 +185,9 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                    <a href="/admin/inventory/detail/<?= $variantId ?>" class="btn btn-outline-secondary">
                         <i class="fas fa-times"></i> Hủy bỏ
-                    </button>
+                    </a>
                     <button type="submit" class="btn btn-warning btn-lg px-5">
                         <i class="fas fa-save"></i> Xác nhận điều chỉnh
                     </button>
@@ -213,6 +196,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     const warehouseSelect = document.getElementById('warehouse');

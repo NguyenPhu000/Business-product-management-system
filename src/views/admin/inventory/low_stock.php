@@ -132,7 +132,7 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="/admin/inventory/detail?id=<?= $product['variant_id'] ?>&warehouse=<?= urlencode($product['warehouse']) ?>"
+                                            <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
                                                 class="btn btn-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
@@ -202,7 +202,7 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="/admin/inventory/detail?id=<?= $product['variant_id'] ?>&warehouse=<?= urlencode($product['warehouse']) ?>"
+                                            <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
                                                 class="btn btn-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>

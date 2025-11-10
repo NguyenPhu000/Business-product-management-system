@@ -1,4 +1,5 @@
 <?php
+
 /**
  * View: Thêm biến thể sản phẩm
  * Path: src/views/admin/products/variants/create.php
@@ -10,21 +11,21 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="bi bi-plus-circle"></i> Thêm biến thể sản phẩm
+                <i class="fas fa-plus-circle"></i> Thêm biến thể sản phẩm
             </h1>
             <p class="text-muted mb-0">
                 Sản phẩm: <strong><?= htmlspecialchars($product['name']) ?></strong>
             </p>
         </div>
         <a href="/admin/products/<?= $product['id'] ?>/variants" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Quay lại
+            <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
 
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
+            <i class="fas fa-exclamation-triangle"></i>
             <?= $flash ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -34,12 +35,12 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-info-circle"></i> Thông tin biến thể
+                <i class="fas fa-info-circle"></i> Thông tin biến thể
             </h6>
         </div>
         <div class="card-body">
             <form method="POST" action="/admin/products/<?= $product['id'] ?>/variants/store" id="variantForm">
-                
+
                 <!-- Row 1: SKU và Barcode -->
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -47,26 +48,26 @@
                             SKU Biến thể <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="sku" 
-                                   name="sku" 
-                                   value="<?= $product['sku'] ?>-VAR-<?= strtoupper(uniqid()) ?>"
-                                   required>
+                            <input type="text"
+                                class="form-control"
+                                id="sku"
+                                name="sku"
+                                value="<?= $product['sku'] ?>-VAR-<?= strtoupper(uniqid()) ?>"
+                                required>
                             <button class="btn btn-outline-secondary" type="button" id="generateSku" title="Tạo mã tự động">
-                                <i class="bi bi-arrow-clockwise"></i>
+                                <i class="fas fa-sync-alt"></i>
                             </button>
                         </div>
                         <small class="text-muted">Mã định danh duy nhất cho biến thể</small>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <label for="barcode" class="form-label">Barcode / EAN</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="barcode" 
-                               name="barcode" 
-                               placeholder="Nhập mã vạch (nếu có)">
+                        <input type="text"
+                            class="form-control"
+                            id="barcode"
+                            name="barcode"
+                            placeholder="Nhập mã vạch (nếu có)">
                         <small class="text-muted">Dùng để quét mã vạch khi bán hàng</small>
                     </div>
                 </div>
@@ -74,60 +75,60 @@
                 <!-- Row 2: Thuộc tính - Màu sắc, Size, Dung lượng -->
                 <div class="card bg-light mb-3">
                     <div class="card-header">
-                        <strong><i class="bi bi-palette"></i> Thuộc tính biến thể</strong>
+                        <strong><i class="fas fa-palette"></i> Thuộc tính biến thể</strong>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="color" class="form-label">Màu sắc</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="color" 
-                                       name="color" 
-                                       placeholder="VD: Đen, Trắng, Xanh...">
+                                <input type="text"
+                                    class="form-control"
+                                    id="color"
+                                    name="color"
+                                    placeholder="VD: Đen, Trắng, Xanh...">
                             </div>
 
                             <div class="col-md-4">
                                 <label for="size" class="form-label">Kích thước / Size</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="size" 
-                                       name="size" 
-                                       placeholder="VD: S, M, L, XL, 39, 40...">
+                                <input type="text"
+                                    class="form-control"
+                                    id="size"
+                                    name="size"
+                                    placeholder="VD: S, M, L, XL, 39, 40...">
                             </div>
 
                             <div class="col-md-4">
                                 <label for="capacity" class="form-label">Dung lượng / Bộ nhớ</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="capacity" 
-                                       name="capacity" 
-                                       placeholder="VD: 64GB, 128GB, 256GB...">
+                                <input type="text"
+                                    class="form-control"
+                                    id="capacity"
+                                    name="capacity"
+                                    placeholder="VD: 64GB, 128GB, 256GB...">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="custom_attr_name" class="form-label">Thuộc tính tùy chỉnh</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="custom_attr_name" 
-                                       name="custom_attr_name" 
-                                       placeholder="VD: Chất liệu, Xuất xứ...">
+                                <input type="text"
+                                    class="form-control"
+                                    id="custom_attr_name"
+                                    name="custom_attr_name"
+                                    placeholder="VD: Chất liệu, Xuất xứ...">
                             </div>
 
                             <div class="col-md-6">
                                 <label for="custom_attr_value" class="form-label">Giá trị</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="custom_attr_value" 
-                                       name="custom_attr_value" 
-                                       placeholder="VD: Cotton, Việt Nam...">
+                                <input type="text"
+                                    class="form-control"
+                                    id="custom_attr_value"
+                                    name="custom_attr_value"
+                                    placeholder="VD: Cotton, Việt Nam...">
                             </div>
                         </div>
 
                         <small class="text-muted">
-                            <i class="bi bi-info-circle"></i> 
+                            <i class="fas fa-info-circle"></i>
                             Chọn các thuộc tính phù hợp với loại sản phẩm của bạn. Có thể để trống nếu không cần.
                         </small>
                     </div>
@@ -140,14 +141,14 @@
                             Giá nhập <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="unit_cost" 
-                                   name="unit_cost" 
-                                   min="0" 
-                                   step="0.01" 
-                                   value="<?= $product['unit_cost'] ?? 0 ?>"
-                                   required>
+                            <input type="number"
+                                class="form-control"
+                                id="unit_cost"
+                                name="unit_cost"
+                                min="0"
+                                step="0.01"
+                                value="<?= $product['unit_cost'] ?? 0 ?>"
+                                required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <small class="text-muted">Giá nhập của biến thể này</small>
@@ -158,32 +159,78 @@
                             Giá bán <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number" 
-                                   class="form-control" 
-                                   id="price" 
-                                   name="price" 
-                                   min="0" 
-                                   step="0.01" 
-                                   value="<?= $product['price'] ?? 0 ?>"
-                                   required>
+                            <input type="number"
+                                class="form-control"
+                                id="price"
+                                name="price"
+                                min="0"
+                                step="0.01"
+                                value="<?= $product['price'] ?? 0 ?>"
+                                required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <small class="text-muted">Giá bán cho khách hàng</small>
                     </div>
                 </div>
 
-                <!-- Row 4: Trạng thái -->
+                <!-- Row 4: Inventory - Tồn kho ban đầu -->
+                <div class="card bg-info bg-opacity-10 mb-3">
+                    <div class="card-header bg-info text-white">
+                        <strong><i class="fas fa-box"></i> Quản lý tồn kho</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="initial_stock" class="form-label">
+                                    Số lượng nhập kho ban đầu
+                                </label>
+                                <div class="input-group">
+                                    <input type="number"
+                                        class="form-control"
+                                        id="initial_stock"
+                                        name="initial_stock"
+                                        min="0"
+                                        value="0">
+                                    <span class="input-group-text">Đơn vị</span>
+                                </div>
+                                <small class="text-muted">Để 0 nếu chưa nhập kho</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="min_threshold" class="form-label">
+                                    Ngưỡng cảnh báo tồn kho thấp
+                                </label>
+                                <div class="input-group">
+                                    <input type="number"
+                                        class="form-control"
+                                        id="min_threshold"
+                                        name="min_threshold"
+                                        min="0"
+                                        value="10">
+                                    <span class="input-group-text">Đơn vị</span>
+                                </div>
+                                <small class="text-muted">Cảnh báo khi tồn kho dưới mức này</small>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Lưu ý:</strong> Hệ thống sẽ tự động tạo phiếu nhập kho nếu bạn nhập số lượng ban đầu > 0
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 5: Trạng thái -->
                 <div class="mb-4">
                     <label class="form-label">Trạng thái</label>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" 
-                               type="checkbox" 
-                               id="is_active" 
-                               name="is_active" 
-                               value="1" 
-                               checked>
+                        <input class="form-check-input"
+                            type="checkbox"
+                            id="is_active"
+                            name="is_active"
+                            value="1"
+                            checked>
                         <label class="form-check-label" for="is_active">
-                            <span class="text-success">Kích hoạt</span> 
+                            <span class="text-success">Kích hoạt</span>
                             <small class="text-muted">(Có thể bán biến thể này)</small>
                         </label>
                     </div>
@@ -196,10 +243,10 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Lưu biến thể
+                            <i class="fas fa-check-circle"></i> Lưu biến thể
                         </button>
                         <a href="/admin/products/<?= $product['id'] ?>/variants" class="btn btn-outline-secondary">
-                            <i class="bi bi-x-circle"></i> Hủy
+                            <i class="fas fa-times-circle"></i> Hủy
                         </a>
                     </div>
                 </div>
@@ -211,7 +258,7 @@
     <!-- Example Box -->
     <div class="card border-success">
         <div class="card-body">
-            <h6 class="text-success"><i class="bi bi-lightbulb"></i> Ví dụ biến thể</h6>
+            <h6 class="text-success"><i class="fas fa-lightbulb"></i> Ví dụ biến thể</h6>
             <p><strong>Sản phẩm:</strong> iPhone 13 Pro Max</p>
             <table class="table table-sm table-bordered">
                 <thead>
@@ -248,28 +295,28 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Generate SKU
-    document.getElementById('generateSku').addEventListener('click', function() {
-        const productSku = '<?= $product['sku'] ?>';
-        const uniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        document.getElementById('sku').value = `${productSku}-VAR-${uniqueId}`;
-    });
-
-    // Validate giá
-    const unitCostInput = document.getElementById('unit_cost');
-    const priceInput = document.getElementById('price');
-
-    if (priceInput && unitCostInput) {
-        priceInput.addEventListener('change', function() {
-            const unitCost = parseFloat(unitCostInput.value) || 0;
-            const price = parseFloat(this.value) || 0;
-            
-            if (price < unitCost) {
-                alert('Giá bán phải lớn hơn hoặc bằng giá nhập!');
-                this.value = unitCost;
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Generate SKU
+        document.getElementById('generateSku').addEventListener('click', function() {
+            const productSku = '<?= $product['sku'] ?>';
+            const uniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('sku').value = `${productSku}-VAR-${uniqueId}`;
         });
-    }
-});
+
+        // Validate giá
+        const unitCostInput = document.getElementById('unit_cost');
+        const priceInput = document.getElementById('price');
+
+        if (priceInput && unitCostInput) {
+            priceInput.addEventListener('change', function() {
+                const unitCost = parseFloat(unitCostInput.value) || 0;
+                const price = parseFloat(this.value) || 0;
+
+                if (price < unitCost) {
+                    alert('Giá bán phải lớn hơn hoặc bằng giá nhập!');
+                    this.value = unitCost;
+                }
+            });
+        }
+    });
 </script>

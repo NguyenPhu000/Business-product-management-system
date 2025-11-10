@@ -79,7 +79,7 @@ class ProductService
 
         // Lấy danh sách variants
         $variants = $this->variantModel->getByProductId($id);
-        
+
         // Lấy thông tin tồn kho cho từng variant
         foreach ($variants as &$variant) {
             try {
@@ -93,7 +93,7 @@ class ProductService
                 error_log("Error loading inventory for variant {$variant['id']}: " . $e->getMessage());
             }
         }
-        
+
         $product['variants'] = $variants;
 
         return $product;
@@ -320,7 +320,7 @@ class ProductService
         }
 
         // Lọc các danh mục cha (parent_id = null hoặc 0)
-        $parentCategories = array_filter($selectedCategories, function($cat) {
+        $parentCategories = array_filter($selectedCategories, function ($cat) {
             return empty($cat['parent_id']) || $cat['parent_id'] == 0;
         });
 
@@ -338,7 +338,7 @@ class ProductService
             $parentId = $parentCategory['id'];
 
             // Kiểm tra tất cả các danh mục con phải thuộc parent này
-            $childCategories = array_filter($selectedCategories, function($cat) {
+            $childCategories = array_filter($selectedCategories, function ($cat) {
                 return !empty($cat['parent_id']) && $cat['parent_id'] != 0;
             });
 
@@ -346,16 +346,16 @@ class ProductService
                 if ($childCategory['parent_id'] != $parentId) {
                     return [
                         'valid' => false,
-                        'message' => 'Các danh mục con phải thuộc về cùng một danh mục cha! Danh mục "' . 
-                                     htmlspecialchars($childCategory['name']) . '" không thuộc danh mục cha "' . 
-                                     htmlspecialchars($parentCategory['name']) . '".'
+                        'message' => 'Các danh mục con phải thuộc về cùng một danh mục cha! Danh mục "' .
+                            htmlspecialchars($childCategory['name']) . '" không thuộc danh mục cha "' .
+                            htmlspecialchars($parentCategory['name']) . '".'
                     ];
                 }
             }
         } else {
             // Nếu không chọn danh mục cha nào, chỉ chọn danh mục con
             // Kiểm tra tất cả danh mục con phải có cùng parent_id
-            $childCategories = array_filter($selectedCategories, function($cat) {
+            $childCategories = array_filter($selectedCategories, function ($cat) {
                 return !empty($cat['parent_id']) && $cat['parent_id'] != 0;
             });
 

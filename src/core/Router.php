@@ -59,6 +59,9 @@ class Router
             if (preg_match($pattern, $uri, $matches)) {
                 // Lọc chỉ lấy named parameters
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+                
+                // Convert to indexed array for call_user_func_array (positional params)
+                $params = array_values($params);
 
                 // Chạy middlewares
                 foreach ($route['middlewares'] as $middleware) {
@@ -76,7 +79,7 @@ class Router
 
         // Route không tìm thấy
         http_response_code(404);
-        View::render('errors/404', null, []);
+        View::render('errors/404', [], null);
     }
 
     /**

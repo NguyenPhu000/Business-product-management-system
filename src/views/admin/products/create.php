@@ -12,14 +12,14 @@
             <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
         </h1>
         <a href="/admin/products" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Quay lại
+            <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
 
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle"></i>
+        <i class="fas fa-exclamation-triangle"></i>
         <?= $flash ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -29,7 +29,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-info-circle"></i> Thông tin sản phẩm
+                <i class="fas fa-info-circle"></i> Thông tin sản phẩm
             </h6>
         </div>
         <div class="card-body">
@@ -50,7 +50,7 @@
                             </button>
                         </div>
                         <small class="text-muted">
-                            <i class="bi bi-info-circle"></i> Mã định danh duy nhất. Nhấn nút "Tạo mã tự động" để hệ thống tạo mã ngẫu nhiên.
+                            <i class="fas fa-info-circle"></i> Mã định danh duy nhất. Nhấn nút "Tạo mã tự động" để hệ thống tạo mã ngẫu nhiên.
                         </small>
                     </div>
 
@@ -93,7 +93,7 @@
                         </div>
                         <small class="text-muted">Có thể chọn nhiều danh mục</small>
                         <div id="categorySelectionInfo" class="alert alert-info mt-2" style="display: none;">
-                            <i class="bi bi-info-circle"></i> 
+                            <i class="fas fa-info-circle"></i> 
                             <strong>Danh mục cha đã chọn:</strong> <span id="selectedParentName"></span>
                             <br>
                             <small>Bạn chỉ có thể chọn thêm các danh mục con của danh mục này.</small>
@@ -287,14 +287,14 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Lưu sản phẩm
+                                <i class="fas fa-check-circle"></i> Lưu sản phẩm
                             </button>
                             <button type="reset" class="btn btn-outline-secondary btn-lg">
-                                <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                                <i class="fas fa-redo"></i> Đặt lại
                             </button>
                         </div>
                         <a href="/admin/products" class="btn btn-link btn-lg text-muted">
-                            <i class="bi bi-x-circle"></i> Hủy bỏ
+                            <i class="fas fa-times-circle"></i> Hủy bỏ
                         </a>
                     </div>
                 </div>
@@ -304,7 +304,7 @@
 
     <!-- Ghi chú hướng dẫn -->
     <div class="alert alert-info" role="alert">
-        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Hướng dẫn</h6>
+        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Hướng dẫn</h6>
         <ul class="mb-0">
             <li>Các trường có dấu <span class="text-danger">*</span> là bắt buộc</li>
             <li>Mã SKU phải là duy nhất trong hệ thống</li>

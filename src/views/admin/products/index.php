@@ -9,7 +9,7 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-box-seam"></i> Quản lý sản phẩm <span class="text-muted fs-6 fw-normal">Tổng:
+        <h2><i class="fas fa-box"></i> Quản lý sản phẩm <span class="text-muted fs-6 fw-normal">Tổng:
                 <?= $totalProducts ?> sản phẩm</span></h2>
         <a href="/admin/products/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Thêm sản phẩm
@@ -19,14 +19,14 @@
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> <?= $flash ?>
+            <i class="fas fa-check-circle"></i> <?= $flash ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
 
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> <?= $flash ?>
+            <i class="fas fa-exclamation-triangle"></i> <?= $flash ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -35,7 +35,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-light">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-funnel"></i> Bộ lọc
+                <i class="fas fa-filter"></i> Bộ lọc
             </h6>
         </div>
         <div class="card-body">
@@ -46,7 +46,7 @@
                     <!-- Tìm kiếm -->
                     <div class="col-lg-3 col-md-6" style="flex: 0 0 auto; margin-right: 1rem;">
                         <label for="keyword" class="form-label mb-2 fw-semibold" style="font-size: 0.95rem;">
-                            <i class="bi bi-search"></i> Tìm kiếm
+                            <i class="fas fa-search"></i> Tìm kiếm
                         </label>
                         <input type="text" class="form-control form-control-lg" id="keyword" name="keyword"
                             placeholder="Tên sản phẩm hoặc SKU..."
@@ -141,7 +141,7 @@
                             style="visibility: hidden; font-size: 0.95rem;">.</label>
                         <button type="submit" class="btn btn-primary btn-lg w-100"
                             style="padding: 0.75rem 1rem; font-size: 1rem;">
-                            <i class="bi bi-search"></i> Tìm
+                            <i class="fas fa-search"></i> Tìm
                         </button>
                     </div>
                 </div>
@@ -151,7 +151,7 @@
                     <div class="col-12">
                         <a href="/admin/products" class="btn btn-secondary btn-lg"
                             style="padding: 0.75rem 1.5rem; font-size: 1rem;">
-                            <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                            <i class="fas fa-redo"></i> Đặt lại
                         </a>
                     </div>
                 </div>
@@ -163,13 +163,13 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-table"></i> Danh sách sản phẩm
+                <i class="fas fa-table"></i> Danh sách sản phẩm
             </h6>
         </div>
         <div class="card-body">
             <?php if (empty($products)): ?>
                 <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle"></i>
+                    <i class="fas fa-info-circle"></i>
                     Chưa có sản phẩm nào. <a href="/admin/products/create">Thêm sản phẩm đầu tiên</a>
                 </div>
             <?php else: ?>
@@ -185,11 +185,11 @@
                                         class="text-decoration-none text-dark">
                                         Tên sản phẩm
                                         <?php if (($filters['sort_by'] ?? '') === 'name_asc'): ?>
-                                            <i class="bi bi-arrow-up"></i>
+                                            <i class="fas fa-arrow-up"></i>
                                         <?php elseif (($filters['sort_by'] ?? '') === 'name_desc'): ?>
-                                            <i class="bi bi-arrow-down"></i>
+                                            <i class="fas fa-arrow-down"></i>
                                         <?php else: ?>
-                                            <i class="bi bi-arrow-down-up text-muted"></i>
+                                            <i class="fas fa-arrow-down-up text-muted"></i>
                                         <?php endif; ?>
                                     </a>
                                 </th>
@@ -199,11 +199,11 @@
                                         class="text-decoration-none text-dark">
                                         Giá bán
                                         <?php if (($filters['sort_by'] ?? '') === 'price_asc'): ?>
-                                            <i class="bi bi-arrow-up text-success"></i>
+                                            <i class="fas fa-arrow-up text-success"></i>
                                         <?php elseif (($filters['sort_by'] ?? '') === 'price_desc'): ?>
-                                            <i class="bi bi-arrow-down text-danger"></i>
+                                            <i class="fas fa-arrow-down text-danger"></i>
                                         <?php else: ?>
-                                            <i class="bi bi-arrow-down-up text-muted"></i>
+                                            <i class="fas fa-arrow-down-up text-muted"></i>
                                         <?php endif; ?>
                                     </a>
                                 </th>
@@ -278,16 +278,16 @@
                                     <td>
                                         <div class="d-flex gap-2 flex-wrap">
                                             <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i> Sửa
+                                                <i class="fas fa-pencil-alt"></i> Sửa
                                             </a>
                                             <a href="/admin/products/<?= $product['id'] ?>/variants"
                                                 class="btn btn-sm btn-info">
-                                                <i class="bi bi-palette"></i> Biến thể
+                                                <i class="fas fa-palette"></i> Biến thể
                                             </a>
                                             <button type="button" class="btn btn-sm btn-danger btn-delete"
                                                 data-id="<?= $product['id'] ?>"
                                                 data-name="<?= htmlspecialchars($product['name']) ?>">
-                                                <i class="bi bi-trash"></i> Xóa
+                                                <i class="fas fa-trash-alt"></i> Xóa
                                             </button>
                                         </div>
                                     </td>

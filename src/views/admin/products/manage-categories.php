@@ -20,7 +20,7 @@
                     <h1 class="h2">Quản lý danh mục sản phẩm</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="/admin/products" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Quay lại
+                            <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Lưu thay đổi
+                                <i class="fas fa-save"></i> Lưu thay đổi
                             </button>
                             <a href="/admin/products" class="btn btn-secondary">Hủy</a>
                         </div>

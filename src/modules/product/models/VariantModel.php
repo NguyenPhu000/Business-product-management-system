@@ -1,7 +1,9 @@
 <?php
+
 /**
  * VariantModel.php - Tương tác với bảng product_variants
  */
+
 namespace Modules\Product\Models;
 
 use Core\BaseModel;
@@ -62,7 +64,7 @@ class VariantModel extends BaseModel
     {
         $fields = ['product_id', 'sku', 'attributes', 'price', 'unit_cost', 'barcode', 'is_active'];
         $filteredData = array_intersect_key($data, array_flip($fields));
-        
+
         return $this->create($filteredData);
     }
 
@@ -73,7 +75,7 @@ class VariantModel extends BaseModel
     {
         $fields = ['sku', 'attributes', 'price', 'unit_cost', 'barcode', 'is_active'];
         $filteredData = array_intersect_key($data, array_flip($fields));
-        
+
         return $this->update($id, $filteredData);
     }
 

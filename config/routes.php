@@ -77,6 +77,15 @@ $router->post('/admin/products/toggle/{id}', 'Modules\Product\Controllers\Produc
 $router->post('/admin/products/delete-image', 'Modules\Product\Controllers\ProductController@deleteImage', [AuthMiddleware::class]);
 $router->post('/admin/products/set-primary-image', 'Modules\Product\Controllers\ProductController@setPrimaryImage', [AuthMiddleware::class]);
 
+// Product Variants Management (Tích hợp với Inventory)
+$router->get('/admin/products/{id}/variants', 'Modules\Product\Controllers\VariantController@index', [AuthMiddleware::class]);
+$router->get('/admin/products/{id}/variants/create', 'Modules\Product\Controllers\VariantController@create', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/store', 'Modules\Product\Controllers\VariantController@store', [AuthMiddleware::class]);
+$router->get('/admin/products/{id}/variants/{variantId}/edit', 'Modules\Product\Controllers\VariantController@edit', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/update', 'Modules\Product\Controllers\VariantController@update', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/delete', 'Modules\Product\Controllers\VariantController@delete', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/toggle', 'Modules\Product\Controllers\VariantController@toggle', [AuthMiddleware::class]);
+
 // ============ CATEGORY ROUTES (Categories, Brands, Suppliers) ============
 
 // Categories Management

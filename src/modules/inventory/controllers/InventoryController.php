@@ -59,26 +59,38 @@ class InventoryController extends Controller
     }
 
     /**
-     * Route 2: GET /admin/inventory/detail
+     * Route 2: GET /admin/inventory/detail/{id}
      * Hiển thị chi tiết tồn kho của 1 variant
      */
-    public function detail(): void
+    public function detail(int $id): void
     {
-        $variantId = (int) $this->input('id');
-        $warehouse = $this->input('warehouse', 'default');
-
-        if (!$variantId) {
-            $this->redirect('/admin/inventory?error=' . urlencode('Thiếu ID variant'));
-            return;
-        }
+        $warehouse = $this->input('warehouse', 'Kho chính');
 
         try {
-            $stockInfo = $this->inventoryService->getStockInfo($variantId, $warehouse);
-            $history = $this->transactionService->getVariantTransactionHistory($variantId, $warehouse, 50);
+            // Get variant with product info
+            $variantModel = new \Modules\Product\Models\VariantModel();
+            $variant = $variantModel->getWithProduct($id);
+
+            if (!$variant) {
+                AuthHelper::setFlash('error', 'Không tìm thấy variant');
+                $this->redirect('/admin/inventory');
+                return;
+            }
+
+            // Get product info
+            $productModel = new \Modules\Product\Models\ProductModel();
+            $product = $productModel->find($variant['product_id']);
+
+            // Get stock info and history (wrap in array for view compatibility)
+            $stockData = $this->inventoryService->getStockInfo($id, $warehouse);
+            $stockInfo = [$stockData]; // Wrap in array vì view expect array
+            $history = $this->transactionService->getVariantTransactionHistory($id, $warehouse, 50);
 
             $this->view('admin/inventory/stock_detail', [
                 'title' => 'Chi Tiết Tồn Kho',
-                'variantId' => $variantId,
+                'variantId' => $id,
+                'variant' => $variant,
+                'product' => $product,
                 'stockInfo' => $stockInfo,
                 'history' => $history,
                 'warehouse' => $warehouse,
@@ -115,32 +127,45 @@ class InventoryController extends Controller
     }
 
     /**
-     * Route 4: GET /admin/inventory/adjust
+     * Route 4: GET /admin/inventory/adjust/{id}
      * Hiển thị form điều chỉnh tồn kho
      */
-    public function adjustForm(): void
+    public function adjustForm(int $id): void
     {
-        $variantId = (int) $this->input('variant_id');
-        $warehouse = $this->input('warehouse', 'default');
-
-        if (!$variantId) {
-            $this->redirect('/admin/inventory?error=' . urlencode('Thiếu ID variant'));
-            return;
-        }
+        $warehouse = $this->input('warehouse', 'Kho chính');
 
         try {
-            $stockInfo = $this->inventoryService->getStockInfo($variantId, $warehouse);
+            // Get variant with product info
+            $variantModel = new \Modules\Product\Models\VariantModel();
+            $variant = $variantModel->getWithProduct($id);
+
+            if (!$variant) {
+                AuthHelper::setFlash('error', 'Không tìm thấy variant');
+                $this->redirect('/admin/inventory');
+                return;
+            }
+
+            // Get product info
+            $productModel = new \Modules\Product\Models\ProductModel();
+            $product = $productModel->find($variant['product_id']);
+
+            // Get inventory for single warehouse (wrap in array for compatibility)
+            $stockInfo = $this->inventoryService->getStockInfo($id, $warehouse);
+            $inventory = [$stockInfo]; // Wrap in array vì view expect array of inventories
 
             $this->view('admin/inventory/adjust_stock', [
                 'title' => 'Điều Chỉnh Tồn Kho',
-                'variantId' => $variantId,
-                'stockInfo' => $stockInfo,
+                'variantId' => $id,
+                'variant' => $variant,
+                'product' => $product,
+                'inventory' => $inventory,
                 'warehouse' => $warehouse,
                 'currentPage' => 'inventory'
             ]);
         } catch (Exception $e) {
             error_log('[Inventory] Adjust Form Error: ' . $e->getMessage());
-            $this->redirect('/admin/inventory?error=' . urlencode('Lỗi tải form điều chỉnh'));
+            AuthHelper::setFlash('error', 'Lỗi tải form điều chỉnh: ' . $e->getMessage());
+            $this->redirect('/admin/inventory');
         }
     }
 
@@ -156,38 +181,83 @@ class InventoryController extends Controller
         }
 
         $variantId = (int) $this->input('variant_id');
-        $newQuantity = (int) $this->input('new_quantity');
-        $warehouse = $this->input('warehouse', 'default');
-        $reason = trim($this->input('reason', ''));
+        $type = $this->input('type'); // import, export, adjust
+        $quantity = (int) $this->input('quantity');
+        $warehouse = $this->input('warehouse', 'Kho chính');
+        $note = trim($this->input('note', ''));
 
-        if (!$variantId || $newQuantity < 0 || empty($reason)) {
-            $this->error('Dữ liệu không hợp lệ. Vui lòng điền đầy đủ thông tin.', 400);
+        if (!$variantId || !$type || $quantity <= 0 || empty($note)) {
+            AuthHelper::setFlash('error', 'Dữ liệu không hợp lệ. Vui lòng điền đầy đủ thông tin.');
+            $this->redirect('/admin/inventory/adjust/' . $variantId);
             return;
         }
 
         try {
             $userId = AuthHelper::id();
+            $result = null;
 
-            $result = $this->inventoryService->adjustStock(
-                $variantId,
-                $newQuantity,
-                $userId,
-                $warehouse,
-                $reason
-            );
+            // Execute operation based on type
+            switch ($type) {
+                case 'import':
+                    $result = $this->inventoryService->importStock(
+                        $variantId,
+                        $quantity,
+                        $userId,
+                        $warehouse,
+                        ['type' => 'manual', 'id' => null],
+                        $note
+                    );
+                    break;
+
+                case 'export':
+                    $result = $this->inventoryService->exportStock(
+                        $variantId,
+                        $quantity,
+                        $userId,
+                        $warehouse,
+                        ['type' => 'manual', 'id' => null],
+                        $note
+                    );
+                    break;
+
+                case 'adjust':
+                    // For adjust, get current stock first
+                    $currentStock = $this->inventoryService->getStockInfo($variantId, $warehouse);
+                    $currentQty = 0;
+                    foreach ($currentStock as $stock) {
+                        if ($stock['warehouse'] === $warehouse) {
+                            $currentQty = $stock['quantity'];
+                            break;
+                        }
+                    }
+
+                    $result = $this->inventoryService->adjustStock(
+                        $variantId,
+                        $quantity, // New quantity
+                        $userId,
+                        $warehouse,
+                        $note
+                    );
+                    break;
+
+                default:
+                    throw new Exception('Loại điều chỉnh không hợp lệ');
+            }
 
             // Log activity
             LogHelper::log(
-                "Điều chỉnh tồn kho: {$result['old_stock']} → {$result['new_stock']}",
+                ucfirst($type) . " tồn kho: {$quantity} đơn vị",
                 'inventory',
                 $variantId,
-                ['warehouse' => $warehouse, 'reason' => $reason]
+                ['warehouse' => $warehouse, 'type' => $type, 'note' => $note]
             );
 
-            $this->success($result, $result['message']);
+            AuthHelper::setFlash('success', $result['message'] ?? 'Điều chỉnh tồn kho thành công!');
+            $this->redirect('/admin/inventory/detail/' . $variantId);
         } catch (Exception $e) {
             error_log('[Inventory] Adjust Error: ' . $e->getMessage());
-            $this->error('Lỗi điều chỉnh tồn kho: ' . $e->getMessage(), 500);
+            AuthHelper::setFlash('error', 'Lỗi điều chỉnh tồn kho: ' . $e->getMessage());
+            $this->redirect('/admin/inventory/adjust/' . $variantId);
         }
     }
 
@@ -370,43 +440,44 @@ class InventoryController extends Controller
     }
 
     /**
-     * Route 10: POST /admin/inventory/update-threshold
+     * Route 10: POST /admin/inventory/threshold/{id}
      * Cập nhật ngưỡng cảnh báo
      */
-    public function updateThreshold(): void
+    public function updateThreshold(int $id): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->error('Method not allowed', 405);
             return;
         }
 
-        $variantId = (int) $this->input('variant_id');
         $minThreshold = (int) $this->input('min_threshold');
-        $warehouse = $this->input('warehouse', 'default');
+        $warehouse = $this->input('warehouse', 'Kho chính');
 
-        if (!$variantId || $minThreshold < 0) {
+        if ($minThreshold < 0) {
             $this->error('Dữ liệu không hợp lệ', 400);
             return;
         }
 
         try {
-            $result = $this->inventoryService->updateThresholds($variantId, $minThreshold, $warehouse);
+            $result = $this->inventoryService->updateThresholds($id, $minThreshold, $warehouse);
 
             if ($result) {
                 LogHelper::log(
                     "Cập nhật ngưỡng cảnh báo: {$minThreshold}",
                     'inventory',
-                    $variantId,
+                    $id,
                     ['warehouse' => $warehouse]
                 );
 
-                $this->success(null, 'Cập nhật ngưỡng cảnh báo thành công');
+                AuthHelper::setFlash('success', 'Cập nhật ngưỡng cảnh báo thành công');
+                $this->redirect("/admin/inventory/detail/{$id}");
             } else {
                 throw new Exception('Không thể cập nhật ngưỡng');
             }
         } catch (Exception $e) {
             error_log('[Inventory] Update Threshold Error: ' . $e->getMessage());
-            $this->error('Lỗi cập nhật ngưỡng: ' . $e->getMessage(), 500);
+            AuthHelper::setFlash('error', 'Lỗi cập nhật ngưỡng: ' . $e->getMessage());
+            $this->redirect("/admin/inventory/detail/{$id}");
         }
     }
 

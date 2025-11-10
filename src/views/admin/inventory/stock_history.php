@@ -30,7 +30,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-light">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-funnel"></i> Bộ lọc
+                <i class="fas fa-filter"></i> Bộ lọc
             </h6>
         </div>
         <div class="card-body">
@@ -39,7 +39,7 @@
                     <!-- Tìm kiếm -->
                     <div class="col-lg-3 col-md-6 mb-3">
                         <label for="search" class="form-label mb-2 fw-semibold">
-                            <i class="bi bi-search"></i> Tìm kiếm
+                            <i class="fas fa-search"></i> Tìm kiếm
                         </label>
                         <input type="text" class="form-control" id="search" name="search"
                             placeholder="Tên sản phẩm hoặc SKU..."
@@ -103,7 +103,7 @@
                     <!-- Buttons -->
                     <div class="col-lg-1 col-md-6 mb-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i>
+                            <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                         30 ngày qua
                     </button>
                     <a href="/admin/inventory/history" class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-x-circle"></i> Xóa lọc
+                        <i class="fas fa-times-circle"></i> Xóa lọc
                     </a>
                 </div>
             </form>
@@ -134,13 +134,13 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="bi bi-table"></i> Danh sách giao dịch
+                <i class="fas fa-table"></i> Danh sách giao dịch
             </h6>
         </div>
         <div class="card-body">
             <?php if (empty($transactions)): ?>
                 <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle"></i> Không tìm thấy giao dịch nào.
+                    <i class="fas fa-info-circle"></i> Không tìm thấy giao dịch nào.
                 </div>
             <?php else: ?>
                 <div class="table-responsive">
@@ -244,7 +244,7 @@
                             <li class="page-item <?= $pagination['current_page'] <= 1 ? 'disabled' : '' ?>">
                                 <a class="page-link"
                                     href="?page=<?= $pagination['current_page'] - 1 ?><?= http_build_query(array_filter($filters ?? [])) ? '&' . http_build_query(array_filter($filters ?? [])) : '' ?>">
-                                    <i class="bi bi-chevron-left"></i>
+                                    <i class="fas fa-chevron-left"></i>
                                 </a>
                             </li>
 
@@ -267,7 +267,7 @@
                                 class="page-item <?= $pagination['current_page'] >= $pagination['last_page'] ? 'disabled' : '' ?>">
                                 <a class="page-link"
                                     href="?page=<?= $pagination['current_page'] + 1 ?><?= http_build_query(array_filter($filters ?? [])) ? '&' . http_build_query(array_filter($filters ?? [])) : '' ?>">
-                                    <i class="bi bi-chevron-right"></i>
+                                    <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                         </ul>
