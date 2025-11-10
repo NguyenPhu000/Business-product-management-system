@@ -169,16 +169,17 @@ class PasswordResetRequestModel extends BaseModel
     /**
      * Lấy yêu cầu approved của user (chưa đổi mật khẩu)
      * QUAN TRỌNG: Chỉ lấy request chưa hoàn tất (new_password IS NULL hoặc != 'changed')
-     * VÀ chưa hết hạn (approved trong vòng 10 GIÂY)
+     * VÀ chưa hết hạn (approved trong vòng 24 GIỜ)
      */
     public function getApprovedRequestByUserId(int $userId): ?array
     {
-        // Timeout: 10 GIÂY kể từ khi approved
+        // Timeout: 24 GIỜ kể từ khi approved (đủ thời gian cho user)
+        // QUAN TRỌNG: new_password phải NULL hoặc khác 'changed'
         $sql = "SELECT * FROM {$this->table} 
                 WHERE user_id = :user_id 
                 AND status = 'approved' 
-                AND (new_password IS NULL OR new_password != 'changed')
-                AND approved_at >= DATE_SUB(NOW(), INTERVAL 10 SECOND)
+                AND (new_password IS NULL OR (new_password != 'changed' AND new_password != ''))
+                AND approved_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
                 ORDER BY approved_at DESC 
                 LIMIT 1";
 
@@ -191,7 +192,7 @@ class PasswordResetRequestModel extends BaseModel
     }
 
     /**
-     * Lấy yêu cầu approved theo ID (vẫn còn hiệu lực: chưa đổi mật khẩu và trong 10 giây)
+     * Lấy yêu cầu approved theo ID (vẫn còn hiệu lực: chưa đổi mật khẩu và trong 24 giờ)
      */
     public function getApprovedRequestById(int $id): ?array
     {
@@ -199,7 +200,7 @@ class PasswordResetRequestModel extends BaseModel
                 WHERE id = :id 
                 AND status = 'approved'
                 AND (new_password IS NULL OR new_password != 'changed')
-                AND approved_at >= DATE_SUB(NOW(), INTERVAL 10 SECOND)
+                AND approved_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
                 LIMIT 1";
 
         $pdo = self::getConnection();
@@ -211,7 +212,7 @@ class PasswordResetRequestModel extends BaseModel
     }
 
     /**
-     * Xóa các request approved đã hết hạn (quá 10 GIÂY chưa đổi MK)
+     * Xóa các request approved đã hết hạn (quá 24 GIỜ chưa đổi MK)
      */
     public function deleteExpiredApprovedRequests(int $userId): bool
     {
@@ -219,7 +220,7 @@ class PasswordResetRequestModel extends BaseModel
                 WHERE user_id = :user_id 
                 AND status = 'approved' 
                 AND (new_password IS NULL OR new_password != 'changed')
-                AND approved_at < DATE_SUB(NOW(), INTERVAL 10 SECOND)";
+                AND approved_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)";
 
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
@@ -238,6 +239,46 @@ class PasswordResetRequestModel extends BaseModel
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         return $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Đánh dấu request đã hoàn tất (alias cho markPasswordChanged)
+     */
+    public function markAsCompleted(int $id): bool
+    {
+        return $this->markPasswordChanged($id);
+    }
+
+    /**
+     * Đánh dấu TẤT CẢ request approved của user thành hoàn tất
+     * (Dùng để cleanup trước khi tạo request mới)
+     */
+    public function markAllApprovedAsCompleted(int $userId): bool
+    {
+        $sql = "UPDATE {$this->table} 
+                SET new_password = 'changed' 
+                WHERE user_id = :user_id 
+                AND status = 'approved'
+                AND (new_password IS NULL OR (new_password != 'changed' AND new_password != ''))";
+
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute(['user_id' => $userId]);
+    }
+
+    /**
+     * Kiểm tra xem user có bất kỳ request nào đã được đánh dấu 'changed'
+     * @param int $userId
+     * @return bool
+     */
+    public function hasChangedRequest(int $userId): bool
+    {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE user_id = :user_id AND new_password = 'changed'";
+        $pdo = self::getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['user_id' => $userId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return ($result['total'] ?? 0) > 0;
     }
 
     /**

@@ -43,13 +43,15 @@
                         </label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="sku" name="sku" value="<?= $autoSku ?>"
-                                required>
-                            <button class="btn btn-outline-secondary" type="button" id="generateSku"
-                                title="Tạo mã tự động">
-                                <i class="bi bi-arrow-clockwise"></i>
+                                required placeholder="VD: PRD-ABC123">
+                            <button class="btn btn-primary" type="button" id="generateSku"
+                                title="Nhấn để tạo mã sản phẩm tự động">
+                                <i class="bi bi-magic"></i> Tạo mã tự động
                             </button>
                         </div>
-                        <small class="text-muted">Mã định danh duy nhất cho sản phẩm</small>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i> Mã định danh duy nhất. Nhấn nút "Tạo mã tự động" để hệ thống tạo mã ngẫu nhiên.
+                        </small>
                     </div>
 
                     <div class="col-md-8">
@@ -90,6 +92,12 @@
                             <?php endif; ?>
                         </div>
                         <small class="text-muted">Có thể chọn nhiều danh mục</small>
+                        <div id="categorySelectionInfo" class="alert alert-info mt-2" style="display: none;">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Danh mục cha đã chọn:</strong> <span id="selectedParentName"></span>
+                            <br>
+                            <small>Bạn chỉ có thể chọn thêm các danh mục con của danh mục này.</small>
+                        </div>
                     </div>
 
                     <div class="col-md-6">
@@ -385,6 +393,122 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ===== CATEGORY SELECTION LOGIC =====
+    // Chỉ cho phép chọn 1 danh mục cha và các con của nó
+    const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+    
+    function updateCategorySelection() {
+        // Lấy tất cả danh mục đã chọn
+        const checkedCategories = Array.from(categoryCheckboxes).filter(cb => cb.checked);
+        
+        // Lấy danh mục cha đã chọn (level 0)
+        const checkedParents = checkedCategories.filter(cb => {
+            return cb.closest('.form-check').classList.contains('category-level-0');
+        });
+        
+        if (checkedParents.length > 0) {
+            // Đã chọn ít nhất 1 danh mục cha
+            const selectedParentId = checkedParents[0].value;
+            
+            // Hiển thị thông báo danh mục cha đã chọn
+            const allCategories = <?= json_encode($categories) ?>;
+            const selectedParent = allCategories.find(cat => cat.id == selectedParentId);
+            if (selectedParent) {
+                document.getElementById('categorySelectionInfo').style.display = 'block';
+                document.getElementById('selectedParentName').textContent = selectedParent.name;
+            }
+            
+            // Disable tất cả danh mục cha khác
+            categoryCheckboxes.forEach(checkbox => {
+                const checkDiv = checkbox.closest('.form-check');
+                const isParent = checkDiv.classList.contains('category-level-0');
+                
+                if (isParent && checkbox.value !== selectedParentId) {
+                    checkbox.disabled = true;
+                    checkDiv.style.opacity = '0.5';
+                    checkDiv.style.cursor = 'not-allowed';
+                } else if (isParent && checkbox.value === selectedParentId) {
+                    checkbox.disabled = false;
+                    checkDiv.style.opacity = '1';
+                    checkDiv.style.cursor = 'pointer';
+                }
+            });
+            
+            // Lọc và disable các danh mục con không thuộc parent đã chọn
+            categoryCheckboxes.forEach(checkbox => {
+                const checkDiv = checkbox.closest('.form-check');
+                const isChild = !checkDiv.classList.contains('category-level-0');
+                
+                if (isChild) {
+                    const currentCategory = allCategories.find(cat => cat.id == checkbox.value);
+                    
+                    // Kiểm tra xem category này có thuộc parent đã chọn không
+                    if (currentCategory && currentCategory.parent_id == selectedParentId) {
+                        // Cho phép chọn các con của parent
+                        checkbox.disabled = false;
+                        checkDiv.style.opacity = '1';
+                        checkDiv.style.cursor = 'pointer';
+                    } else {
+                        // Disable các con của parent khác
+                        checkbox.disabled = true;
+                        checkbox.checked = false; // Bỏ chọn nếu đang được chọn
+                        checkDiv.style.opacity = '0.5';
+                        checkDiv.style.cursor = 'not-allowed';
+                    }
+                }
+            });
+            
+        } else {
+            // Chưa chọn danh mục cha nào → enable tất cả và ẩn thông báo
+            document.getElementById('categorySelectionInfo').style.display = 'none';
+            
+            categoryCheckboxes.forEach(checkbox => {
+                const checkDiv = checkbox.closest('.form-check');
+                const originalDisabled = checkbox.dataset.originalDisabled === 'true';
+                
+                if (!originalDisabled) {
+                    checkbox.disabled = false;
+                    checkDiv.style.opacity = '1';
+                    checkDiv.style.cursor = 'pointer';
+                }
+            });
+        }
+    }
+    
+    // Lưu trạng thái disabled ban đầu (do is_active = 0)
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.dataset.originalDisabled = checkbox.disabled;
+    });
+    
+    // Lắng nghe sự kiện thay đổi checkbox
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function(e) {
+            const checkDiv = this.closest('.form-check');
+            const isParent = checkDiv.classList.contains('category-level-0');
+            
+            // Nếu đang cố gắng chọn danh mục cha thứ 2
+            if (isParent && this.checked) {
+                const otherParentsChecked = Array.from(categoryCheckboxes).some(cb => {
+                    return cb !== this && 
+                           cb.checked && 
+                           cb.closest('.form-check').classList.contains('category-level-0');
+                });
+                
+                if (otherParentsChecked) {
+                    e.preventDefault();
+                    this.checked = false;
+                    alert('Chỉ được chọn một danh mục cha! Vui lòng bỏ chọn danh mục cha hiện tại trước.');
+                    return;
+                }
+            }
+            
+            updateCategorySelection();
+        });
+    });
+    
+    // Chạy lần đầu khi load trang
+    updateCategorySelection();
+
     // Generate SKU
     document.getElementById('generateSku').addEventListener('click', function() {
         const randomStr = Math.random().toString(36).substring(2, 10).toUpperCase();

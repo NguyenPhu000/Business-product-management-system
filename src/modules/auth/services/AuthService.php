@@ -134,6 +134,17 @@ class AuthService
 
         // Kiểm tra đã được approve chưa
         $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($user['id']);
+
+        // DEBUG LOG
+        LogHelper::log('forgot_password_check', 'password_reset_request', null, [
+            'user_id' => $user['id'],
+            'email' => $email,
+            'has_approved_request' => $approvedRequest ? 'yes' : 'no',
+            'approved_request_id' => $approvedRequest ? $approvedRequest['id'] : null,
+            'new_password_value' => $approvedRequest ? $approvedRequest['new_password'] : null,
+            'has_new_password_input' => !empty($newPassword) ? 'yes' : 'no'
+        ]);
+
         if ($approvedRequest && empty($newPassword)) {
             return [
                 'action' => 'redirect_to_form',
@@ -171,13 +182,26 @@ class AuthService
         if (!empty($newPassword)) {
             $this->validatePassword($newPassword, $confirmPassword);
 
-            // Update password
-            $this->updatePassword($user['id'], $newPassword, $email, 'user_reset_after_approval');
-
-            // Mark request as password changed
-            if ($approvedRequest) {
-                $this->resetRequestModel->markPasswordChanged($approvedRequest['id']);
+            // Lấy lại approvedRequest để đánh dấu hoàn tất
+            if (!$approvedRequest) {
+                $approvedRequest = $this->resetRequestModel->getApprovedRequestByUserId($user['id']);
             }
+
+            // QUAN TRỌNG: Mark request as password changed TRƯỚC khi update password
+            // Để đảm bảo khi vào lại trang forgot-password thì không bị redirect nữa
+            if ($approvedRequest) {
+                $marked = $this->resetRequestModel->markPasswordChanged($approvedRequest['id']);
+
+                // Log để debug
+                LogHelper::log('password_changed_marked', 'password_reset_request', $approvedRequest['id'], [
+                    'user_id' => $user['id'],
+                    'email' => $email,
+                    'marked_success' => $marked ? 'yes' : 'no'
+                ]);
+            }
+
+            // Update password sau khi đã mark
+            $this->updatePassword($user['id'], $newPassword, $email, 'user_reset_after_approval');
 
             return [
                 'action' => 'password_changed',
@@ -186,7 +210,11 @@ class AuthService
         }
 
         // User thường tạo request
+        // QUAN TRỌNG: Xóa/đánh dấu hoàn tất TẤT CẢ request cũ trước khi tạo mới
         $this->resetRequestModel->deleteExpiredApprovedRequests($user['id']);
+
+        // Đánh dấu hoàn tất tất cả request approved cũ (nếu có)
+        $this->markAllOldApprovedRequestsAsCompleted($user['id']);
 
         if ($this->resetRequestModel->hasPendingRequest($user['id'])) {
             throw new Exception('Bạn đã có yêu cầu đang chờ xét duyệt!');
@@ -267,6 +295,16 @@ class AuthService
     }
 
     /**
+     * Kiểm tra user có request đã được đánh dấu 'changed' hay không
+     * @param int $userId
+     * @return bool
+     */
+    public function hasChangedRequest(int $userId): bool
+    {
+        return $this->resetRequestModel->hasChangedRequest($userId);
+    }
+
+    /**
      * Kiểm tra trạng thái yêu cầu reset password
      * 
      * @param int $userId
@@ -318,6 +356,67 @@ class AuthService
         }
 
         return $this->resetRequestModel->cancelPendingRequest($userId);
+    }
+
+    /**
+     * Tự động đánh dấu request đã hoàn tất
+     * (Dùng khi user vào form reset nhưng quay lại login mà không đổi MK)
+     * 
+     * @param int $requestId
+     * @return bool
+     */
+    public function autoMarkRequestCompleted(int $requestId): bool
+    {
+        try {
+            // Kiểm tra request có tồn tại và đang ở trạng thái approved không
+            $request = $this->resetRequestModel->find($requestId);
+
+            if (!$request || $request['status'] !== 'approved') {
+                return false;
+            }
+
+            // Đánh dấu đã hoàn tất
+            $result = $this->resetRequestModel->markPasswordChanged($requestId);
+
+            if ($result) {
+                LogHelper::log('auto_mark_completed', 'password_reset_request', $requestId, [
+                    'reason' => 'User viewed reset form but returned to login without changing password',
+                    'user_id' => $request['user_id']
+                ]);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            error_log("Error in autoMarkRequestCompleted: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Đánh dấu hoàn tất tất cả request approved cũ của user
+     * (Để đảm bảo chỉ có 1 request active tại 1 thời điểm)
+     * 
+     * @param int $userId
+     * @return bool
+     */
+    private function markAllOldApprovedRequestsAsCompleted(int $userId): bool
+    {
+        try {
+            // Lấy tất cả request approved chưa hoàn tất của user
+            $result = $this->resetRequestModel->markAllApprovedAsCompleted($userId);
+
+            if ($result) {
+                LogHelper::log('mark_all_old_approved_completed', 'password_reset_request', null, [
+                    'user_id' => $userId,
+                    'reason' => 'Clean up old approved requests before creating new one'
+                ]);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            error_log("Error in markAllOldApprovedRequestsAsCompleted: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

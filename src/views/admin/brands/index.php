@@ -69,8 +69,11 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
                         <td><?= $brand['id'] ?></td>
                         <td>
                             <?php if ($brand['logo_url']): ?>
+                            <!-- Hiển thị logo từ base64 hoặc URL -->
                             <img src="<?= htmlspecialchars($brand['logo_url']) ?>"
-                                alt="<?= htmlspecialchars($brand['name']) ?>" class="brand-logo img-thumbnail">
+                                alt="<?= htmlspecialchars($brand['name']) ?>" 
+                                class="brand-logo img-thumbnail"
+                                style="max-width: 80px; max-height: 80px; object-fit: contain;">
                             <?php else: ?>
                             <div class="text-muted"><i class="fas fa-image"></i> Chưa có</div>
                             <?php endif; ?>

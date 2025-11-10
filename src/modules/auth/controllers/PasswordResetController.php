@@ -163,6 +163,29 @@ class PasswordResetController extends Controller
     }
 
     /**
+     * Đánh dấu request đã hoàn tất (sau khi approve)
+     */
+    public function markCompleted($id = null): void
+    {
+        try {
+            $requestId = (int)$id;
+
+            // Gọi service để đánh dấu hoàn tất
+            $this->passwordResetService->markCompleted($requestId);
+
+            $this->jsonResponse([
+                'success' => true,
+                'message' => 'Đã cập nhật trạng thái thành công!'
+            ]);
+        } catch (\Exception $e) {
+            $this->jsonResponse([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Trả về JSON response
      */
     private function jsonResponse(array $data): void
