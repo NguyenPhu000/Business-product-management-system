@@ -11,6 +11,7 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
 $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
     str_starts_with($currentPath, '/admin/brands') ||
     str_starts_with($currentPath, '/admin/suppliers');
+$isInventoryMenuActive = str_starts_with($currentPath, '/admin/inventory');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -128,6 +129,40 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
                         class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
                         <i class="fas fa-truck"></i>
                         <span>Nhà cung cấp</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Inventory Menu (Quản lý kho) -->
+        <li class="menu-item-has-children <?= $isInventoryMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="inventory-menu-toggle" class="menu-toggle"
+                <?= $isInventoryMenuActive ? 'checked' : '' ?>>
+            <label for="inventory-menu-toggle" class="menu-label">
+                <i class="fas fa-warehouse"></i>
+                <span>Quản lý kho hàng</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/inventory"
+                        class="<?= $currentPath === '/admin/inventory' || str_starts_with($currentPath, '/admin/inventory/detail') || str_starts_with($currentPath, '/admin/inventory/adjust') ? 'active' : '' ?>">
+                        <i class="fas fa-boxes"></i>
+                        <span>Tồn kho</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/inventory/low-stock"
+                        class="<?= str_starts_with($currentPath, '/admin/inventory/low-stock') ? 'active' : '' ?>">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Cảnh báo tồn kho</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/inventory/history"
+                        class="<?= str_starts_with($currentPath, '/admin/inventory/history') ? 'active' : '' ?>">
+                        <i class="fas fa-history"></i>
+                        <span>Lịch sử giao dịch</span>
                     </a>
                 </li>
             </ul>

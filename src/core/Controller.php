@@ -12,7 +12,7 @@ abstract class Controller
      */
     protected function view(string $view, array $data = [], ?string $layout = 'admin/layout/main'): void
     {
-        View::render($view, $layout, $data);
+        View::render($view, $data, $layout);
     }
 
     /**

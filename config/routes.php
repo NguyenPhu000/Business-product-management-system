@@ -106,3 +106,28 @@ $router->get('/admin/suppliers/edit/{id}', 'Modules\Category\Controllers\Supplie
 $router->post('/admin/suppliers/update/{id}', 'Modules\Category\Controllers\SupplierController@update', [AuthMiddleware::class]);
 $router->post('/admin/suppliers/delete/{id}', 'Modules\Category\Controllers\SupplierController@destroy', [AuthMiddleware::class]);
 $router->post('/admin/suppliers/toggle/{id}', 'Modules\Category\Controllers\SupplierController@toggle', [AuthMiddleware::class]);
+
+// ============ INVENTORY ROUTES (Quản lý kho hàng) ============
+
+// Inventory List & Low Stock Alerts
+$router->get('/admin/inventory', 'Modules\Inventory\Controllers\InventoryController@index', [AuthMiddleware::class]);
+$router->get('/admin/inventory/low-stock', 'Modules\Inventory\Controllers\InventoryController@lowStock', [AuthMiddleware::class]);
+
+// Stock Detail & Adjustment
+$router->get('/admin/inventory/detail/{id}', 'Modules\Inventory\Controllers\InventoryController@detail', [AuthMiddleware::class]);
+$router->get('/admin/inventory/adjust/{id}', 'Modules\Inventory\Controllers\InventoryController@adjustForm', [AuthMiddleware::class]);
+$router->post('/admin/inventory/adjust', 'Modules\Inventory\Controllers\InventoryController@adjust', [AuthMiddleware::class]);
+
+// Transaction History
+$router->get('/admin/inventory/history', 'Modules\Inventory\Controllers\InventoryController@history', [AuthMiddleware::class]);
+
+// Stock Operations
+$router->post('/admin/inventory/import', 'Modules\Inventory\Controllers\InventoryController@import', [AuthMiddleware::class]);
+$router->post('/admin/inventory/export', 'Modules\Inventory\Controllers\InventoryController@export', [AuthMiddleware::class]);
+$router->post('/admin/inventory/transfer', 'Modules\Inventory\Controllers\InventoryController@transfer', [AuthMiddleware::class]);
+
+// Threshold Update
+$router->post('/admin/inventory/threshold/{id}', 'Modules\Inventory\Controllers\InventoryController@updateThreshold', [AuthMiddleware::class]);
+
+// Reports
+$router->get('/admin/inventory/report', 'Modules\Inventory\Controllers\InventoryController@exportReport', [AuthMiddleware::class]);
