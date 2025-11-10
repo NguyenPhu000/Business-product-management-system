@@ -278,6 +278,16 @@ class UserService
             $errors[] = 'Vui lòng chọn quyền hạn';
         }
 
+        // Phone (nếu có nhập)
+        if (!empty($data['phone'])) {
+            // Loại bỏ khoảng trắng
+            $phone = trim($data['phone']);
+            // Kiểm tra định dạng: phải là 10 số, bắt đầu bằng số 0
+            if (!preg_match('/^0[0-9]{9}$/', $phone)) {
+                $errors[] = 'Số điện thoại phải gồm 10 số và bắt đầu bằng số 0';
+            }
+        }
+
         // Password (chỉ khi tạo mới)
         if ($isCreate) {
             if (empty($data['password'])) {

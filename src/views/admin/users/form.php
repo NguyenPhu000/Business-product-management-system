@@ -36,7 +36,9 @@ $formAction = isset($user) ? "/admin/users/update/{$user['id']}" : "/admin/users
                     <div class="form-group">
                         <label for="phone" class="form-label">Số điện thoại</label>
                         <input type="text" id="phone" name="phone" class="form-control"
-                            value="<?= \Core\View::e($old['phone'] ?? $user['phone'] ?? '') ?>">
+                            value="<?= \Core\View::e($old['phone'] ?? $user['phone'] ?? '') ?>" pattern="^0[0-9]{9}$"
+                            maxlength="10" title="Số điện thoại phải gồm 10 số và bắt đầu bằng số 0">
+                        <small class="text-muted"></small>
                     </div>
                 </div>
 
@@ -98,3 +100,30 @@ $formAction = isset($user) ? "/admin/users/update/{$user['id']}" : "/admin/users
         </form>
     </div>
 </div>
+
+<script>
+    // Chặn nhập ký tự không phải số vào trường số điện thoại
+    document.getElementById('phone').addEventListener('input', function(e) {
+        // Chỉ cho phép nhập số
+        this.value = this.value.replace(/[^0-9]/g, '');
+
+        // Giới hạn 10 số
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10);
+        }
+    });
+
+    // Validate khi submit form
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const phoneInput = document.getElementById('phone');
+        const phone = phoneInput.value.trim();
+
+        // Nếu có nhập số điện thoại, kiểm tra định dạng
+        if (phone && !(/^0[0-9]{9}$/.test(phone))) {
+            e.preventDefault();
+            alert('Số điện thoại phải gồm 10 số và bắt đầu bằng số 0');
+            phoneInput.focus();
+            return false;
+        }
+    });
+</script>
