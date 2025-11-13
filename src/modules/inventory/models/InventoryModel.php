@@ -30,6 +30,21 @@ class InventoryModel extends BaseModel
     }
 
     /**
+     * Lấy tồn kho của 1 variant ở tất cả các kho (warehouse)
+     *
+     * @param int $variantId
+     * @return array Mảng các bản ghi: [ ['warehouse'=>..., 'quantity'=>..., 'min_threshold'=>..., 'last_updated'=>...], ... ]
+     */
+    public function getVariantAllWarehouses(int $variantId): array
+    {
+        $sql = "SELECT warehouse, quantity, min_threshold, last_updated
+                FROM {$this->table}
+                WHERE product_variant_id = ?";
+
+        return $this->query($sql, [$variantId]);
+    }
+
+    /**
      * Lấy tổng tồn kho của product (aggregate từ tất cả variants)
      * 
      * @param int $productId ID của product
@@ -64,6 +79,8 @@ class InventoryModel extends BaseModel
                     p.id as product_id,
                     p.name as product_name,
                     p.sku as product_sku,
+                    p.brand_id,
+                    GROUP_CONCAT(DISTINCT pc.category_id) as category_ids,
                     pv.id as variant_id,
                     pv.sku as variant_sku,
                     pv.attributes as variant_attributes,
@@ -80,6 +97,7 @@ class InventoryModel extends BaseModel
                 FROM {$this->table} i
                 INNER JOIN product_variants pv ON i.product_variant_id = pv.id
                 INNER JOIN products p ON pv.product_id = p.id
+                LEFT JOIN product_categories pc ON p.id = pc.product_id
                 WHERE 1=1";
 
         $params = [];
@@ -99,6 +117,22 @@ class InventoryModel extends BaseModel
             }
         }
 
+        // Filter by brand
+        if (!empty($filters['brand_id'])) {
+            $sql .= " AND p.brand_id = ?";
+            $params[] = $filters['brand_id'];
+        }
+
+        // Filter by quantity range
+        if (isset($filters['quantity_min']) && $filters['quantity_min'] !== '') {
+            $sql .= " AND i.quantity >= ?";
+            $params[] = (int)$filters['quantity_min'];
+        }
+        if (isset($filters['quantity_max']) && $filters['quantity_max'] !== '') {
+            $sql .= " AND i.quantity <= ?";
+            $params[] = (int)$filters['quantity_max'];
+        }
+
         // Search by product name or SKU
         if (!empty($filters['search'])) {
             $sql .= " AND (p.name LIKE ? OR p.sku LIKE ? OR pv.sku LIKE ?)";
@@ -108,7 +142,33 @@ class InventoryModel extends BaseModel
             $params[] = $search;
         }
 
-        $sql .= " ORDER BY i.last_updated DESC LIMIT ? OFFSET ?";
+        // Group by để xử lý multiple categories
+        $sql .= " GROUP BY i.id, p.id, pv.id";
+
+        // Filter by category (after GROUP BY, use HAVING)
+        if (!empty($filters['category_id'])) {
+            $sql .= " HAVING FIND_IN_SET(?, category_ids) > 0";
+            $params[] = $filters['category_id'];
+        }
+
+        // Sorting
+        $sortBy = $filters['sort_by'] ?? 'last_updated';
+        $sortOrder = $filters['sort_order'] ?? 'DESC';
+
+        $allowedSortFields = ['quantity', 'min_threshold', 'last_updated', 'product_name'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'last_updated';
+        }
+
+        $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
+
+        if ($sortBy === 'product_name') {
+            $sql .= " ORDER BY p.name {$sortOrder}";
+        } else {
+            $sql .= " ORDER BY i.{$sortBy} {$sortOrder}";
+        }
+
+        $sql .= " LIMIT ? OFFSET ?";
         $params[] = $limit;
         $params[] = $offset;
 
@@ -210,6 +270,77 @@ class InventoryModel extends BaseModel
                 LIMIT ?";
 
         return $this->query($sql, [$limit]);
+    }
+
+    /**
+     * Đếm tổng số bản ghi tồn kho (cho pagination)
+     * 
+     * @param array $filters Filter conditions
+     * @return int Tổng số bản ghi
+     */
+    public function countInventoryRecords(array $filters): int
+    {
+        $sql = "SELECT COUNT(DISTINCT i.id) as total
+                FROM {$this->table} i
+                INNER JOIN product_variants pv ON i.product_variant_id = pv.id
+                INNER JOIN products p ON pv.product_id = p.id
+                LEFT JOIN product_categories pc ON p.id = pc.product_id
+                WHERE 1=1";
+
+        $params = [];
+
+        // Filter by warehouse
+        if (!empty($filters['warehouse'])) {
+            $sql .= " AND i.warehouse = ?";
+            $params[] = $filters['warehouse'];
+        }
+
+        // Filter by stock status
+        if (!empty($filters['stock_status'])) {
+            if ($filters['stock_status'] === 'low') {
+                $sql .= " AND i.quantity <= i.min_threshold AND i.quantity > 0";
+            } elseif ($filters['stock_status'] === 'out') {
+                $sql .= " AND i.quantity = 0";
+            }
+        }
+
+        // Filter by brand
+        if (!empty($filters['brand_id'])) {
+            $sql .= " AND p.brand_id = ?";
+            $params[] = $filters['brand_id'];
+        }
+
+        // Filter by quantity range
+        if (isset($filters['quantity_min']) && $filters['quantity_min'] !== '') {
+            $sql .= " AND i.quantity >= ?";
+            $params[] = (int)$filters['quantity_min'];
+        }
+        if (isset($filters['quantity_max']) && $filters['quantity_max'] !== '') {
+            $sql .= " AND i.quantity <= ?";
+            $params[] = (int)$filters['quantity_max'];
+        }
+
+        // Search by product name or SKU
+        if (!empty($filters['search'])) {
+            $sql .= " AND (p.name LIKE ? OR p.sku LIKE ? OR pv.sku LIKE ?)";
+            $search = '%' . $filters['search'] . '%';
+            $params[] = $search;
+            $params[] = $search;
+            $params[] = $search;
+        }
+
+        // For category filter, we need a subquery approach since we're using DISTINCT
+        if (!empty($filters['category_id'])) {
+            $sql .= " AND p.id IN (
+                SELECT DISTINCT product_id 
+                FROM product_categories 
+                WHERE category_id = ?
+            )";
+            $params[] = $filters['category_id'];
+        }
+
+        $result = $this->queryOne($sql, $params);
+        return (int) ($result['total'] ?? 0);
     }
 
     /**

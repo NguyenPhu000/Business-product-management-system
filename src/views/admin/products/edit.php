@@ -1,10 +1,10 @@
-<?php
+View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
 
-/**
- * View: Chỉnh sửa sản phẩm
- * Path: src/views/admin/products/edit.php
- */
-?>
+                                                                /**
+                                                                 * View: Chỉnh sửa sản phẩm
+                                                                 * Path: src/views/admin/products/edit.php
+                                                                 */
+                                                                ?>
 
 <div class="container-fluid">
     <!-- Header -->
@@ -420,12 +420,12 @@
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
                                             <a href="/admin/inventory/adjust/<?= $variant['id'] ?>"
-                                                class="btn btn-sm btn-warning"
+                                                class="btn btn-sm btn-outline-warning"
                                                 title="Điều chỉnh tồn kho">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <a href="/admin/inventory/detail/<?= $variant['id'] ?>"
-                                                class="btn btn-sm btn-info"
+                                                class="btn btn-sm btn-outline-info"
                                                 title="Xem chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>

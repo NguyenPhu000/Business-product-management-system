@@ -31,18 +31,47 @@ class InventoryController extends Controller
     public function index(): void
     {
         $page = (int) ($this->input('page') ?? 1);
-        $perPage = 50;
+        $perPage = (int) ($this->input('per_page') ?? 50);
 
-        // Lấy bộ lọc
+        // Validate per_page (allow 25, 50, 100, 200)
+        if (!in_array($perPage, [25, 50, 100, 200])) {
+            $perPage = 50;
+        }
+
+        // Lấy bộ lọc mở rộng
         $filters = [
             'warehouse' => $this->input('warehouse'),
             'stock_status' => $this->input('stock_status'),
-            'search' => $this->input('search')
+            'search' => $this->input('search'),
+            'category_id' => $this->input('category_id'),
+            'brand_id' => $this->input('brand_id'),
+            'quantity_min' => $this->input('quantity_min'),
+            'quantity_max' => $this->input('quantity_max'),
+            'sort_by' => $this->input('sort_by', 'last_updated'),
+            'sort_order' => $this->input('sort_order', 'DESC')
         ];
 
         try {
             $result = $this->inventoryService->getStockList($filters, $page, $perPage);
             $stats = $this->inventoryService->getLowStockAlerts();
+
+            // Get categories and brands for filters
+            $categories = [];
+            $brands = [];
+
+            try {
+                $categoryModel = new \Modules\Category\Models\CategoryModel();
+                $categories = $categoryModel->getActiveCategories();
+            } catch (Exception $catError) {
+                error_log('[Inventory] Category Error: ' . $catError->getMessage());
+            }
+
+            try {
+                $brandModel = new \Modules\Category\Models\BrandModel();
+                $brands = $brandModel->getActiveBrands();
+            } catch (Exception $brandError) {
+                error_log('[Inventory] Brand Error: ' . $brandError->getMessage());
+            }
 
             $this->view('admin/inventory/stock_list', [
                 'title' => 'Quản lý Tồn Kho',
@@ -50,11 +79,15 @@ class InventoryController extends Controller
                 'pagination' => $result['pagination'],
                 'filters' => $filters,
                 'stats' => $stats,
+                'categories' => $categories,
+                'brands' => $brands,
+                'perPage' => $perPage,
                 'currentPage' => 'inventory'
             ]);
         } catch (Exception $e) {
             error_log('[Inventory] List Error: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard?error=' . urlencode('Lỗi tải danh sách tồn kho'));
+            error_log('[Inventory] Stack trace: ' . $e->getTraceAsString());
+            $this->redirect('/admin/dashboard?error=' . urlencode('Lỗi tải danh sách tồn kho: ' . $e->getMessage()));
         }
     }
 
@@ -497,8 +530,11 @@ class InventoryController extends Controller
         try {
             $csv = $this->transactionService->exportToCSV($filters);
 
+            // Set headers cho file CSV với UTF-8 encoding
             header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename="inventory_report_' . date('Y-m-d') . '.csv"');
+            header('Content-Disposition: attachment; filename="bao_cao_ton_kho_' . date('Y-m-d') . '.csv"');
+            header('Pragma: no-cache');
+            header('Expires: 0');
 
             echo $csv;
             exit;

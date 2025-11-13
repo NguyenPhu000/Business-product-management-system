@@ -1,10 +1,10 @@
-<?php
+View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/create.php<?php
 
-/**
- * View: Thêm biến thể sản phẩm
- * Path: src/views/admin/products/variants/create.php
- */
-?>
+                                                                                /**
+                                                                                 * View: Thêm biến thể sản phẩm
+                                                                                 * Path: src/views/admin/products/variants/create.php
+                                                                                 */
+                                                                                ?>
 
 <div class="container-fluid">
     <!-- Header -->
@@ -73,63 +73,91 @@
                 </div>
 
                 <!-- Row 2: Thuộc tính - Màu sắc, Size, Dung lượng -->
+                <?php $attributeOptions = require __DIR__ . '/attribute_options.php'; ?>
                 <div class="card bg-light mb-3">
                     <div class="card-header">
                         <strong><i class="fas fa-palette"></i> Thuộc tính biến thể</strong>
+                        <small class="text-muted">(Chọn từ danh sách hoặc nhập tùy chỉnh)</small>
                     </div>
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <label for="color" class="form-label">Màu sắc</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="color"
-                                    name="color"
-                                    placeholder="VD: Đen, Trắng, Xanh...">
+                                <label for="color" class="form-label">
+                                    <i class="fas fa-<?= $attributeOptions['color']['icon'] ?>"></i>
+                                    <?= $attributeOptions['color']['label'] ?>
+                                </label>
+                                <select class="form-select" id="color" name="color" data-allow-custom="true">
+                                    <option value="">-- Chọn hoặc nhập tùy chỉnh --</option>
+                                    <?php foreach ($attributeOptions['color']['options'] as $value => $label): ?>
+                                        <option value="<?= $value ?>"><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                    <option value="__custom__">✏️ Nhập tùy chỉnh...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="color_custom" placeholder="Nhập màu tùy chỉnh">
                             </div>
 
                             <div class="col-md-4">
-                                <label for="size" class="form-label">Kích thước / Size</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="size"
-                                    name="size"
-                                    placeholder="VD: S, M, L, XL, 39, 40...">
+                                <label for="size" class="form-label">
+                                    <i class="fas fa-<?= $attributeOptions['size']['icon'] ?>"></i>
+                                    <?= $attributeOptions['size']['label'] ?>
+                                </label>
+                                <select class="form-select" id="size" name="size" data-allow-custom="true">
+                                    <option value="">-- Chọn hoặc nhập tùy chỉnh --</option>
+                                    <?php foreach ($attributeOptions['size']['options'] as $value => $label): ?>
+                                        <option value="<?= $value ?>"><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                    <option value="__custom__">✏️ Nhập tùy chỉnh...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="size_custom" placeholder="Nhập size tùy chỉnh">
                             </div>
 
                             <div class="col-md-4">
-                                <label for="capacity" class="form-label">Dung lượng / Bộ nhớ</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="capacity"
-                                    name="capacity"
-                                    placeholder="VD: 64GB, 128GB, 256GB...">
+                                <label for="capacity" class="form-label">
+                                    <i class="fas fa-<?= $attributeOptions['storage']['icon'] ?>"></i>
+                                    <?= $attributeOptions['storage']['label'] ?>
+                                </label>
+                                <select class="form-select" id="capacity" name="capacity" data-allow-custom="true">
+                                    <option value="">-- Chọn hoặc nhập tùy chỉnh --</option>
+                                    <?php foreach ($attributeOptions['storage']['options'] as $value => $label): ?>
+                                        <option value="<?= $value ?>"><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                    <option value="__custom__">✏️ Nhập tùy chỉnh...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="capacity_custom" placeholder="Nhập dung lượng tùy chỉnh">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
-                                <label for="custom_attr_name" class="form-label">Thuộc tính tùy chỉnh</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="custom_attr_name"
-                                    name="custom_attr_name"
-                                    placeholder="VD: Chất liệu, Xuất xứ...">
+                                <label for="custom_attr_name" class="form-label">
+                                    <i class="fas fa-tag"></i> Thuộc tính bổ sung
+                                </label>
+                                <select class="form-select" id="custom_attr_name" name="custom_attr_name" data-allow-custom="true">
+                                    <option value="">-- Chọn loại thuộc tính --</option>
+                                    <option value="material">Chất liệu</option>
+                                    <option value="origin">Xuất xứ</option>
+                                    <option value="version">Phiên bản</option>
+                                    <option value="weight">Trọng lượng</option>
+                                    <option value="ram">RAM</option>
+                                    <option value="__custom__">✏️ Nhập tên tùy chỉnh...</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="custom_attr_name_custom" placeholder="Nhập tên thuộc tính">
                             </div>
 
                             <div class="col-md-6">
-                                <label for="custom_attr_value" class="form-label">Giá trị</label>
-                                <input type="text"
-                                    class="form-control"
-                                    id="custom_attr_value"
-                                    name="custom_attr_value"
-                                    placeholder="VD: Cotton, Việt Nam...">
+                                <label for="custom_attr_value" class="form-label">
+                                    <i class="fas fa-edit"></i> Giá trị
+                                </label>
+                                <select class="form-select" id="custom_attr_value" name="custom_attr_value" data-allow-custom="true" disabled>
+                                    <option value="">-- Chọn giá trị --</option>
+                                </select>
+                                <input type="text" class="form-control mt-2 d-none" id="custom_attr_value_custom" placeholder="Nhập giá trị">
                             </div>
                         </div>
 
-                        <small class="text-muted">
+                        <small class="text-muted mt-2 d-block">
                             <i class="fas fa-info-circle"></i>
-                            Chọn các thuộc tính phù hợp với loại sản phẩm của bạn. Có thể để trống nếu không cần.
+                            Chọn các thuộc tính từ danh sách có sẵn hoặc nhập tùy chỉnh. Có thể để trống nếu không cần.
                         </small>
                     </div>
                 </div>
@@ -296,12 +324,96 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Attribute options for custom attribute value dropdown
+        const attributeOptions = <?= json_encode($attributeOptions) ?>;
+
         // Generate SKU
         document.getElementById('generateSku').addEventListener('click', function() {
             const productSku = '<?= $product['sku'] ?>';
             const uniqueId = Math.random().toString(36).substring(2, 8).toUpperCase();
             document.getElementById('sku').value = `${productSku}-VAR-${uniqueId}`;
         });
+
+        // Handle custom input for select dropdowns
+        function handleCustomSelect(selectId) {
+            const select = document.getElementById(selectId);
+            const customInput = document.getElementById(selectId + '_custom');
+
+            if (!select || !customInput) return;
+
+            select.addEventListener('change', function() {
+                if (this.value === '__custom__') {
+                    customInput.classList.remove('d-none');
+                    customInput.required = true;
+                    customInput.focus();
+                    // Reset the actual select to use custom input value
+                    this.value = '';
+                } else {
+                    customInput.classList.add('d-none');
+                    customInput.required = false;
+                    customInput.value = '';
+                }
+            });
+
+            // When custom input changes, update the hidden field
+            customInput.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    // Create a temporary option and select it
+                    const option = document.createElement('option');
+                    option.value = this.value;
+                    option.text = this.value;
+                    option.selected = true;
+                    select.insertBefore(option, select.querySelector('[value="__custom__"]'));
+                }
+            });
+        }
+
+        // Apply to all attribute selects
+        handleCustomSelect('color');
+        handleCustomSelect('size');
+        handleCustomSelect('capacity');
+        handleCustomSelect('custom_attr_name');
+        handleCustomSelect('custom_attr_value');
+
+        // Handle custom attribute name change to populate value options
+        const attrNameSelect = document.getElementById('custom_attr_name');
+        const attrValueSelect = document.getElementById('custom_attr_value');
+
+        if (attrNameSelect && attrValueSelect) {
+            attrNameSelect.addEventListener('change', function() {
+                const selectedAttr = this.value;
+
+                // Clear existing options
+                attrValueSelect.innerHTML = '<option value="">-- Chọn giá trị --</option>';
+
+                if (selectedAttr && selectedAttr !== '__custom__' && attributeOptions[selectedAttr]) {
+                    // Populate options from predefined values
+                    const options = attributeOptions[selectedAttr].options;
+                    for (const [value, label] of Object.entries(options)) {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.text = label;
+                        attrValueSelect.appendChild(option);
+                    }
+
+                    // Add custom option
+                    const customOption = document.createElement('option');
+                    customOption.value = '__custom__';
+                    customOption.text = '✏️ Nhập tùy chỉnh...';
+                    attrValueSelect.appendChild(customOption);
+
+                    attrValueSelect.disabled = false;
+                } else if (selectedAttr === '__custom__') {
+                    attrValueSelect.disabled = false;
+                    const customOption = document.createElement('option');
+                    customOption.value = '__custom__';
+                    customOption.text = '✏️ Nhập tùy chỉnh...';
+                    attrValueSelect.appendChild(customOption);
+                } else {
+                    attrValueSelect.disabled = true;
+                }
+            });
+        }
 
         // Validate giá
         const unitCostInput = document.getElementById('unit_cost');

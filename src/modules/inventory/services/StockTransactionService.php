@@ -237,8 +237,11 @@ class StockTransactionService
         // Lấy tất cả transactions theo filter (không giới hạn)
         $transactions = $this->transactionModel->getTransactionsWithFilter($filters, 10000, 0);
 
-        // Tạo CSV header
-        $csv = "ID,Product,Variant,Warehouse,Type,Quantity Change,Reference,Note,Created By,Created At\n";
+        // Thêm UTF-8 BOM để Excel nhận diện tiếng Việt đúng
+        $csv = "\xEF\xBB\xBF";
+
+        // Tạo CSV header với tiếng Việt
+        $csv .= "ID,Sản phẩm,Biến thể,Kho,Loại,Thay đổi,Tham chiếu,Ghi chú,Người tạo,Thời gian\n";
 
         // Thêm data rows
         foreach ($transactions as $t) {

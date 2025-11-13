@@ -393,12 +393,27 @@ class InventoryService
             ];
         } else {
             // Lấy tồn kho tất cả warehouses
-            // TODO: Implement getVariantAllWarehouses() in Model
-            return [
-                'variant_id' => $variantId,
-                'total_quantity' => 0,
-                'warehouses' => []
-            ];
+            $rows = $this->inventoryModel->getVariantAllWarehouses($variantId);
+
+            if (empty($rows)) {
+                return [];
+            }
+
+            $result = [];
+            foreach ($rows as $r) {
+                $qty = (int) ($r['quantity'] ?? 0);
+                $min = (int) ($r['min_threshold'] ?? 0);
+                $result[] = [
+                    'variant_id' => $variantId,
+                    'warehouse' => $r['warehouse'],
+                    'quantity' => $qty,
+                    'min_threshold' => $min,
+                    'last_updated' => $r['last_updated'] ?? null,
+                    'status' => $this->determineStockStatus($qty, $min)
+                ];
+            }
+
+            return $result;
         }
     }
 
@@ -414,10 +429,11 @@ class InventoryService
     {
         $offset = ($page - 1) * $perPage;
 
-        $data = $this->inventoryModel->getInventoryListWithDetails($filters, $perPage, $offset);
+        // Get total count for pagination
+        $total = $this->inventoryModel->countInventoryRecords($filters);
 
-        // TODO: Implement count method for total records
-        $total = count($data); // Placeholder
+        // Get data for current page
+        $data = $this->inventoryModel->getInventoryListWithDetails($filters, $perPage, $offset);
 
         return [
             'data' => $data,
@@ -425,7 +441,9 @@ class InventoryService
                 'current_page' => $page,
                 'per_page' => $perPage,
                 'total' => $total,
-                'last_page' => ceil($total / $perPage)
+                'last_page' => $total > 0 ? ceil($total / $perPage) : 1,
+                'from' => $total > 0 ? $offset + 1 : 0,
+                'to' => min($offset + $perPage, $total)
             ]
         ];
     }

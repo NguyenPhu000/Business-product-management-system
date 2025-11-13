@@ -1,9 +1,4 @@
 <?php
-
-/**
- * View: Cảnh báo sắp hết hàng
- * Path: src/views/admin/inventory/low_stock.php
- */
 ?>
 
 <div class="container-fluid">
@@ -107,7 +102,8 @@
                                         <small class="text-muted">
                                             <?= htmlspecialchars($product['variant_sku']) ?>
                                             <?php if (!empty($product['variant_attributes'])): ?>
-                                                <br><span class="badge bg-secondary"><?= htmlspecialchars($product['variant_attributes']) ?></span>
+                                                <br><span
+                                                    class="badge bg-secondary"><?= htmlspecialchars($product['variant_attributes']) ?></span>
                                             <?php endif; ?>
                                         </small>
                                     </td>
@@ -133,10 +129,10 @@
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
-                                                class="btn btn-info btn-sm" title="Chi tiết">
+                                                class="btn btn-outline-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-success btn-sm"
+                                            <button type="button" class="btn btn-outline-success btn-sm"
                                                 onclick="quickImport(<?= $product['variant_id'] ?>, '<?= htmlspecialchars($product['warehouse']) ?>')"
                                                 title="Nhập kho nhanh">
                                                 <i class="fas fa-plus"></i>
@@ -188,7 +184,8 @@
                                         <small class="text-muted">
                                             <?= htmlspecialchars($product['variant_sku']) ?>
                                             <?php if (!empty($product['variant_attributes'])): ?>
-                                                <br><span class="badge bg-secondary"><?= htmlspecialchars($product['variant_attributes']) ?></span>
+                                                <br><span
+                                                    class="badge bg-secondary"><?= htmlspecialchars($product['variant_attributes']) ?></span>
                                             <?php endif; ?>
                                         </small>
                                     </td>
@@ -203,10 +200,10 @@
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
-                                                class="btn btn-info btn-sm" title="Chi tiết">
+                                                class="btn btn-outline-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-success btn-sm"
+                                            <button type="button" class="btn btn-outline-success btn-sm"
                                                 onclick="quickImport(<?= $product['variant_id'] ?>, '<?= htmlspecialchars($product['warehouse']) ?>')"
                                                 title="Nhập kho nhanh">
                                                 <i class="fas fa-plus"></i>
@@ -251,9 +248,9 @@
                     <input type="hidden" id="import_warehouse" name="warehouse">
 
                     <div class="mb-3">
-                        <label for="import_quantity" class="form-label">Số lượng nhập <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="import_quantity" name="quantity"
-                            min="1" required>
+                        <label for="import_quantity" class="form-label">Số lượng nhập <span
+                                class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="import_quantity" name="quantity" min="1" required>
                     </div>
 
                     <div class="mb-3">
@@ -287,35 +284,65 @@
 </style>
 
 <script>
+    let currentModal = null;
+
     function quickImport(variantId, warehouse) {
         document.getElementById('import_variant_id').value = variantId;
         document.getElementById('import_warehouse').value = warehouse;
         document.getElementById('import_quantity').value = '';
         document.getElementById('import_note').value = '';
 
-        const modal = new bootstrap.Modal(document.getElementById('quickImportModal'));
-        modal.show();
+        currentModal = new bootstrap.Modal(document.getElementById('quickImportModal'));
+        currentModal.show();
     }
 
     function submitQuickImport() {
         const form = document.getElementById('quickImportForm');
+        const quantity = document.getElementById('import_quantity').value;
+
+        // Validate
+        if (!quantity || quantity <= 0) {
+            alert('Vui lòng nhập số lượng hợp lệ!');
+            return;
+        }
+
         const formData = new FormData(form);
+        const submitBtn = event.target;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
         fetch('/admin/inventory/import', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    // Đóng modal trước
+                    if (currentModal) {
+                        currentModal.hide();
+                    }
+                    alert('✓ ' + data.message);
                     location.reload();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    alert('❌ Lỗi: ' + (data.message || 'Không xác định'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Nhập kho';
                 }
             })
             .catch(error => {
-                alert('Lỗi kết nối: ' + error.message);
+                console.error('Import Error:', error);
+                alert('❌ Lỗi kết nối: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Nhập kho';
             });
     }
 </script>
