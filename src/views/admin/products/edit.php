@@ -1,10 +1,10 @@
-View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
+<?php
 
-                                                                /**
-                                                                 * View: Chỉnh sửa sản phẩm
-                                                                 * Path: src/views/admin/products/edit.php
-                                                                 */
-                                                                ?>
+/**
+ * View: Chỉnh sửa sản phẩm
+ * Path: src/views/admin/products/edit.php
+ */
+?>
 
 <div class="container-fluid">
     <!-- Header -->
@@ -73,26 +73,26 @@ View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
                         </label>
                         <div class="category-selector border rounded p-3" style="max-height: 250px; overflow-y: auto;">
                             <?php if (!empty($categories)): ?>
-                                <?php foreach ($categories as $category): ?>
-                                    <?php
+                            <?php foreach ($categories as $category): ?>
+                            <?php
                                     $level = $category['level'] ?? 0;
                                     $indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $level);
                                     $disabled = $category['is_active'] == 0 ? 'disabled' : '';
                                     $badge = $category['is_active'] == 0 ? '<span class="badge bg-secondary ms-2">Ẩn</span>' : '';
                                     $checked = in_array($category['id'], $assignedCategoryIds) ? 'checked' : '';
                                     ?>
-                                    <div class="form-check category-level-<?= $level ?>">
-                                        <input class="form-check-input category-checkbox" type="checkbox" name="category_ids[]"
-                                            value="<?= $category['id'] ?>" id="cat_<?= $category['id'] ?>" <?= $disabled ?>
-                                            <?= $checked ?>>
-                                        <label class="form-check-label" for="cat_<?= $category['id'] ?>">
-                                            <?= $indent ?><?= htmlspecialchars($category['name']) ?> <?= $badge ?>
-                                        </label>
-                                    </div>
-                                <?php endforeach; ?>
+                            <div class="form-check category-level-<?= $level ?>">
+                                <input class="form-check-input category-checkbox" type="checkbox" name="category_ids[]"
+                                    value="<?= $category['id'] ?>" id="cat_<?= $category['id'] ?>" <?= $disabled ?>
+                                    <?= $checked ?>>
+                                <label class="form-check-label" for="cat_<?= $category['id'] ?>">
+                                    <?= $indent ?><?= htmlspecialchars($category['name']) ?> <?= $badge ?>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
                             <?php else: ?>
-                                <p class="text-muted">Chưa có danh mục nào. <a href="/admin/categories/create">Tạo danh mục
-                                        mới</a></p>
+                            <p class="text-muted">Chưa có danh mục nào. <a href="/admin/categories/create">Tạo danh mục
+                                    mới</a></p>
                             <?php endif; ?>
                         </div>
                         <small class="text-muted">Có thể chọn nhiều danh mục</small>
@@ -111,12 +111,12 @@ View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
                         <select class="form-select" id="brand_id" name="brand_id" required>
                             <option value="">-- Chọn thương hiệu --</option>
                             <?php foreach ($brands as $brand): ?>
-                                <?php if ($brand['is_active'] == 1): ?>
-                                    <option value="<?= $brand['id'] ?>"
-                                        <?= $brand['id'] == $product['brand_id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($brand['name']) ?>
-                                    </option>
-                                <?php endif; ?>
+                            <?php if ($brand['is_active'] == 1): ?>
+                            <option value="<?= $brand['id'] ?>"
+                                <?= $brand['id'] == $product['brand_id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($brand['name']) ?>
+                            </option>
+                            <?php endif; ?>
                             <?php endforeach; ?>
                         </select>
                         <small class="text-muted">
@@ -137,7 +137,7 @@ View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
                             foreach ($units as $unit):
                                 $selected = ($product['unit'] ?? 'cái') == $unit ? 'selected' : '';
                             ?>
-                                <option value="<?= $unit ?>" <?= $selected ?>><?= ucfirst($unit) ?></option>
+                            <option value="<?= $unit ?>" <?= $selected ?>><?= ucfirst($unit) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -211,10 +211,10 @@ View: Chỉnh sửa sản phẩmPath: src/views/admin/products/edit.php<?php
 
                 <!-- Row 7: Hình ảnh hiện tại -->
                 <?php if (!empty($images)): ?>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Hình ảnh hiện tại</label>
-                        <div class="d-flex gap-3 flex-wrap">
-                            <?php
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Hình ảnh hiện tại</label>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <?php
                             // Tìm ảnh chính và ảnh phụ
                             $primaryImage = null;
                             $otherImages = [];

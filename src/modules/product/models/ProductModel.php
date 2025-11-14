@@ -166,6 +166,14 @@ class ProductModel extends BaseModel
     }
 
     /**
+     * Cập nhật số lượng sản phẩm
+     */
+    public function updateStock(int $id, int $quantity): bool
+    {
+        return $this->update($id, ['stock_quantity' => $quantity]);
+    }
+
+    /**
      * Kiểm tra SKU đã tồn tại chưa
      */
     public function skuExists(string $sku, ?int $excludeId = null): bool

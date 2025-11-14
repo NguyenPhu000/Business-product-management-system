@@ -1,5 +1,4 @@
 <?php
-
 /**
  * View: Quản lý biến thể sản phẩm
  * Path: src/views/admin/products/variants/index.php

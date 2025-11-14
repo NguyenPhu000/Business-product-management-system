@@ -1,10 +1,9 @@
-View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/create.php<?php
-
-                                                                                /**
-                                                                                 * View: Thêm biến thể sản phẩm
-                                                                                 * Path: src/views/admin/products/variants/create.php
-                                                                                 */
-                                                                                ?>
+<?php
+/**
+ * View: Thêm biến thể sản phẩm
+ * Path: src/views/admin/products/variants/create.php
+ */
+?>
 
 <div class="container-fluid">
     <!-- Header -->
@@ -40,7 +39,7 @@ View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/cre
         </div>
         <div class="card-body">
             <form method="POST" action="/admin/products/<?= $product['id'] ?>/variants/store" id="variantForm">
-
+                
                 <!-- Row 1: SKU và Barcode -->
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -60,14 +59,14 @@ View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/cre
                         </div>
                         <small class="text-muted">Mã định danh duy nhất cho biến thể</small>
                     </div>
-
+                    
                     <div class="col-md-6">
                         <label for="barcode" class="form-label">Barcode / EAN</label>
-                        <input type="text"
-                            class="form-control"
-                            id="barcode"
-                            name="barcode"
-                            placeholder="Nhập mã vạch (nếu có)">
+                        <input type="text" 
+                               class="form-control" 
+                               id="barcode" 
+                               name="barcode" 
+                               placeholder="Nhập mã vạch (nếu có)">
                         <small class="text-muted">Dùng để quét mã vạch khi bán hàng</small>
                     </div>
                 </div>
@@ -169,14 +168,14 @@ View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/cre
                             Giá nhập <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number"
-                                class="form-control"
-                                id="unit_cost"
-                                name="unit_cost"
-                                min="0"
-                                step="0.01"
-                                value="<?= $product['unit_cost'] ?? 0 ?>"
-                                required>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="unit_cost" 
+                                   name="unit_cost" 
+                                   min="0" 
+                                   step="0.01" 
+                                   value="<?= $product['unit_cost'] ?? 0 ?>"
+                                   required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <small class="text-muted">Giá nhập của biến thể này</small>
@@ -187,14 +186,14 @@ View: Thêm biến thể sản phẩmPath: src/views/admin/products/variants/cre
                             Giá bán <span class="text-danger">*</span>
                         </label>
                         <div class="input-group">
-                            <input type="number"
-                                class="form-control"
-                                id="price"
-                                name="price"
-                                min="0"
-                                step="0.01"
-                                value="<?= $product['price'] ?? 0 ?>"
-                                required>
+                            <input type="number" 
+                                   class="form-control" 
+                                   id="price" 
+                                   name="price" 
+                                   min="0" 
+                                   step="0.01" 
+                                   value="<?= $product['price'] ?? 0 ?>"
+                                   required>
                             <span class="input-group-text">VNĐ</span>
                         </div>
                         <small class="text-muted">Giá bán cho khách hàng</small>

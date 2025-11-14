@@ -121,6 +121,7 @@ class ProductController extends Controller
         try {
             // Lấy sản phẩm kèm thông tin inventory
             $product = $this->productService->getProductWithInventory($id);
+            $product = $this->productService->getProductWithCategories($id);
 
             if (!$product) {
                 AuthHelper::setFlash('error', 'Không tìm thấy sản phẩm');

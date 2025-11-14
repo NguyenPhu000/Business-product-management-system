@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * View: Danh sách sản phẩm
+ * Path: src/views/admin/products/index.php
+ */
 ?>
 
 <div class="container-fluid">
@@ -57,13 +62,13 @@
                             style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($categories as $category): ?>
-                            <?php
+                                <?php
                                 $indent = str_repeat('&nbsp;&nbsp;', $category['level'] ?? 0);
                                 $selected = ($filters['category_id'] ?? '') == $category['id'] ? 'selected' : '';
                                 ?>
-                            <option value="<?= $category['id'] ?>" <?= $selected ?>>
-                                <?= $indent ?><?= htmlspecialchars($category['name']) ?>
-                            </option>
+                                <option value="<?= $category['id'] ?>" <?= $selected ?>>
+                                    <?= $indent ?><?= htmlspecialchars($category['name']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -76,10 +81,10 @@
                             style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($brands as $brand): ?>
-                            <?php $selected = ($filters['brand_id'] ?? '') == $brand['id'] ? 'selected' : ''; ?>
-                            <option value="<?= $brand['id'] ?>" <?= $selected ?>>
-                                <?= htmlspecialchars($brand['name']) ?>
-                            </option>
+                                <?php $selected = ($filters['brand_id'] ?? '') == $brand['id'] ? 'selected' : ''; ?>
+                                <option value="<?= $brand['id'] ?>" <?= $selected ?>>
+                                    <?= htmlspecialchars($brand['name']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -93,8 +98,7 @@
                             <option value="">-- Tất cả --</option>
                             <option value="1" <?= ($filters['status'] ?? '') === '1' ? 'selected' : '' ?>>Hiển thị
                             </option>
-                            <option value="0" <?= ($filters['status'] ?? '') === '0' ? 'selected' : '' ?>>Đã ẩn
-                            </option>
+                            <option value="0" <?= ($filters['status'] ?? '') === '0' ? 'selected' : '' ?>>Đã ẩn</option>
                         </select>
                     </div>
 
