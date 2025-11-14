@@ -28,6 +28,18 @@ class SupplierService
     }
 
     /**
+     * Lấy nhà cung cấp với phân trang
+     * 
+     * @param int $page
+     * @param int $perPage
+     * @return array
+     */
+    public function getSuppliersWithPagination(int $page = 1, int $perPage = 8): array
+    {
+        return $this->supplierModel->getAllWithPagination($page, $perPage);
+    }
+
+    /**
      * Tìm kiếm nhà cung cấp
      */
     public function searchSuppliers(string $keyword): array

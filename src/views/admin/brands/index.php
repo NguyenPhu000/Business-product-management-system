@@ -46,7 +46,7 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th width="5%">ID</th>
+                        <th width="5%">STT</th>
                         <th width="15%">Logo</th>
                         <th width="25%">Tên thương hiệu</th>
                         <th width="30%">Mô tả</th>
@@ -64,9 +64,12 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
                         </td>
                     </tr>
                     <?php else: ?>
-                    <?php foreach ($brands as $brand): ?>
+                    <?php 
+                    $stt = isset($pagination) ? (($pagination['page'] - 1) * $pagination['perPage']) + 1 : 1;
+                    foreach ($brands as $brand): 
+                    ?>
                     <tr>
-                        <td><?= $brand['id'] ?></td>
+                        <td><?= $stt++ ?></td>
                         <td>
                             <?php if ($brand['logo_url']): ?>
                             <!-- Hiển thị logo từ base64 hoặc URL -->
@@ -114,6 +117,72 @@ $pageTitle = $pageTitle ?? 'Quản lý thương hiệu';
                 </tbody>
             </table>
         </div>
+        
+        <?php if (isset($pagination) && $pagination && $pagination['totalPages'] > 1): ?>
+        <!-- Pagination -->
+        <div class="card-footer">
+            <div class="d-flex flex-column align-items-center gap-3">
+                <div>
+                    <span class="text-muted">
+                        Hiển thị <?= count($brands) ?> / <?= $pagination['total'] ?> thương hiệu
+                    </span>
+                </div>
+                <nav aria-label="Phân trang thương hiệu">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Trang đầu -->
+                        <li class="page-item <?= $pagination['page'] <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=1" aria-label="Đầu">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Trang trước -->
+                        <li class="page-item <?= $pagination['page'] <= 1 ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= max(1, $pagination['page'] - 1) ?>" aria-label="Trước">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        
+                        <?php
+                        // Logic hiển thị các số trang
+                        $startPage = max(1, $pagination['page'] - 2);
+                        $endPage = min($pagination['totalPages'], $pagination['page'] + 2);
+                        
+                        // Nếu gần đầu, hiện thêm trang sau
+                        if ($pagination['page'] <= 3) {
+                            $endPage = min($pagination['totalPages'], 5);
+                        }
+                        
+                        // Nếu gần cuối, hiện thêm trang trước
+                        if ($pagination['page'] >= $pagination['totalPages'] - 2) {
+                            $startPage = max(1, $pagination['totalPages'] - 4);
+                        }
+                        ?>
+                        
+                        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <li class="page-item <?= $i == $pagination['page'] ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                        </li>
+                        <?php endfor; ?>
+                        
+                        <!-- Trang sau -->
+                        <li class="page-item <?= $pagination['page'] >= $pagination['totalPages'] ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= min($pagination['totalPages'], $pagination['page'] + 1) ?>" aria-label="Sau">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        
+                        <!-- Trang cuối -->
+                        <li class="page-item <?= $pagination['page'] >= $pagination['totalPages'] ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $pagination['totalPages'] ?>" aria-label="Cuối">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

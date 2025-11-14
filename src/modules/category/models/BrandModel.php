@@ -33,6 +33,43 @@ class BrandModel extends BaseModel
     }
 
     /**
+     * Lấy thương hiệu với phân trang
+     * 
+     * @param int $page Trang hiện tại (bắt đầu từ 1)
+     * @param int $perPage Số lượng/trang
+     * @return array ['data' => [], 'total' => int, 'page' => int, 'perPage' => int, 'totalPages' => int]
+     */
+    public function getAllWithPagination(int $page = 1, int $perPage = 8): array
+    {
+        // Đảm bảo page >= 1
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        // Đếm tổng số thương hiệu
+        $countSql = "SELECT COUNT(DISTINCT b.id) as total FROM {$this->table} b";
+        $countResult = $this->queryOne($countSql);
+        $total = (int) ($countResult['total'] ?? 0);
+
+        // Lấy dữ liệu phân trang
+        $sql = "SELECT b.*, COUNT(p.id) as product_count 
+                FROM {$this->table} b 
+                LEFT JOIN products p ON b.id = p.brand_id 
+                GROUP BY b.id 
+                ORDER BY b.id ASC
+                LIMIT {$perPage} OFFSET {$offset}";
+
+        $data = $this->query($sql);
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => (int) ceil($total / $perPage)
+        ];
+    }
+
+    /**
      * Lấy thương hiệu kèm số lượng sản phẩm
      */
     public function findWithProductCount(int $id): ?array

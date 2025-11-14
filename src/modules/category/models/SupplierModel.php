@@ -33,6 +33,42 @@ class SupplierModel extends BaseModel
     }
 
     /**
+     * Lấy nhà cung cấp với phân trang
+     * 
+     * @param int $page Trang hiện tại (bắt đầu từ 1)
+     * @param int $perPage Số lượng/trang
+     * @return array ['data' => [], 'total' => int, 'page' => int, 'perPage' => int, 'totalPages' => int]
+     */
+    public function getAllWithPagination(int $page = 1, int $perPage = 8): array
+    {
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+
+        // Đếm tổng số nhà cung cấp
+        $countSql = "SELECT COUNT(DISTINCT s.id) as total FROM {$this->table} s";
+        $countResult = $this->queryOne($countSql);
+        $total = (int) ($countResult['total'] ?? 0);
+
+        // Lấy dữ liệu phân trang
+        $sql = "SELECT s.*, COUNT(po.id) as order_count 
+                FROM {$this->table} s 
+                LEFT JOIN purchase_orders po ON s.id = po.supplier_id 
+                GROUP BY s.id 
+                ORDER BY s.id ASC
+                LIMIT {$perPage} OFFSET {$offset}";
+
+        $data = $this->query($sql);
+
+        return [
+            'data' => $data,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => (int) ceil($total / $perPage)
+        ];
+    }
+
+    /**
      * Lấy nhà cung cấp kèm số lượng đơn hàng
      */
     public function findWithOrderCount(int $id): ?array

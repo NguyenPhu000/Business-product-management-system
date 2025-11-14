@@ -28,6 +28,18 @@ class CategoryService
     }
 
     /**
+     * Lấy danh mục với phân trang
+     * 
+     * @param int $page
+     * @param int $perPage
+     * @return array
+     */
+    public function getCategoriesWithPagination(int $page = 1, int $perPage = 8): array
+    {
+        return $this->categoryModel->getAllWithPagination($page, $perPage);
+    }
+
+    /**
      * Lấy cây danh mục
      */
     public function getCategoryTree(): array

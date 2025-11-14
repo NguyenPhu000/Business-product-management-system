@@ -27,14 +27,29 @@ class BrandController extends Controller
     public function index(): void
     {
         $keyword = $this->input('keyword', '');
+        $page = (int) $this->input('page', 1);
+        $perPage = 8; // 8 thương hiệu mỗi trang
 
-        $brands = $keyword
-            ? $this->brandService->searchBrands($keyword)
-            : $this->brandService->getAllBrands();
+        if ($keyword) {
+            // Tìm kiếm không phân trang
+            $brands = $this->brandService->searchBrands($keyword);
+            $pagination = null;
+        } else {
+            // Lấy dữ liệu với phân trang
+            $result = $this->brandService->getBrandsWithPagination($page, $perPage);
+            $brands = $result['data'];
+            $pagination = [
+                'total' => $result['total'],
+                'page' => $result['page'],
+                'perPage' => $result['perPage'],
+                'totalPages' => $result['totalPages']
+            ];
+        }
 
         $this->view('admin/brands/index', [
             'brands' => $brands,
             'keyword' => $keyword,
+            'pagination' => $pagination,
             'pageTitle' => 'Quản lý thương hiệu'
         ]);
     }

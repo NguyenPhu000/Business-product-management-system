@@ -35,6 +35,18 @@ class BrandService
     }
 
     /**
+     * Lấy thương hiệu với phân trang
+     * 
+     * @param int $page
+     * @param int $perPage
+     * @return array
+     */
+    public function getBrandsWithPagination(int $page = 1, int $perPage = 8): array
+    {
+        return $this->brandModel->getAllWithPagination($page, $perPage);
+    }
+
+    /**
      * Tìm kiếm thương hiệu
      * 
      * @param string $keyword

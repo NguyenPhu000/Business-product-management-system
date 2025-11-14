@@ -26,12 +26,25 @@ class CategoryController extends Controller
      */
     public function index(): void
     {
-        $categories = $this->categoryService->getAllWithParent();
+        $page = (int) $this->input('page', 1);
+        $perPage = 8; // 8 danh mục mỗi trang
+
+        // Lấy dữ liệu với phân trang
+        $result = $this->categoryService->getCategoriesWithPagination($page, $perPage);
+        $categories = $result['data'];
+        $pagination = [
+            'total' => $result['total'],
+            'page' => $result['page'],
+            'perPage' => $result['perPage'],
+            'totalPages' => $result['totalPages']
+        ];
+
         $categoryTree = $this->categoryService->getCategoryTree();
 
         $this->view('admin/categories/index', [
             'categories' => $categories,
             'categoryTree' => $categoryTree,
+            'pagination' => $pagination,
             'pageTitle' => 'Quản lý danh mục sản phẩm'
         ]);
     }
