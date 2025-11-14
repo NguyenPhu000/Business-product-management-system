@@ -6,6 +6,9 @@
  */
 ?>
 
+<!-- Thêm CSS riêng cho module sản phẩm -->
+<link rel="stylesheet" href="/assets/css/products.css">
+
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -18,17 +21,17 @@
 
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle"></i> <?= $flash ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> <?= $flash ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> <?= $flash ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> <?= $flash ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     <?php endif; ?>
 
     <!-- Filters -->
@@ -62,13 +65,13 @@
                             style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($categories as $category): ?>
-                                <?php
+                            <?php
                                 $indent = str_repeat('&nbsp;&nbsp;', $category['level'] ?? 0);
                                 $selected = ($filters['category_id'] ?? '') == $category['id'] ? 'selected' : '';
                                 ?>
-                                <option value="<?= $category['id'] ?>" <?= $selected ?>>
-                                    <?= $indent ?><?= htmlspecialchars($category['name']) ?>
-                                </option>
+                            <option value="<?= $category['id'] ?>" <?= $selected ?>>
+                                <?= $indent ?><?= htmlspecialchars($category['name']) ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -81,10 +84,10 @@
                             style="padding: 0.75rem 1rem; font-size: 1rem;">
                             <option value="">-- Tất cả --</option>
                             <?php foreach ($brands as $brand): ?>
-                                <?php $selected = ($filters['brand_id'] ?? '') == $brand['id'] ? 'selected' : ''; ?>
-                                <option value="<?= $brand['id'] ?>" <?= $selected ?>>
-                                    <?= htmlspecialchars($brand['name']) ?>
-                                </option>
+                            <?php $selected = ($filters['brand_id'] ?? '') == $brand['id'] ? 'selected' : ''; ?>
+                            <option value="<?= $brand['id'] ?>" <?= $selected ?>>
+                                <?= htmlspecialchars($brand['name']) ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -168,138 +171,147 @@
         </div>
         <div class="card-body">
             <?php if (empty($products)): ?>
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle"></i>
-                    Chưa có sản phẩm nào. <a href="/admin/products/create">Thêm sản phẩm đầu tiên</a>
-                </div>
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i>
+                Chưa có sản phẩm nào. <a href="/admin/products/create">Thêm sản phẩm đầu tiên</a>
+            </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th width="50">#</th>
-                                <th width="100">Hình ảnh</th>
-                                <th width="120">SKU</th>
-                                <th>
-                                    <a href="?sort_by=name_<?= ($filters['sort_by'] ?? '') === 'name_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
-                                        class="text-decoration-none text-dark">
-                                        Tên sản phẩm
-                                        <?php if (($filters['sort_by'] ?? '') === 'name_asc'): ?>
-                                            <i class="bi bi-arrow-up"></i>
-                                        <?php elseif (($filters['sort_by'] ?? '') === 'name_desc'): ?>
-                                            <i class="bi bi-arrow-down"></i>
-                                        <?php else: ?>
-                                            <i class="bi bi-arrow-down-up text-muted"></i>
-                                        <?php endif; ?>
-                                    </a>
-                                </th>
-                                <th>Danh mục</th>
-                                <th width="130">
-                                    <a href="?sort_by=price_<?= ($filters['sort_by'] ?? '') === 'price_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
-                                        class="text-decoration-none text-dark">
-                                        Giá bán
-                                        <?php if (($filters['sort_by'] ?? '') === 'price_asc'): ?>
-                                            <i class="bi bi-arrow-up text-success"></i>
-                                        <?php elseif (($filters['sort_by'] ?? '') === 'price_desc'): ?>
-                                            <i class="bi bi-arrow-down text-danger"></i>
-                                        <?php else: ?>
-                                            <i class="bi bi-arrow-down-up text-muted"></i>
-                                        <?php endif; ?>
-                                    </a>
-                                </th>
-                                <th width="100">Trạng thái</th>
-                                <th width="220">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($products as $index => $product): ?>
-                                <tr>
-                                    <td class="text-center">
-                                        <?= ($currentPage - 1) * 20 + $index + 1 ?>
-                                    </td>
-                                    <td>
-                                        <img src="<?= $product['primary_image'] ?? '/assets/images/no-image.png' ?>"
-                                            alt="<?= htmlspecialchars($product['name']) ?>" class="img-thumbnail"
-                                            style="width: 60px; height: 60px; object-fit: cover;">
-                                    </td>
-                                    <td>
-                                        <code><?= htmlspecialchars($product['sku']) ?></code>
-                                    </td>
-                                    <td>
-                                        <strong><?= htmlspecialchars($product['name']) ?></strong>
-                                        <?php if (!empty($product['short_desc'])): ?>
-                                            <br>
-                                            <small class="text-muted">
-                                                <?= htmlspecialchars(mb_substr($product['short_desc'], 0, 80)) ?>...
-                                            </small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if (!empty($product['category_names'])): ?>
-                                            <?php
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="50">#</th>
+                            <th width="100">Hình ảnh</th>
+                            <th width="120">SKU</th>
+                            <th>
+                                <a href="?sort_by=name_<?= ($filters['sort_by'] ?? '') === 'name_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
+                                    class="text-decoration-none text-dark">
+                                    Tên sản phẩm
+                                    <?php if (($filters['sort_by'] ?? '') === 'name_asc'): ?>
+                                    <i class="bi bi-arrow-up"></i>
+                                    <?php elseif (($filters['sort_by'] ?? '') === 'name_desc'): ?>
+                                    <i class="bi bi-arrow-down"></i>
+                                    <?php else: ?>
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th>Danh mục</th>
+                            <th width="130">
+                                <a href="?sort_by=price_<?= ($filters['sort_by'] ?? '') === 'price_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
+                                    class="text-decoration-none text-dark">
+                                    Giá bán
+                                    <?php if (($filters['sort_by'] ?? '') === 'price_asc'): ?>
+                                    <i class="bi bi-arrow-up text-success"></i>
+                                    <?php elseif (($filters['sort_by'] ?? '') === 'price_desc'): ?>
+                                    <i class="bi bi-arrow-down text-danger"></i>
+                                    <?php else: ?>
+                                    <i class="bi bi-arrow-down-up text-muted"></i>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th width="100">Trạng thái</th>
+                            <th width="220">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($products as $index => $product): ?>
+                        <tr>
+                            <td class="text-center">
+                                <?= ($currentPage - 1) * 20 + $index + 1 ?>
+                            </td>
+                            <td>
+                                <img src="<?= $product['primary_image'] ?? '/assets/images/no-image.png' ?>"
+                                    alt="<?= htmlspecialchars($product['name']) ?>" class="img-thumbnail"
+                                    style="width: 60px; height: 60px; object-fit: cover;">
+                            </td>
+                            <td>
+                                <code><?= htmlspecialchars($product['sku']) ?></code>
+                            </td>
+                            <td>
+                                <strong><?= htmlspecialchars($product['name']) ?></strong>
+                                <?php if (!empty($product['short_desc'])): ?>
+                                <br>
+                                <small class="text-muted">
+                                    <?= htmlspecialchars(mb_substr($product['short_desc'], 0, 80)) ?>...
+                                </small>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (!empty($product['category_names'])): ?>
+                                <?php
                                             $categories = explode(', ', $product['category_names']);
                                             foreach ($categories as $cat): ?>
-                                                <span class="badge bg-info me-1"><?= htmlspecialchars($cat) ?></span>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <span class="text-muted">Chưa phân loại</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-end">
-                                        <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
-                                            <div>
-                                                <small class="text-muted text-decoration-line-through">
-                                                    <?= number_format($product['price'], 0, ',', '.') ?> đ
-                                                </small>
-                                            </div>
-                                            <div>
-                                                <strong class="text-danger">
-                                                    <?= number_format($product['sale_price'], 0, ',', '.') ?> đ
-                                                </strong>
-                                            </div>
-                                        <?php else: ?>
-                                            <strong class="text-primary">
-                                                <?= number_format($product['price'] ?? 0, 0, ',', '.') ?> đ
-                                            </strong>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input toggle-status" type="checkbox" role="switch"
-                                                data-id="<?= $product['id'] ?>" <?= $product['status'] == 1 ? 'checked' : '' ?>
-                                                title="Click để ẩn/hiện sản phẩm">
-                                        </div>
-                                        <?php if ($product['status'] == 1): ?>
-                                            <small class="text-success d-block">Đang bán</small>
-                                        <?php else: ?>
-                                            <small class="text-secondary d-block">Đã ẩn</small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i> Sửa
-                                            </a>
-                                            <a href="/admin/products/<?= $product['id'] ?>/variants"
-                                                class="btn btn-sm btn-info">
-                                                <i class="bi bi-palette"></i> Biến thể
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                                data-id="<?= $product['id'] ?>"
-                                                data-name="<?= htmlspecialchars($product['name']) ?>">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                <span class="badge bg-info me-1"><?= htmlspecialchars($cat) ?></span>
+                                <?php endforeach; ?>
+                                <?php else: ?>
+                                <span class="text-muted">Chưa phân loại</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-end">
+                                <!-- Giá bán (ưu tiên giá khuyến mãi) -->
+                                <div class="mb-1">
+                                    <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
+                                    <strong class="text-danger fs-6">
+                                        <?= number_format($product['sale_price'], 0, ',', '.') ?> đ
+                                    </strong>
+                                    <?php else: ?>
+                                    <strong class="text-primary fs-6">
+                                        <?= number_format($product['price'] ?? 0, 0, ',', '.') ?> đ
+                                    </strong>
+                                    <?php endif; ?>
+                                </div>
 
-                <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                    <?php
+                                <!-- Giá đã bao gồm thuế (nếu có) -->
+                                <?php if (!empty($product['tax_rate']) && $product['tax_rate'] > 0): ?>
+                                <div>
+                                    <small class="text-muted fst-italic" style="font-size: 0.75rem;">
+                                        (Đã bao gồm VAT <?= number_format($product['tax_rate'], 1) ?>%)
+                                    </small>
+                                    <br>
+                                    <strong class="text-success" style="font-size: 0.9rem;">
+                                        <?= number_format($product['final_price_with_tax'] ?? 0, 0, ',', '.') ?> đ
+                                    </strong>
+                                </div>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input toggle-status" type="checkbox" role="switch"
+                                        data-id="<?= $product['id'] ?>" <?= $product['status'] == 1 ? 'checked' : '' ?>
+                                        title="Click để ẩn/hiện sản phẩm">
+                                </div>
+                                <?php if ($product['status'] == 1): ?>
+                                <small class="text-success d-block">Đang bán</small>
+                                <?php else: ?>
+                                <small class="text-secondary d-block">Đã ẩn</small>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    <a href="/admin/products/<?= $product['id'] ?>/variants"
+                                        class="btn btn-sm btn-info">
+                                        <i class="bi bi-palette"></i> Biến thể
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                        data-id="<?= $product['id'] ?>"
+                                        data-name="<?= htmlspecialchars($product['name']) ?>">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+            <?php
                     // Build query string để giữ lại các filter
                     $queryParams = [];
                     if (!empty($filters['keyword'])) $queryParams[] = 'keyword=' . urlencode($filters['keyword']);
@@ -309,170 +321,107 @@
                     if (!empty($filters['sort_by'])) $queryParams[] = 'sort_by=' . $filters['sort_by'];
                     $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
                     ?>
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
-                            <!-- Previous -->
-                            <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $currentPage - 1 ?><?= $queryString ?>"
-                                    aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous -->
+                    <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $currentPage - 1 ?><?= $queryString ?>"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
 
-                            <!-- Page numbers -->
-                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $i ?><?= $queryString ?>">
-                                        <?= $i ?>
-                                    </a>
-                                </li>
-                            <?php endfor; ?>
+                    <!-- Page numbers -->
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?><?= $queryString ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                    <?php endfor; ?>
 
-                            <!-- Next -->
-                            <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $currentPage + 1 ?><?= $queryString ?>" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                <?php endif; ?>
+                    <!-- Next -->
+                    <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= $currentPage + 1 ?><?= $queryString ?>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle product status
-        document.querySelectorAll('.toggle-status').forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                const productId = this.dataset.id;
-                const isChecked = this.checked;
-                const statusText = this.parentElement.nextElementSibling;
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle product status
+    document.querySelectorAll('.toggle-status').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const productId = this.dataset.id;
+            const isChecked = this.checked;
+            const statusText = this.parentElement.nextElementSibling;
 
-                fetch(`/admin/products/toggle/${productId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Update text
-                            if (isChecked) {
-                                statusText.textContent = 'Đang bán';
-                                statusText.className = 'text-success d-block';
-                            } else {
-                                statusText.textContent = 'Đã ẩn';
-                                statusText.className = 'text-secondary d-block';
-                            }
+            fetch(`/admin/products/toggle/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update text
+                        if (isChecked) {
+                            statusText.textContent = 'Đang bán';
+                            statusText.className = 'text-success d-block';
                         } else {
-                            alert('Lỗi: ' + data.message);
-                            this.checked = !isChecked; // Revert
+                            statusText.textContent = 'Đã ẩn';
+                            statusText.className = 'text-secondary d-block';
                         }
-                    })
-                    .catch(err => {
-                        alert('Có lỗi xảy ra!');
+                    } else {
+                        alert('Lỗi: ' + data.message);
                         this.checked = !isChecked; // Revert
-                    });
-            });
-        });
-
-        // Delete product
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                const productId = this.dataset.id;
-                const productName = this.dataset.name;
-
-                console.log('Delete button clicked:', {
-                    productId,
-                    productName
+                    }
+                })
+                .catch(err => {
+                    alert('Có lỗi xảy ra!');
+                    this.checked = !isChecked; // Revert
                 });
-
-                if (confirm(
-                        `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
-                    )) {
-                    console.log('User confirmed delete');
-
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/admin/products/delete/${productId}`;
-
-                    console.log('Form action:', form.action);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                } else {
-                    console.log('User cancelled delete');
-                }
-            });
         });
     });
+
+    // Delete product
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const productId = this.dataset.id;
+            const productName = this.dataset.name;
+
+            console.log('Delete button clicked:', {
+                productId,
+                productName
+            });
+
+            if (confirm(
+                    `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
+                )) {
+                console.log('User confirmed delete');
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/products/delete/${productId}`;
+
+                console.log('Form action:', form.action);
+
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                console.log('User cancelled delete');
+            }
+        });
+    });
+});
 </script>
-
-<style>
-    /* Custom styles cho trang danh sách sản phẩm */
-    .card-header.bg-light {
-        background-color: #f8f9fc !important;
-        border-bottom: 2px solid #e3e6f0;
-    }
-
-    .form-label.fw-semibold {
-        font-weight: 600;
-        color: #5a5c69;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control-lg {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-    }
-
-    .form-select,
-    .form-control {
-        border: 1px solid #d1d3e2;
-        border-radius: 0.35rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-select:focus,
-    .form-control:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-    }
-
-    .btn {
-        font-weight: 500;
-        padding: 0.5rem 1rem;
-        border-radius: 0.35rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-        min-width: 120px;
-    }
-
-    .btn-secondary {
-        min-width: 120px;
-    }
-
-    .d-flex.gap-2 {
-        gap: 0.5rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .row.g-3>div {
-            margin-bottom: 0.5rem;
-        }
-
-        .btn {
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-    }
-</style>

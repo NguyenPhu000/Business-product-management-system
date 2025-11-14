@@ -106,7 +106,19 @@ class ProductModel extends BaseModel
                        END
                    FROM product_images pi2 
                    WHERE pi2.product_id = p.id AND pi2.is_primary = 1 
-                   LIMIT 1) AS primary_image
+                   LIMIT 1) AS primary_image,
+                   -- Tính giá cuối cùng có thuế (ưu tiên sale_price, không thì lấy price)
+                   CASE 
+                       WHEN p.sale_price IS NOT NULL AND p.sale_price > 0 THEN 
+                           p.sale_price * (1 + COALESCE(p.tax_rate, 0) / 100)
+                       ELSE 
+                           p.price * (1 + COALESCE(p.tax_rate, 0) / 100)
+                   END AS final_price_with_tax,
+                   -- Giá gốc dùng để tính (sale_price hoặc price)
+                   CASE 
+                       WHEN p.sale_price IS NOT NULL AND p.sale_price > 0 THEN p.sale_price
+                       ELSE p.price
+                   END AS base_price
             FROM {$this->table} p
             LEFT JOIN product_categories pc ON p.id = pc.product_id
             LEFT JOIN categories c ON pc.category_id = c.id

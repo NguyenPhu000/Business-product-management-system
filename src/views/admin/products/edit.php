@@ -6,6 +6,9 @@
  */
 ?>
 
+<!-- Thêm CSS riêng cho module sản phẩm -->
+<link rel="stylesheet" href="/assets/css/products.css">
+
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -356,6 +359,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
 
     function updateCategorySelection() {
+        const allCategories = <?= json_encode($categories) ?>;
+        
         // Lấy tất cả danh mục đã chọn
         const checkedCategories = Array.from(categoryCheckboxes).filter(cb => cb.checked);
 
@@ -364,13 +369,44 @@ document.addEventListener('DOMContentLoaded', function() {
             return cb.closest('.form-check').classList.contains('category-level-0');
         });
 
-        if (checkedParents.length > 0) {
-            // Đã chọn ít nhất 1 danh mục cha
-            const selectedParentId = checkedParents[0].value;
+        // Lấy danh mục con đã chọn
+        const checkedChildren = checkedCategories.filter(cb => {
+            return !cb.closest('.form-check').classList.contains('category-level-0');
+        });
 
-            // Hiển thị thông báo danh mục cha đã chọn
-            const allCategories = <?= json_encode($categories) ?>;
-            const selectedParent = allCategories.find(cat => cat.id == selectedParentId);
+        // Xác định danh mục cha đang active (được chọn hoặc có con được chọn)
+        let activeParentId = null;
+
+        if (checkedParents.length > 0) {
+            // Đã chọn danh mục cha trực tiếp
+            activeParentId = checkedParents[0].value;
+        } else if (checkedChildren.length > 0) {
+            // Có danh mục con được chọn → tìm parent của nó
+            const firstChild = allCategories.find(cat => cat.id == checkedChildren[0].value);
+            if (firstChild) {
+                // Tìm parent_id gốc (level 0)
+                let parentId = firstChild.parent_id;
+                let parentCat = allCategories.find(cat => cat.id == parentId);
+                
+                // Lặp lên đến khi tìm được danh mục cha level 0
+                while (parentCat && parentCat.level > 0) {
+                    parentId = parentCat.parent_id;
+                    parentCat = allCategories.find(cat => cat.id == parentId);
+                }
+                
+                activeParentId = parentId;
+                
+                // Tự động chọn danh mục cha
+                const parentCheckbox = document.querySelector(`.category-checkbox[value="${activeParentId}"]`);
+                if (parentCheckbox && !parentCheckbox.checked) {
+                    parentCheckbox.checked = true;
+                }
+            }
+        }
+
+        if (activeParentId) {
+            // Có danh mục cha active → hiển thị thông báo
+            const selectedParent = allCategories.find(cat => cat.id == activeParentId);
             if (selectedParent) {
                 document.getElementById('categorySelectionInfo').style.display = 'block';
                 document.getElementById('selectedParentName').textContent = selectedParent.name;
@@ -381,18 +417,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const checkDiv = checkbox.closest('.form-check');
                 const isParent = checkDiv.classList.contains('category-level-0');
 
-                if (isParent && checkbox.value !== selectedParentId) {
+                if (isParent && checkbox.value !== activeParentId) {
                     checkbox.disabled = true;
                     checkDiv.style.opacity = '0.5';
                     checkDiv.style.cursor = 'not-allowed';
-                } else if (isParent && checkbox.value === selectedParentId) {
+                } else if (isParent && checkbox.value === activeParentId) {
                     checkbox.disabled = false;
                     checkDiv.style.opacity = '1';
                     checkDiv.style.cursor = 'pointer';
                 }
             });
 
-            // Lọc và disable các danh mục con không thuộc parent đã chọn
+            // Xử lý danh mục con
             categoryCheckboxes.forEach(checkbox => {
                 const checkDiv = checkbox.closest('.form-check');
                 const isChild = !checkDiv.classList.contains('category-level-0');
@@ -400,24 +436,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isChild) {
                     const currentCategory = allCategories.find(cat => cat.id == checkbox.value);
 
-                    // Kiểm tra xem category này có thuộc parent đã chọn không
-                    if (currentCategory && currentCategory.parent_id == selectedParentId) {
-                        // Cho phép chọn các con của parent
-                        checkbox.disabled = false;
-                        checkDiv.style.opacity = '1';
-                        checkDiv.style.cursor = 'pointer';
-                    } else {
-                        // Disable các con của parent khác
-                        checkbox.disabled = true;
-                        checkbox.checked = false; // Bỏ chọn nếu đang được chọn
-                        checkDiv.style.opacity = '0.5';
-                        checkDiv.style.cursor = 'not-allowed';
+                    if (currentCategory) {
+                        // Tìm parent_id gốc của danh mục này
+                        let rootParentId = currentCategory.parent_id;
+                        let parentCat = allCategories.find(cat => cat.id == rootParentId);
+                        
+                        while (parentCat && parentCat.level > 0) {
+                            rootParentId = parentCat.parent_id;
+                            parentCat = allCategories.find(cat => cat.id == rootParentId);
+                        }
+
+                        // Kiểm tra xem có thuộc parent đã chọn không
+                        if (rootParentId == activeParentId) {
+                            // Cho phép chọn các con thuộc parent này
+                            checkbox.disabled = false;
+                            checkDiv.style.opacity = '1';
+                            checkDiv.style.cursor = 'pointer';
+                        } else {
+                            // Disable các con của parent khác
+                            checkbox.disabled = true;
+                            checkbox.checked = false;
+                            checkDiv.style.opacity = '0.5';
+                            checkDiv.style.cursor = 'not-allowed';
+                        }
                     }
                 }
             });
 
         } else {
-            // Chưa chọn danh mục cha nào → enable tất cả và ẩn thông báo
+            // Chưa chọn danh mục nào → enable tất cả
             document.getElementById('categorySelectionInfo').style.display = 'none';
 
             categoryCheckboxes.forEach(checkbox => {
@@ -441,28 +488,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Lắng nghe sự kiện thay đổi checkbox
     categoryCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function(e) {
-            const checkDiv = this.closest('.form-check');
-            const isParent = checkDiv.classList.contains('category-level-0');
-
-            // Nếu đang cố gắng chọn danh mục cha thứ 2
-            if (isParent && this.checked) {
-                const otherParentsChecked = Array.from(categoryCheckboxes).some(cb => {
-                    return cb !== this &&
-                        cb.checked &&
-                        cb.closest('.form-check').classList.contains(
-                            'category-level-0');
-                });
-
-                if (otherParentsChecked) {
-                    e.preventDefault();
-                    this.checked = false;
-                    alert(
-                        'Chỉ được chọn một danh mục cha! Vui lòng bỏ chọn danh mục cha hiện tại trước.'
-                    );
-                    return;
-                }
-            }
-
             updateCategorySelection();
         });
     });
