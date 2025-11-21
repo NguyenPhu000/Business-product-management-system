@@ -78,7 +78,7 @@
                             <tr>
                                 <th>Trạng thái:</th>
                                 <td>
-                                    <?php if (($variant['status'] ?? 0) == 1): ?>
+                                    <?php if (($variant['is_active'] ?? 0) == 1): ?>
                                     <span class="badge bg-success">Hoạt động</span>
                                     <?php else: ?>
                                     <span class="badge bg-secondary">Ngừng hoạt động</span>
