@@ -127,16 +127,19 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
+                                        <div class="btn-group btn-group-sm">
                                             <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
                                                 class="btn btn-outline-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-outline-success btn-sm"
-                                                onclick="quickImport(<?= $product['variant_id'] ?>, '<?= htmlspecialchars($product['warehouse']) ?>')"
-                                                title="Nhập kho nhanh">
+                                            <a href="/admin/purchase/create?variant_id=<?= $product['variant_id'] ?>"
+                                                class="btn btn-outline-success btn-sm" title="Tạo phiếu nhập">
                                                 <i class="fas fa-plus"></i>
-                                            </button>
+                                            </a>
+                                            <a href="/admin/sales/create?variant_id=<?= $product['variant_id'] ?>"
+                                                class="btn btn-outline-danger btn-sm" title="Tạo phiếu xuất">
+                                                <i class="fas fa-minus"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -198,16 +201,19 @@
                                         </small>
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
+                                        <div class="btn-group btn-group-sm">
                                             <a href="/admin/inventory/detail/<?= $product['variant_id'] ?>?warehouse=<?= urlencode($product['warehouse']) ?>"
                                                 class="btn btn-outline-info btn-sm" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-outline-success btn-sm"
-                                                onclick="quickImport(<?= $product['variant_id'] ?>, '<?= htmlspecialchars($product['warehouse']) ?>')"
-                                                title="Nhập kho nhanh">
+                                            <a href="/admin/purchase/create?variant_id=<?= $product['variant_id'] ?>"
+                                                class="btn btn-outline-success btn-sm" title="Tạo phiếu nhập">
                                                 <i class="fas fa-plus"></i>
-                                            </button>
+                                            </a>
+                                            <a href="/admin/sales/create?variant_id=<?= $product['variant_id'] ?>"
+                                                class="btn btn-outline-danger btn-sm" title="Tạo phiếu xuất">
+                                                <i class="fas fa-minus"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -234,115 +240,7 @@
     <?php endif; ?>
 </div>
 
-<!-- Quick Import Modal -->
-<div class="modal fade" id="quickImportModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-plus-circle"></i> Nhập kho nhanh</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="quickImportForm">
-                    <input type="hidden" id="import_variant_id" name="variant_id">
-                    <input type="hidden" id="import_warehouse" name="warehouse">
-
-                    <div class="mb-3">
-                        <label for="import_quantity" class="form-label">Số lượng nhập <span
-                                class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="import_quantity" name="quantity" min="1" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="import_note" class="form-label">Ghi chú</label>
-                        <textarea class="form-control" id="import_note" name="note" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-success" onclick="submitQuickImport()">
-                    <i class="fas fa-check"></i> Nhập kho
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .border-left-warning {
-        border-left: 0.25rem solid #f6c23e !important;
-    }
-
-    .border-left-danger {
-        border-left: 0.25rem solid #e74a3b !important;
-    }
-
-    .text-xs {
-        font-size: .7rem;
-    }
-</style>
-
+<!-- Quick import removed: use full Purchase form for imports and Sales form for exports -->
 <script>
-    let currentModal = null;
-
-    function quickImport(variantId, warehouse) {
-        document.getElementById('import_variant_id').value = variantId;
-        document.getElementById('import_warehouse').value = warehouse;
-        document.getElementById('import_quantity').value = '';
-        document.getElementById('import_note').value = '';
-
-        currentModal = new bootstrap.Modal(document.getElementById('quickImportModal'));
-        currentModal.show();
-    }
-
-    function submitQuickImport() {
-        const form = document.getElementById('quickImportForm');
-        const quantity = document.getElementById('import_quantity').value;
-
-        // Validate
-        if (!quantity || quantity <= 0) {
-            alert('Vui lòng nhập số lượng hợp lệ!');
-            return;
-        }
-
-        const formData = new FormData(form);
-        const submitBtn = event.target;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
-        fetch('/admin/inventory/import', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Đóng modal trước
-                    if (currentModal) {
-                        currentModal.hide();
-                    }
-                    alert('✓ ' + data.message);
-                    location.reload();
-                } else {
-                    alert('❌ Lỗi: ' + (data.message || 'Không xác định'));
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Nhập kho';
-                }
-            })
-            .catch(error => {
-                console.error('Import Error:', error);
-                alert('❌ Lỗi kết nối: ' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> Nhập kho';
-            });
-    }
+    // Quick import functionality removed to keep behavior consistent with inventory list.
 </script>

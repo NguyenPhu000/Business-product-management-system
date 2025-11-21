@@ -148,11 +148,11 @@
                                                 title="Chỉnh sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="/admin/inventory/adjust/<?= $variant['id'] ?>"
+                                            <!-- <a href="/admin/inventory/adjust/<?= $variant['id'] ?>"
                                                 class="btn btn-sm btn-outline-warning"
                                                 title="Điều chỉnh tồn kho">
                                                 <i class="fas fa-boxes"></i>
-                                            </a>
+                                            </a> -->
                                             <button type="button"
                                                 class="btn btn-sm btn-outline-danger btn-delete"
                                                 data-id="<?= $variant['id'] ?>"

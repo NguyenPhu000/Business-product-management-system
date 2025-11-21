@@ -1,1 +1,0 @@
-<!-- create.php (Purchase) - Form tạo đơn mua -->

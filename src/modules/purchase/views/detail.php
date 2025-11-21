@@ -1,1 +1,0 @@
-<!-- detail.php (Purchase) - Chi tiết đơn mua -->

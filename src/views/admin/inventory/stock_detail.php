@@ -12,9 +12,9 @@
             <a href="/admin/inventory" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Quay lại
             </a>
-            <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" class="btn btn-warning">
+            <!-- <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" class="btn btn-warning">
                 <i class="fas fa-edit"></i> Điều chỉnh
-            </a>
+            </a> -->
         </div>
     </div>
 
@@ -136,7 +136,7 @@
                 <div class="stat-content">
                     <div class="stat-label">Ngưỡng tối thiểu</div>
                     <div class="stat-number text-primary"><?= number_format($minThreshold) ?></div>
-                    <div class="stat-footer">Cảnh báo khi dưới ngưỡng</div>
+                    <div class="stat-footer">Cảnh báo khi dưới hoặc bằng ngưỡng</div>
                 </div>
             </div>
         </div>
@@ -191,7 +191,7 @@
         </div>
         <div class="card-body p-4">
             <form method="POST" action="/admin/inventory/threshold/<?= $variantId ?>" id="thresholdForm">
-                <input type="hidden" name="warehouse" value="Kho chính">
+                <input type="hidden" name="warehouse" value="default">
 
                 <div class="row g-3 align-items-end">
                     <div class="col-md-6 col-lg-4">
@@ -263,7 +263,7 @@
                                                         $typeLabel = [
                                                             'import' => 'Nhập kho',
                                                             'export' => 'Xuất kho',
-                                                            'adjust' => 'Điều chỉnh',
+                                                            // 'adjust' => 'Điều chỉnh',
                                                             'return' => 'Trả hàng'
                                                         ];
                                                         echo $typeLabel[$type] ?? $type;

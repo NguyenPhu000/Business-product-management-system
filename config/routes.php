@@ -116,6 +116,14 @@ $router->post('/admin/suppliers/update/{id}', 'Modules\Category\Controllers\Supp
 $router->post('/admin/suppliers/delete/{id}', 'Modules\Category\Controllers\SupplierController@destroy', [AuthMiddleware::class]);
 $router->post('/admin/suppliers/toggle/{id}', 'Modules\Category\Controllers\SupplierController@toggle', [AuthMiddleware::class]);
 
+// Purchase (Import) - tạo phiếu nhập
+$router->get('/admin/purchase/create', 'Modules\Purchase\Controllers\PurchaseController@create', [AuthMiddleware::class]);
+$router->post('/admin/purchase/store', 'Modules\Purchase\Controllers\PurchaseController@store', [AuthMiddleware::class]);
+
+// Sales (Export) - tạo phiếu xuất
+$router->get('/admin/sales/create', 'Modules\Sales\Controllers\SalesController@create', [AuthMiddleware::class]);
+$router->post('/admin/sales/store', 'Modules\Sales\Controllers\SalesController@store', [AuthMiddleware::class]);
+
 // ============ INVENTORY ROUTES (Quản lý kho hàng) ============
 
 // Inventory List & Low Stock Alerts

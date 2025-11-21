@@ -1,5 +1,16 @@
 <?php
-// SalesDetailModel.php - Chi tiết sản phẩm trong đơn bán
 namespace Modules\Sales\Models;
-use Core\Model;
-class SalesDetailModel extends Model { /* TODO */ }
+
+use Core\BaseModel;
+
+class SalesDetailModel extends BaseModel
+{
+    protected string $table = 'sales_details';
+    protected string $primaryKey = 'id';
+
+    public function createDetail(array $data): int
+    {
+        return $this->create($data);
+    }
+}
+

@@ -1,1 +1,0 @@
-<!-- list.php (Purchase) - Danh sách đơn mua hàng -->

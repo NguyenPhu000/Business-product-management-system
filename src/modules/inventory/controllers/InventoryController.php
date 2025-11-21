@@ -97,7 +97,8 @@ class InventoryController extends Controller
      */
     public function detail(int $id): void
     {
-        $warehouse = $this->input('warehouse', 'Kho chính');
+        // Use canonical warehouse key 'default' as the system now stores warehouses with this name
+        $warehouse = $this->input('warehouse', 'default');
 
         try {
             // Get variant with product info
@@ -165,7 +166,7 @@ class InventoryController extends Controller
      */
     public function adjustForm(int $id): void
     {
-        $warehouse = $this->input('warehouse', 'Kho chính');
+        $warehouse = $this->input('warehouse', 'default');
 
         try {
             // Get variant with product info
@@ -216,7 +217,7 @@ class InventoryController extends Controller
         $variantId = (int) $this->input('variant_id');
         $type = $this->input('type'); // import, export, adjust
         $quantity = (int) $this->input('quantity');
-        $warehouse = $this->input('warehouse', 'Kho chính');
+    $warehouse = $this->input('warehouse', 'default');
         $note = trim($this->input('note', ''));
 
         if (!$variantId || !$type || $quantity <= 0 || empty($note)) {
@@ -483,8 +484,8 @@ class InventoryController extends Controller
             return;
         }
 
-        $minThreshold = (int) $this->input('min_threshold');
-        $warehouse = $this->input('warehouse', 'Kho chính');
+    $minThreshold = (int) $this->input('min_threshold');
+    $warehouse = $this->input('warehouse', 'default');
 
         if ($minThreshold < 0) {
             $this->error('Dữ liệu không hợp lệ', 400);

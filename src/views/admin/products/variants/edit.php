@@ -1,24 +1,18 @@
-View: Sửa biến thể sản phẩmPath: src/views/admin/products/variants/edit.php<?php
+<?php
+    // Parse attributes
+    $attributes = !empty($variant['attributes']) ? json_decode($variant['attributes'], true) : [];
+    $color = $attributes['Màu sắc'] ?? '';
+    $size = $attributes['Kích thước'] ?? '';
+    $capacity = $attributes['Dung lượng'] ?? '';
 
-                                                                            /**
-                                                                             * View: Sửa biến thể sản phẩm
-                                                                             * Path: src/views/admin/products/variants/edit.php
-                                                                             */
+    // Custom attributes (loại trừ các thuộc tính chuẩn)
+    $customAttrs = array_diff_key($attributes, array_flip(['Màu sắc', 'Kích thước', 'Dung lượng']));
+    $customAttrName = !empty($customAttrs) ? key($customAttrs) : '';
+    $customAttrValue = !empty($customAttrs) ? current($customAttrs) : '';
 
-                                                                            // Parse attributes
-                                                                            $attributes = !empty($variant['attributes']) ? json_decode($variant['attributes'], true) : [];
-                                                                            $color = $attributes['Màu sắc'] ?? '';
-                                                                            $size = $attributes['Kích thước'] ?? '';
-                                                                            $capacity = $attributes['Dung lượng'] ?? '';
-
-                                                                            // Custom attributes (loại trừ các thuộc tính chuẩn)
-                                                                            $customAttrs = array_diff_key($attributes, array_flip(['Màu sắc', 'Kích thước', 'Dung lượng']));
-                                                                            $customAttrName = !empty($customAttrs) ? key($customAttrs) : '';
-                                                                            $customAttrValue = !empty($customAttrs) ? current($customAttrs) : '';
-
-                                                                            // Inventory info
-                                                                            $totalStock = !empty($variant['inventory']) ? array_sum(array_column($variant['inventory'], 'quantity')) : 0;
-                                                                            ?>
+    // Inventory info
+    $totalStock = !empty($variant['inventory']) ? array_sum(array_column($variant['inventory'], 'quantity')) : 0;
+    ?>
 
 <div class="container-fluid">
     <!-- Header -->
@@ -59,12 +53,12 @@ View: Sửa biến thể sản phẩmPath: src/views/admin/products/variants/edi
                                 <?= number_format($totalStock) ?> đơn vị
                             </strong>
                         </h6>
-                        <small class="text-muted">Để thay đổi tồn kho, vui lòng dùng chức năng Điều chỉnh tồn kho</small>
+                        <small class="text-muted">Để thay đổi tồn kho, vui lòng vào mục Quản lý kho hàng</small>
                     </div>
                     <div class="col-md-4 text-end">
-                        <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" class="btn btn-outline-warning btn-sm">
+                        <!-- <a href="/admin/inventory/adjust/<?= $variant['id'] ?>" class="btn btn-outline-warning btn-sm">
                             <i class="fas fa-edit"></i> Điều chỉnh tồn kho
-                        </a>
+                        </a> -->
                         <a href="/admin/inventory/detail/<?= $variant['id'] ?>" class="btn btn-outline-info btn-sm">
                             <i class="fas fa-info-circle"></i> Chi tiết
                         </a>
