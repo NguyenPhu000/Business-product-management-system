@@ -12,6 +12,7 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
     str_starts_with($currentPath, '/admin/brands') ||
     str_starts_with($currentPath, '/admin/suppliers');
 $isInventoryMenuActive = str_starts_with($currentPath, '/admin/inventory');
+$isReportMenuActive = str_starts_with($currentPath, '/admin/reports');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -163,6 +164,77 @@ $isInventoryMenuActive = str_starts_with($currentPath, '/admin/inventory');
                         class="<?= str_starts_with($currentPath, '/admin/inventory/history') ? 'active' : '' ?>">
                         <i class="fas fa-history"></i>
                         <span>Lịch sử giao dịch</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Reports Menu (Báo Cáo & Thống Kê) -->
+        <li class="menu-item-has-children <?= $isReportMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="report-menu-toggle" class="menu-toggle"
+                <?= $isReportMenuActive ? 'checked' : '' ?>>
+            <label for="report-menu-toggle" class="menu-label">
+                <i class="fas fa-chart-line"></i>
+                <span>Báo cáo & Thống kê</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/reports/inventory-over-time"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/inventory-over-time') ? 'active' : '' ?>">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Tồn theo thời gian</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/admin/reports/sales"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/sales') ? 'active' : '' ?>">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>Doanh thu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports/profit"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/profit') ? 'active' : '' ?>">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Lợi nhuận gộp</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/admin/reports/top-selling"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/top-selling') ? 'active' : '' ?>">
+                        <i class="fas fa-fire"></i>
+                        <span>Bán chạy nhất</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports/slow-moving"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/slow-moving') ? 'active' : '' ?>">
+                        <i class="fas fa-turtle"></i>
+                        <span>Tồn kho lâu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports/dead-stock"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/dead-stock') ? 'active' : '' ?>">
+                        <i class="fas fa-skull-crossbones"></i>
+                        <span>Dead Stock</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports/high-value"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/high-value') ? 'active' : '' ?>">
+                        <i class="fas fa-gem"></i>
+                        <span>Giá trị cao</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/reports/top-profit"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/top-profit') ? 'active' : '' ?>">
+                        <i class="fas fa-award"></i>
+                        <span>Lợi nhuận cao</span>
                     </a>
                 </li>
             </ul>

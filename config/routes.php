@@ -148,3 +148,24 @@ $router->post('/admin/inventory/threshold/{id}', 'Modules\Inventory\Controllers\
 
 // Reports
 $router->get('/admin/inventory/report', 'Modules\Inventory\Controllers\InventoryController@exportReport', [AuthMiddleware::class]);
+
+// ============ REPORT ROUTES (Báo Cáo & Thống Kê) ============
+
+// Report Dashboard - Redirect to main company dashboard
+$router->get('/admin/reports', 'Modules\Report\Controllers\ReportController@dashboard', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Inventory Reports (5.1 - Báo Cáo Tồn Kho)
+$router->get('/admin/reports/inventory-over-time', 'Modules\Report\Controllers\ReportController@inventoryOverTime', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/reports/stock-at-date', 'Modules\Report\Controllers\ReportController@stockAtDate', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/reports/product-stock-history', 'Modules\Report\Controllers\ReportController@productStockHistory', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Sales & Profit Reports (5.2 - Báo Cáo Doanh Thu & Lợi Nhuận)
+$router->get('/admin/reports/sales', 'Modules\Report\Controllers\ReportController@salesReport', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/profit', 'Modules\Report\Controllers\ReportController@profitReport', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Top Products Reports (5.3 - Báo Cáo Top Sản Phẩm)
+$router->get('/admin/reports/top-selling', 'Modules\Report\Controllers\ReportController@topSellingProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/slow-moving', 'Modules\Report\Controllers\ReportController@slowMovingInventory', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/dead-stock', 'Modules\Report\Controllers\ReportController@deadStock', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/high-value', 'Modules\Report\Controllers\ReportController@highValueProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/top-profit', 'Modules\Report\Controllers\ReportController@topProfitProducts', [AuthMiddleware::class, RoleMiddleware::class]);
