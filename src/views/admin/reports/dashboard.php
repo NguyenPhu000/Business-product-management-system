@@ -226,6 +226,11 @@
 </div>
 
 <style>
+/* Fix scrollbar causing layout shift */
+.table-responsive {
+    scrollbar-gutter: stable;
+}
+
 .btn-outline-primary:hover,
 .btn-outline-success:hover,
 .btn-outline-info:hover {

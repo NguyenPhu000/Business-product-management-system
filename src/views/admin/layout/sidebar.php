@@ -194,47 +194,12 @@ $isReportMenuActive = str_starts_with($currentPath, '/admin/reports');
                         <span>Doanh thu</span>
                     </a>
                 </li>
-                <li>
-                    <a href="/admin/reports/profit"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/profit') ? 'active' : '' ?>">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span>Lợi nhuận gộp</span>
-                    </a>
-                </li>
 
                 <li>
-                    <a href="/admin/reports/top-selling"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/top-selling') ? 'active' : '' ?>">
-                        <i class="fas fa-fire"></i>
-                        <span>Bán chạy nhất</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/reports/slow-moving"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/slow-moving') ? 'active' : '' ?>">
-                        <i class="fas fa-turtle"></i>
-                        <span>Tồn kho lâu</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/reports/dead-stock"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/dead-stock') ? 'active' : '' ?>">
-                        <i class="fas fa-skull-crossbones"></i>
-                        <span>Dead Stock</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/reports/high-value"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/high-value') ? 'active' : '' ?>">
-                        <i class="fas fa-gem"></i>
-                        <span>Giá trị cao</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/admin/reports/top-profit"
-                        class="<?= str_starts_with($currentPath, '/admin/reports/top-profit') ? 'active' : '' ?>">
-                        <i class="fas fa-award"></i>
-                        <span>Lợi nhuận cao</span>
+                    <a href="/admin/reports/top-products"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/top-products') ? 'active' : '' ?>">
+                        <i class="fas fa-star"></i>
+                        <span>Top sản phẩm</span>
                     </a>
                 </li>
             </ul>

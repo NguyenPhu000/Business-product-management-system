@@ -164,8 +164,14 @@ $router->get('/admin/reports/sales', 'Modules\Report\Controllers\ReportControlle
 $router->get('/admin/reports/profit', 'Modules\Report\Controllers\ReportController@profitReport', [AuthMiddleware::class, RoleMiddleware::class]);
 
 // Top Products Reports (5.3 - Báo Cáo Top Sản Phẩm)
+$router->get('/admin/reports/top-products', 'Modules\Report\Controllers\ReportController@topProducts', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->get('/admin/reports/top-selling', 'Modules\Report\Controllers\ReportController@topSellingProducts', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->get('/admin/reports/slow-moving', 'Modules\Report\Controllers\ReportController@slowMovingInventory', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->get('/admin/reports/dead-stock', 'Modules\Report\Controllers\ReportController@deadStock', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->get('/admin/reports/high-value', 'Modules\Report\Controllers\ReportController@highValueProducts', [AuthMiddleware::class, RoleMiddleware::class]);
 $router->get('/admin/reports/top-profit', 'Modules\Report\Controllers\ReportController@topProfitProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// API: Sales data by category (AJAX)
+$router->get('/admin/reports/sales-data/brands', 'Modules\Report\Controllers\ReportController@getSalesDataBrands', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/sales-data/products', 'Modules\Report\Controllers\ReportController@getSalesDataProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+

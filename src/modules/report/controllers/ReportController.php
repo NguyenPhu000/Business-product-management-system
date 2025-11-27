@@ -4,6 +4,7 @@ namespace Modules\Report\Controllers;
 
 use Core\Controller;
 use Modules\Report\Services\ReportService;
+use Modules\Report\Services\SalesAnalyticsService;
 use Helpers\AuthHelper;
 use Exception;
 
@@ -15,10 +16,12 @@ use Exception;
 class ReportController extends Controller
 {
     private ReportService $reportService;
+    private SalesAnalyticsService $salesAnalyticsService;
 
     public function __construct()
     {
         $this->reportService = new ReportService();
+        $this->salesAnalyticsService = new SalesAnalyticsService();
     }
 
     /**
@@ -172,29 +175,46 @@ class ReportController extends Controller
      */
 
     /**
-     * Báo cáo doanh thu
+     * Báo cáo doanh thu toàn diện (KPIs, Charts, Tables)
      */
     public function salesReport(): void
     {
         $startDate = $this->input('start_date');
         $endDate = $this->input('end_date');
+        $categoryId = $this->input('category_id') ? (int) $this->input('category_id') : null;
+        $page = (int) ($this->input('page') ?? 1);
 
         try {
-            $summary = $this->reportService->getSalesSummary($startDate, $endDate);
-            $byCategory = $this->reportService->getSalesRevenueByCategory($startDate, $endDate);
-            $dailyRevenue = $this->reportService->getDailySalesRevenue($startDate, $endDate);
+            // Nếu có filter danh mục, lấy dữ liệu lọc
+            if ($categoryId !== null) {
+                $dashboardData = $this->salesAnalyticsService->getSalesDashboardByCategory($categoryId, $startDate, $endDate, $page);
+            } else {
+                $dashboardData = $this->salesAnalyticsService->getSalesDashboard($startDate, $endDate, $page);
+            }
+
+            // Lấy cấu trúc cây danh mục
+            $categoryTree = $this->salesAnalyticsService->getCategoryTree();
 
             $data = [
                 'title' => 'Báo Cáo Doanh Thu',
-                'summary' => $summary,
-                'by_category' => $byCategory,
-                'daily_revenue' => $dailyRevenue,
+                'kpis' => $dashboardData['kpis'],
+                'daily_trend' => $dashboardData['daily_trend'] ?? null,
+                'chart_daily' => $dashboardData['chart_daily'] ?? null,
+                'chart_category' => $dashboardData['chart_category'],
+                'top_products' => $dashboardData['top_products'] ?? [],
+                'category_revenue' => $dashboardData['category_revenue'],
+                'category_details' => $dashboardData['category_details'],
+                'category_tree' => $categoryTree,
+                'supplier_details' => $dashboardData['brand_details'],
+                'product_details' => $dashboardData['product_details'],
+                'pagination' => $dashboardData['pagination'],
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'category_id' => $categoryId,
                 'activeTab' => 'sales'
             ];
 
-            $this->view('admin/reports/sales_report', $data);
+            $this->view('admin/reports/sales_dashboard', $data);
         } catch (Exception $e) {
             AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
             $this->redirect('/admin/dashboard');
@@ -202,167 +222,143 @@ class ReportController extends Controller
     }
 
     /**
-     * Báo cáo lợi nhuận
+     * Báo cáo lợi nhuận (DEPRECATED - Redirect to sales_dashboard)
      */
     public function profitReport(): void
     {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo bán chạy nhất (DEPRECATED - Redirect to sales_dashboard)
+     */
+    public function topSellingProducts(): void
+    {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo sản phẩm tồn kho lâu (DEPRECATED - Redirect to sales_dashboard)
+     */
+    public function slowMovingInventory(): void
+    {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo dead stock (DEPRECATED - Redirect to sales_dashboard)
+     */
+    public function deadStock(): void
+    {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo high value products (DEPRECATED - Redirect to sales_dashboard)
+     */
+    public function highValueProducts(): void
+    {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo top sản phẩm lợi nhuận (DEPRECATED - Redirect to sales_dashboard)
+     */
+    public function topProfitProducts(): void
+    {
+        $this->redirect('/admin/reports/sales');
+    }
+
+    /**
+     * Báo cáo Top Sản Phẩm - Bán chạy nhất & Tồn kho lâu, ít bán
+     */
+    public function topProducts(): void
+    {
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        try {
+            $model = new \Modules\Report\Models\SalesAnalyticsModel();
+            
+            // Lấy dữ liệu
+            $topSellingProducts = $model->getTopSellingProducts(20, $startDate, $endDate);
+            $slowMovingProducts = $model->getSlowMovingProducts(20, $startDate, $endDate);
+
+            $data = [
+                'title' => 'Top Sản Phẩm',
+                'top_selling_products' => $topSellingProducts,
+                'slow_moving_products' => $slowMovingProducts,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'activeTab' => 'sales'
+            ];
+
+            $this->view('admin/reports/top_products', $data);
+        } catch (Exception $e) {
+            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
+            $this->redirect('/admin/dashboard');
+        }
+    }
+
+    /**
+     * API: Lấy dữ liệu thương hiệu theo danh mục (AJAX)
+     */
+    public function getSalesDataBrands(): void
+    {
+        $categoryId = $this->input('category_id') ? (int) $this->input('category_id') : null;
+        $startDate = $this->input('start_date');
+        $endDate = $this->input('end_date');
+
+        try {
+            if ($categoryId === null) {
+                $this->json(['error' => 'Thiếu tham số category_id'], 400);
+                return;
+            }
+
+            // Lấy dữ liệu thương hiệu theo danh mục
+            $brands = $this->salesAnalyticsService->getBrandsByCategory($categoryId, $startDate, $endDate);
+
+            $this->json([
+                'success' => true,
+                'category_id' => $categoryId,
+                'brands' => $brands,
+                'count' => count($brands)
+            ]);
+        } catch (Exception $e) {
+            $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * API: Lấy dữ liệu sản phẩm theo danh mục (AJAX)
+     */
+    public function getSalesDataProducts(): void
+    {
+        $categoryId = $this->input('category_id') ? (int) $this->input('category_id') : null;
         $startDate = $this->input('start_date');
         $endDate = $this->input('end_date');
         $page = (int) ($this->input('page') ?? 1);
 
         try {
-            $summary = $this->reportService->getProfitSummary($startDate, $endDate);
-            $byProduct = $this->reportService->getGrossProfitByProduct($startDate, $endDate, $page);
+            if ($categoryId === null) {
+                $this->json(['error' => 'Thiếu tham số category_id'], 400);
+                return;
+            }
 
-            $data = [
-                'title' => 'Báo Cáo Lợi Nhuận',
-                'summary' => $summary,
-                'products' => $byProduct['products'],
-                'pagination' => $byProduct['pagination'],
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'activeTab' => 'sales'
-            ];
+            // Lấy dữ liệu sản phẩm theo danh mục
+            $result = $this->salesAnalyticsService->getProductsByCategory($categoryId, $startDate, $endDate, $page);
 
-            $this->view('admin/reports/profit_report', $data);
+            $this->json([
+                'success' => true,
+                'category_id' => $categoryId,
+                'products' => $result['products'],
+                'pagination' => $result['pagination'],
+                'count' => count($result['products'])
+            ]);
         } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
-        }
-    }
-
-    /**
-     * ==================== TOP PRODUCTS REPORTS ====================
-     */
-
-    /**
-     * Báo cáo top sản phẩm bán chạy
-     */
-    public function topSellingProducts(): void
-    {
-        $topN = (int) ($this->input('top', 10));
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
-
-        try {
-            $products = $this->reportService->getTopSellingProducts($topN, $startDate, $endDate);
-
-            $data = [
-                'title' => 'Top Sản Phẩm Bán Chạy',
-                'products' => $products,
-                'topN' => $topN,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'activeTab' => 'top_products'
-            ];
-
-            $this->view('admin/reports/top_selling_products', $data);
-        } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
-        }
-    }
-
-    /**
-     * Báo cáo sản phẩm tồn kho lâu
-     */
-    public function slowMovingInventory(): void
-    {
-        $topN = (int) ($this->input('top', 10));
-        $daysThreshold = (int) ($this->input('days', 30));
-
-        try {
-            $products = $this->reportService->getSlowMovingInventory($topN, $daysThreshold);
-
-            $data = [
-                'title' => 'Sản Phẩm Tồn Kho Lâu',
-                'products' => $products,
-                'topN' => $topN,
-                'daysThreshold' => $daysThreshold,
-                'activeTab' => 'top_products'
-            ];
-
-            $this->view('admin/reports/slow_moving_inventory', $data);
-        } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
-        }
-    }
-
-    /**
-     * Báo cáo dead stock
-     */
-    public function deadStock(): void
-    {
-        $topN = (int) ($this->input('top', 10));
-
-        try {
-            $products = $this->reportService->getDeadStock($topN);
-
-            $data = [
-                'title' => 'Dead Stock (Chưa Bao Giờ Bán)',
-                'products' => $products,
-                'topN' => $topN,
-                'activeTab' => 'top_products'
-            ];
-
-            $this->view('admin/reports/dead_stock', $data);
-        } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
-        }
-    }
-
-    /**
-     * Báo cáo high value products
-     */
-    public function highValueProducts(): void
-    {
-        $topN = (int) ($this->input('top', 10));
-
-        try {
-            $products = $this->reportService->getHighValueProducts($topN);
-
-            $data = [
-                'title' => 'Top Sản Phẩm Giá Trị Cao',
-                'products' => $products,
-                'topN' => $topN,
-                'activeTab' => 'top_products'
-            ];
-
-            $this->view('admin/reports/high_value_products', $data);
-        } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
-        }
-    }
-
-    /**
-     * Báo cáo top sản phẩm lợi nhuận
-     */
-    public function topProfitProducts(): void
-    {
-        $topN = (int) ($this->input('top', 10));
-        $startDate = $this->input('start_date');
-        $endDate = $this->input('end_date');
-
-        try {
-            $products = $this->reportService->getTopProfitProducts($topN, $startDate, $endDate);
-
-            $data = [
-                'title' => 'Top Sản Phẩm Lợi Nhuận Cao',
-                'products' => $products,
-                'topN' => $topN,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'activeTab' => 'top_products'
-            ];
-
-            $this->view('admin/reports/top_profit_products', $data);
-        } catch (Exception $e) {
-            AuthHelper::setFlash('error', 'Lỗi: ' . $e->getMessage());
-            $this->redirect('/admin/dashboard');
+            $this->json(['error' => $e->getMessage()], 500);
         }
     }
 }
+
 

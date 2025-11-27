@@ -440,6 +440,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<style>
+/* Fix scrollbar causing layout shift */
+.table-responsive {
+    scrollbar-gutter: stable;
+}
+</style>
+
 <?php
 // End file
 ?>

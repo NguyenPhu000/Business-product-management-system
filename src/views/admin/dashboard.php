@@ -97,3 +97,11 @@
         </div>
     </div>
 </div>
+
+<style>
+/* Fix scrollbar causing layout shift */
+.table-responsive,
+.card {
+    scrollbar-gutter: stable;
+}
+</style>
