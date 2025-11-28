@@ -11,6 +11,8 @@ $isProductMenuActive = str_starts_with($currentPath, '/admin/products');
 $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
     str_starts_with($currentPath, '/admin/brands') ||
     str_starts_with($currentPath, '/admin/suppliers');
+$isInventoryMenuActive = str_starts_with($currentPath, '/admin/inventory');
+$isReportMenuActive = str_starts_with($currentPath, '/admin/reports');
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -128,6 +130,76 @@ $isCategoryMenuActive = str_starts_with($currentPath, '/admin/categories') ||
                         class="<?= str_starts_with($currentPath, '/admin/suppliers') ? 'active' : '' ?>">
                         <i class="fas fa-truck"></i>
                         <span>Nhà cung cấp</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Inventory Menu (Quản lý kho) -->
+        <li class="menu-item-has-children <?= $isInventoryMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="inventory-menu-toggle" class="menu-toggle"
+                <?= $isInventoryMenuActive ? 'checked' : '' ?>>
+            <label for="inventory-menu-toggle" class="menu-label">
+                <i class="fas fa-warehouse"></i>
+                <span>Quản lý kho hàng</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/inventory"
+                        class="<?= $currentPath === '/admin/inventory' || str_starts_with($currentPath, '/admin/inventory/detail') || str_starts_with($currentPath, '/admin/inventory/adjust') ? 'active' : '' ?>">
+                        <i class="fas fa-boxes"></i>
+                        <span>Tồn kho</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/inventory/low-stock"
+                        class="<?= str_starts_with($currentPath, '/admin/inventory/low-stock') ? 'active' : '' ?>">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Cảnh báo tồn kho</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/inventory/history"
+                        class="<?= str_starts_with($currentPath, '/admin/inventory/history') ? 'active' : '' ?>">
+                        <i class="fas fa-history"></i>
+                        <span>Lịch sử giao dịch</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Reports Menu (Báo Cáo & Thống Kê) -->
+        <li class="menu-item-has-children <?= $isReportMenuActive ? 'active' : '' ?>">
+            <input type="checkbox" id="report-menu-toggle" class="menu-toggle"
+                <?= $isReportMenuActive ? 'checked' : '' ?>>
+            <label for="report-menu-toggle" class="menu-label">
+                <i class="fas fa-chart-line"></i>
+                <span>Báo cáo & Thống kê</span>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </label>
+            <ul class="submenu">
+                <li>
+                    <a href="/admin/reports/inventory-over-time"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/inventory-over-time') ? 'active' : '' ?>">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Tồn theo thời gian</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/admin/reports/sales"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/sales') ? 'active' : '' ?>">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>Doanh thu</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/admin/reports/top-products"
+                        class="<?= str_starts_with($currentPath, '/admin/reports/top-products') ? 'active' : '' ?>">
+                        <i class="fas fa-star"></i>
+                        <span>Top sản phẩm</span>
                     </a>
                 </li>
             </ul>

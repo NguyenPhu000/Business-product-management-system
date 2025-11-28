@@ -10,6 +10,6 @@ return [
     'app_debug' => true,
     'app_url' => 'http://localhost',
     'timezone' => 'Asia/Ho_Chi_Minh',
-    
+
     // TODO: Thêm cấu hình khác nếu cần
 ];

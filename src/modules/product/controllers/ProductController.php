@@ -119,6 +119,8 @@ class ProductController extends Controller
     public function edit(int $id): void
     {
         try {
+            // Lấy sản phẩm kèm thông tin inventory
+            $product = $this->productService->getProductWithInventory($id);
             $product = $this->productService->getProductWithCategories($id);
 
             if (!$product) {

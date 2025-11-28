@@ -77,6 +77,15 @@ $router->post('/admin/products/toggle/{id}', 'Modules\Product\Controllers\Produc
 $router->post('/admin/products/delete-image', 'Modules\Product\Controllers\ProductController@deleteImage', [AuthMiddleware::class]);
 $router->post('/admin/products/set-primary-image', 'Modules\Product\Controllers\ProductController@setPrimaryImage', [AuthMiddleware::class]);
 
+// Product Variants Management (Tích hợp với Inventory)
+$router->get('/admin/products/{id}/variants', 'Modules\Product\Controllers\VariantController@index', [AuthMiddleware::class]);
+$router->get('/admin/products/{id}/variants/create', 'Modules\Product\Controllers\VariantController@create', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/store', 'Modules\Product\Controllers\VariantController@store', [AuthMiddleware::class]);
+$router->get('/admin/products/{id}/variants/{variantId}/edit', 'Modules\Product\Controllers\VariantController@edit', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/update', 'Modules\Product\Controllers\VariantController@update', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/delete', 'Modules\Product\Controllers\VariantController@delete', [AuthMiddleware::class]);
+$router->post('/admin/products/{id}/variants/{variantId}/toggle', 'Modules\Product\Controllers\VariantController@toggle', [AuthMiddleware::class]);
+
 // ============ CATEGORY ROUTES (Categories, Brands, Suppliers) ============
 
 // Categories Management
@@ -106,3 +115,63 @@ $router->get('/admin/suppliers/edit/{id}', 'Modules\Category\Controllers\Supplie
 $router->post('/admin/suppliers/update/{id}', 'Modules\Category\Controllers\SupplierController@update', [AuthMiddleware::class]);
 $router->post('/admin/suppliers/delete/{id}', 'Modules\Category\Controllers\SupplierController@destroy', [AuthMiddleware::class]);
 $router->post('/admin/suppliers/toggle/{id}', 'Modules\Category\Controllers\SupplierController@toggle', [AuthMiddleware::class]);
+
+// Purchase (Import) - tạo phiếu nhập
+$router->get('/admin/purchase/create', 'Modules\Purchase\Controllers\PurchaseController@create', [AuthMiddleware::class]);
+$router->post('/admin/purchase/store', 'Modules\Purchase\Controllers\PurchaseController@store', [AuthMiddleware::class]);
+
+// Sales (Export) - tạo phiếu xuất
+$router->get('/admin/sales/create', 'Modules\Sales\Controllers\SalesController@create', [AuthMiddleware::class]);
+$router->post('/admin/sales/store', 'Modules\Sales\Controllers\SalesController@store', [AuthMiddleware::class]);
+
+// ============ INVENTORY ROUTES (Quản lý kho hàng) ============
+
+// Inventory List & Low Stock Alerts
+$router->get('/admin/inventory', 'Modules\Inventory\Controllers\InventoryController@index', [AuthMiddleware::class]);
+$router->get('/admin/inventory/low-stock', 'Modules\Inventory\Controllers\InventoryController@lowStock', [AuthMiddleware::class]);
+
+// Stock Detail & Adjustment
+$router->get('/admin/inventory/detail/{id}', 'Modules\Inventory\Controllers\InventoryController@detail', [AuthMiddleware::class]);
+$router->get('/admin/inventory/adjust/{id}', 'Modules\Inventory\Controllers\InventoryController@adjustForm', [AuthMiddleware::class]);
+$router->post('/admin/inventory/adjust', 'Modules\Inventory\Controllers\InventoryController@adjust', [AuthMiddleware::class]);
+
+// Transaction History
+$router->get('/admin/inventory/history', 'Modules\Inventory\Controllers\InventoryController@history', [AuthMiddleware::class]);
+
+// Stock Operations
+$router->post('/admin/inventory/import', 'Modules\Inventory\Controllers\InventoryController@import', [AuthMiddleware::class]);
+$router->post('/admin/inventory/export', 'Modules\Inventory\Controllers\InventoryController@export', [AuthMiddleware::class]);
+$router->post('/admin/inventory/transfer', 'Modules\Inventory\Controllers\InventoryController@transfer', [AuthMiddleware::class]);
+
+// Threshold Update
+$router->post('/admin/inventory/threshold/{id}', 'Modules\Inventory\Controllers\InventoryController@updateThreshold', [AuthMiddleware::class]);
+
+// Reports
+$router->get('/admin/inventory/report', 'Modules\Inventory\Controllers\InventoryController@exportReport', [AuthMiddleware::class]);
+
+// ============ REPORT ROUTES (Báo Cáo & Thống Kê) ============
+
+// Report Dashboard - Redirect to main company dashboard
+$router->get('/admin/reports', 'Modules\Report\Controllers\ReportController@dashboard', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Inventory Reports (5.1 - Báo Cáo Tồn Kho)
+$router->get('/admin/reports/inventory-over-time', 'Modules\Report\Controllers\ReportController@inventoryOverTime', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/reports/stock-at-date', 'Modules\Report\Controllers\ReportController@stockAtDate', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->post('/admin/reports/product-stock-history', 'Modules\Report\Controllers\ReportController@productStockHistory', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Sales & Profit Reports (5.2 - Báo Cáo Doanh Thu & Lợi Nhuận)
+$router->get('/admin/reports/sales', 'Modules\Report\Controllers\ReportController@salesReport', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/profit', 'Modules\Report\Controllers\ReportController@profitReport', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// Top Products Reports (5.3 - Báo Cáo Top Sản Phẩm)
+$router->get('/admin/reports/top-products', 'Modules\Report\Controllers\ReportController@topProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/top-selling', 'Modules\Report\Controllers\ReportController@topSellingProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/slow-moving', 'Modules\Report\Controllers\ReportController@slowMovingInventory', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/dead-stock', 'Modules\Report\Controllers\ReportController@deadStock', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/high-value', 'Modules\Report\Controllers\ReportController@highValueProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/top-profit', 'Modules\Report\Controllers\ReportController@topProfitProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+
+// API: Sales data by category (AJAX)
+$router->get('/admin/reports/sales-data/brands', 'Modules\Report\Controllers\ReportController@getSalesDataBrands', [AuthMiddleware::class, RoleMiddleware::class]);
+$router->get('/admin/reports/sales-data/products', 'Modules\Report\Controllers\ReportController@getSalesDataProducts', [AuthMiddleware::class, RoleMiddleware::class]);
+
