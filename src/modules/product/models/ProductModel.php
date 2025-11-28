@@ -106,7 +106,19 @@ class ProductModel extends BaseModel
                        END
                    FROM product_images pi2 
                    WHERE pi2.product_id = p.id AND pi2.is_primary = 1 
-                   LIMIT 1) AS primary_image
+                   LIMIT 1) AS primary_image,
+                   COALESCE(
+                       (SELECT JSON_ARRAYAGG(
+                           CASE 
+                               WHEN pi3.image_data IS NOT NULL THEN CONCAT('data:', pi3.mime_type, ';base64,', pi3.image_data)
+                               ELSE pi3.url
+                           END
+                       )
+                       FROM product_images pi3 
+                       WHERE pi3.product_id = p.id 
+                       ORDER BY pi3.is_primary DESC, pi3.id ASC),
+                       '[]'
+                   ) AS images
             FROM {$this->table} p
             LEFT JOIN product_categories pc ON p.id = pc.product_id
             LEFT JOIN categories c ON pc.category_id = c.id

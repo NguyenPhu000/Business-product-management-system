@@ -28,12 +28,8 @@ class DashboardController extends Controller
         // Lấy dữ liệu từ service
         $dashboardData = $this->dashboardService->getDashboardData();
 
-        $data = [
-            'title' => 'Dashboard',
-            'stats' => $dashboardData['stats'],
-            'recentLogs' => $dashboardData['recentLogs'],
-            'recentUsers' => $dashboardData['recentUsers']
-        ];
+        // Truyền toàn bộ dữ liệu vào view
+        $data = array_merge(['title' => 'Dashboard'], $dashboardData);
 
         $this->view('admin/dashboard', $data);
     }

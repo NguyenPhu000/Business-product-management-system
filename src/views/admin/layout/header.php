@@ -2,6 +2,9 @@
 $user = \Helpers\AuthHelper::user();
 ?>
 <header class="admin-header">
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
     <div class="header-title">
         <h1><?= \Core\View::e($title ?? 'Dashboard') ?></h1>
     </div>
@@ -24,11 +27,27 @@ $user = \Helpers\AuthHelper::user();
 </header>
 
 <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('adminSidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+            // Save state
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            try {
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            } catch (e) {
+                document.cookie = 'sidebarCollapsed=' + isCollapsed + ';path=/;max-age=31536000';
+            }
+            console.log('Sidebar toggled:', isCollapsed ? 'collapsed' : 'expanded');
+        }
+    }
+
     function handleLogout(event) {
         // Xóa storage
         sessionStorage.clear();
-        localStorage.clear();
-
+        try {
+            localStorage.clear();
+        } catch (e) {}
         // Cho phép link chạy bình thường
         return true;
     }

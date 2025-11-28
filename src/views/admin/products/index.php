@@ -18,17 +18,17 @@
 
     <!-- Flash Messages -->
     <?php if ($flash = \Helpers\AuthHelper::getFlash('success')): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle"></i> <?= $flash ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> <?= $flash ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     <?php endif; ?>
 
     <?php if ($flash = \Helpers\AuthHelper::getFlash('error')): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i> <?= $flash ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> <?= $flash ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     <?php endif; ?>
 
     <!-- Filters -->
@@ -168,143 +168,189 @@
         </div>
         <div class="card-body">
             <?php if (empty($products)): ?>
-            <div class="alert alert-info text-center">
-                <i class="fas fa-info-circle"></i>
-                Chưa có sản phẩm nào. <a href="/admin/products/create">Thêm sản phẩm đầu tiên</a>
-            </div>
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i>
+                    Chưa có sản phẩm nào. <a href="/admin/products/create">Thêm sản phẩm đầu tiên</a>
+                </div>
             <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="50">#</th>
-                            <th width="100">Hình ảnh</th>
-                            <th width="120">SKU</th>
-                            <th>
-                                <a href="?sort_by=name_<?= ($filters['sort_by'] ?? '') === 'name_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
-                                    class="text-decoration-none text-dark">
-                                    Tên sản phẩm
-                                    <?php if (($filters['sort_by'] ?? '') === 'name_asc'): ?>
-                                    <i class="fas fa-arrow-up"></i>
-                                    <?php elseif (($filters['sort_by'] ?? '') === 'name_desc'): ?>
-                                    <i class="fas fa-arrow-down"></i>
-                                    <?php else: ?>
-                                    <i class="fas fa-arrow-down-up text-muted"></i>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th>Danh mục</th>
-                            <th width="130">
-                                <a href="?sort_by=price_<?= ($filters['sort_by'] ?? '') === 'price_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
-                                    class="text-decoration-none text-dark">
-                                    Giá bán
-                                    <?php if (($filters['sort_by'] ?? '') === 'price_asc'): ?>
-                                    <i class="fas fa-arrow-up text-success"></i>
-                                    <?php elseif (($filters['sort_by'] ?? '') === 'price_desc'): ?>
-                                    <i class="fas fa-arrow-down text-danger"></i>
-                                    <?php else: ?>
-                                    <i class="fas fa-arrow-down-up text-muted"></i>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th width="100">Trạng thái</th>
-                            <th width="220">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($products as $index => $product): ?>
-                        <tr>
-                            <td class="text-center">
-                                <?= ($currentPage - 1) * 20 + $index + 1 ?>
-                            </td>
-                            <td>
-                                <img src="<?= $product['primary_image'] ?? '/assets/images/no-image.png' ?>"
-                                    alt="<?= htmlspecialchars($product['name']) ?>" class="img-thumbnail"
-                                    style="width: 60px; height: 60px; object-fit: cover;">
-                            </td>
-                            <td>
-                                <code><?= htmlspecialchars($product['sku']) ?></code>
-                            </td>
-                            <td>
-                                <strong><?= htmlspecialchars($product['name']) ?></strong>
-                                <?php if (!empty($product['short_desc'])): ?>
-                                <br>
-                                <small class="text-muted">
-                                    <?= htmlspecialchars(mb_substr($product['short_desc'], 0, 80)) ?>...
-                                </small>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if (!empty($product['category_names'])): ?>
-                                <?php
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="50">#</th>
+                                <th width="100">Hình ảnh</th>
+                                <th width="120">SKU</th>
+                                <th>
+                                    <a href="?sort_by=name_<?= ($filters['sort_by'] ?? '') === 'name_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
+                                        class="text-decoration-none text-dark">
+                                        Tên sản phẩm
+                                        <?php if (($filters['sort_by'] ?? '') === 'name_asc'): ?>
+                                            <i class="fas fa-arrow-up"></i>
+                                        <?php elseif (($filters['sort_by'] ?? '') === 'name_desc'): ?>
+                                            <i class="fas fa-arrow-down"></i>
+                                        <?php else: ?>
+                                            <i class="fas fa-arrow-down-up text-muted"></i>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
+                                <th>Danh mục</th>
+                                <th width="130">
+                                    <a href="?sort_by=price_<?= ($filters['sort_by'] ?? '') === 'price_asc' ? 'desc' : 'asc' ?><?= !empty($filters['keyword']) ? '&keyword=' . urlencode($filters['keyword']) : '' ?><?= !empty($filters['category_id']) ? '&category_id=' . $filters['category_id'] : '' ?><?= !empty($filters['brand_id']) ? '&brand_id=' . $filters['brand_id'] : '' ?><?= isset($filters['status']) && $filters['status'] !== '' ? '&status=' . $filters['status'] : '' ?>"
+                                        class="text-decoration-none text-dark">
+                                        Giá bán
+                                        <?php if (($filters['sort_by'] ?? '') === 'price_asc'): ?>
+                                            <i class="fas fa-arrow-up text-success"></i>
+                                        <?php elseif (($filters['sort_by'] ?? '') === 'price_desc'): ?>
+                                            <i class="fas fa-arrow-down text-danger"></i>
+                                        <?php else: ?>
+                                            <i class="fas fa-arrow-down-up text-muted"></i>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
+                                <th width="100">Trạng thái</th>
+                                <th width="220">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($products as $index => $product): ?>
+                                <tr>
+                                    <td class="text-center">
+                                        <?= ($currentPage - 1) * 20 + $index + 1 ?>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        // Parse images
+                                        $images = [];
+                                        if (!empty($product['images'])) {
+                                            $imageData = json_decode($product['images'], true);
+                                            if (is_array($imageData)) {
+                                                $images = $imageData;
+                                            }
+                                        }
+
+                                        // Nếu không có images trong JSON, dùng primary_image
+                                        if (empty($images) && !empty($product['primary_image'])) {
+                                            $images = [$product['primary_image']];
+                                        }
+
+                                        $primaryImage = $images[0] ?? '/assets/images/no-image.png';
+                                        $totalImages = count($images);
+                                        ?>
+
+                                        <div class="product-image-gallery">
+                                            <!-- Ảnh chính -->
+                                            <div class="position-relative d-inline-block">
+                                                <img src="<?= $primaryImage ?>"
+                                                    alt="<?= htmlspecialchars($product['name']) ?>"
+                                                    class="img-thumbnail product-thumb-main"
+                                                    style="width: 60px; height: 60px; object-fit: cover; cursor: pointer;"
+                                                    onclick="openImageGallery(<?= htmlspecialchars(json_encode($images)) ?>, 0)">
+
+                                                <?php if ($totalImages > 1): ?>
+                                                    <span class="badge bg-primary position-absolute bottom-0 end-0 m-1"
+                                                        style="font-size: 9px; padding: 2px 5px;">
+                                                        +<?= $totalImages - 1 ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <!-- Ảnh phụ (mini thumbnails) -->
+                                            <?php if ($totalImages > 1): ?>
+                                                <div class="mt-1 d-flex gap-1 flex-wrap">
+                                                    <?php for ($i = 1; $i < min(4, $totalImages); $i++): ?>
+                                                        <img src="<?= $images[$i] ?>"
+                                                            alt="Image <?= $i + 1 ?>"
+                                                            class="img-thumbnail product-thumb-mini"
+                                                            style="width: 28px; height: 28px; object-fit: cover; cursor: pointer;"
+                                                            onclick="openImageGallery(<?= htmlspecialchars(json_encode($images)) ?>, <?= $i ?>)">
+                                                    <?php endfor; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code><?= htmlspecialchars($product['sku']) ?></code>
+                                    </td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($product['name']) ?></strong>
+                                        <?php if (!empty($product['short_desc'])): ?>
+                                            <br>
+                                            <small class="text-muted">
+                                                <?= htmlspecialchars(mb_substr($product['short_desc'], 0, 80)) ?>...
+                                            </small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($product['category_names'])): ?>
+                                            <?php
                                             $categories = explode(', ', $product['category_names']);
                                             $colors = ['primary', 'success', 'danger', 'warning', 'info', 'secondary', 'dark'];
                                             foreach ($categories as $index => $cat):
                                                 $colorClass = $colors[$index % count($colors)];
                                             ?>
-                                <span
-                                    class="badge-category badge-<?= $colorClass ?>"><?= htmlspecialchars($cat) ?></span>
-                                <?php endforeach; ?>
-                                <?php else: ?>
-                                <span class="text-muted">Chưa phân loại</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-end">
-                                <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
-                                <div>
-                                    <small class="text-muted text-decoration-line-through">
-                                        <?= number_format($product['price'], 0, ',', '.') ?> đ
-                                    </small>
-                                </div>
-                                <div>
-                                    <strong class="text-danger">
-                                        <?= number_format($product['sale_price'], 0, ',', '.') ?> đ
-                                    </strong>
-                                </div>
-                                <?php else: ?>
-                                <strong class="text-primary">
-                                    <?= number_format($product['price'] ?? 0, 0, ',', '.') ?> đ
-                                </strong>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-center">
-                                <div class="form-check form-switch d-inline-block">
-                                    <input class="form-check-input toggle-status" type="checkbox" role="switch"
-                                        data-id="<?= $product['id'] ?>" <?= $product['status'] == 1 ? 'checked' : '' ?>
-                                        title="Click để ẩn/hiện sản phẩm">
-                                </div>
-                                <?php if ($product['status'] == 1): ?>
-                                <small class="text-success d-block">Đang bán</small>
-                                <?php else: ?>
-                                <small class="text-secondary d-block">Đã ẩn</small>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-outline-warning"
-                                        title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="/admin/products/<?= $product['id'] ?>/variants"
-                                        class="btn btn-outline-info" title="Quản lý biến thể">
-                                        <i class="fas fa-palette"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger btn-delete"
-                                        data-id="<?= $product['id'] ?>"
-                                        data-name="<?= htmlspecialchars($product['name']) ?>" title="Xóa sản phẩm">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                                                <span
+                                                    class="badge-category badge-<?= $colorClass ?>"><?= htmlspecialchars($cat) ?></span>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">Chưa phân loại</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
+                                            <div>
+                                                <small class="text-muted text-decoration-line-through">
+                                                    <?= number_format($product['price'], 0, ',', '.') ?> đ
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <strong class="text-danger">
+                                                    <?= number_format($product['sale_price'], 0, ',', '.') ?> đ
+                                                </strong>
+                                            </div>
+                                        <?php else: ?>
+                                            <strong class="text-primary">
+                                                <?= number_format($product['price'] ?? 0, 0, ',', '.') ?> đ
+                                            </strong>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-inline-block">
+                                            <input class="form-check-input toggle-status" type="checkbox" role="switch"
+                                                data-id="<?= $product['id'] ?>" <?= $product['status'] == 1 ? 'checked' : '' ?>
+                                                title="Click để ẩn/hiện sản phẩm">
+                                        </div>
+                                        <?php if ($product['status'] == 1): ?>
+                                            <small class="text-success d-block">Đang bán</small>
+                                        <?php else: ?>
+                                            <small class="text-secondary d-block">Đã ẩn</small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-outline-warning"
+                                                title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="/admin/products/<?= $product['id'] ?>/variants"
+                                                class="btn btn-outline-info" title="Quản lý biến thể">
+                                                <i class="fas fa-palette"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-delete"
+                                                data-id="<?= $product['id'] ?>"
+                                                data-name="<?= htmlspecialchars($product['name']) ?>" title="Xóa sản phẩm">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-            <?php
+                <!-- Pagination -->
+                <?php if ($totalPages > 1): ?>
+                    <?php
                     // Build query string để giữ lại các filter
                     $queryParams = [];
                     if (!empty($filters['keyword'])) $queryParams[] = 'keyword=' . urlencode($filters['keyword']);
@@ -314,346 +360,565 @@
                     if (!empty($filters['sort_by'])) $queryParams[] = 'sort_by=' . $filters['sort_by'];
                     $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
                     ?>
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <!-- Previous -->
-                    <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= $currentPage - 1 ?><?= $queryString ?>"
-                            aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous -->
+                            <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $currentPage - 1 ?><?= $queryString ?>"
+                                    aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
 
-                    <!-- Page numbers -->
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=<?= $i ?><?= $queryString ?>">
-                            <?= $i ?>
-                        </a>
-                    </li>
-                    <?php endfor; ?>
+                            <!-- Page numbers -->
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?= $i == $currentPage ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?><?= $queryString ?>">
+                                        <?= $i ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
 
-                    <!-- Next -->
-                    <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= $currentPage + 1 ?><?= $queryString ?>" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <?php endif; ?>
+                            <!-- Next -->
+                            <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                                <a class="page-link" href="?page=<?= $currentPage + 1 ?><?= $queryString ?>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Toggle product status
-    document.querySelectorAll('.toggle-status').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            const productId = this.dataset.id;
-            const isChecked = this.checked;
-            const statusText = this.parentElement.nextElementSibling;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle product status
+        document.querySelectorAll('.toggle-status').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const productId = this.dataset.id;
+                const isChecked = this.checked;
+                const statusText = this.parentElement.nextElementSibling;
 
-            fetch(`/admin/products/toggle/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update text
-                        if (isChecked) {
-                            statusText.textContent = 'Đang bán';
-                            statusText.className = 'text-success d-block';
-                        } else {
-                            statusText.textContent = 'Đã ẩn';
-                            statusText.className = 'text-secondary d-block';
+                fetch(`/admin/products/toggle/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         }
-                    } else {
-                        alert('Lỗi: ' + data.message);
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update text
+                            if (isChecked) {
+                                statusText.textContent = 'Đang bán';
+                                statusText.className = 'text-success d-block';
+                            } else {
+                                statusText.textContent = 'Đã ẩn';
+                                statusText.className = 'text-secondary d-block';
+                            }
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                            this.checked = !isChecked; // Revert
+                        }
+                    })
+                    .catch(err => {
+                        alert('Có lỗi xảy ra!');
                         this.checked = !isChecked; // Revert
-                    }
-                })
-                .catch(err => {
-                    alert('Có lỗi xảy ra!');
-                    this.checked = !isChecked; // Revert
-                });
-        });
-    });
-
-    // Delete product
-    document.querySelectorAll('.btn-delete').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            const productId = this.dataset.id;
-            const productName = this.dataset.name;
-
-            console.log('Delete button clicked:', {
-                productId,
-                productName
+                    });
             });
+        });
 
-            if (confirm(
-                    `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
-                )) {
-                console.log('User confirmed delete');
+        // Delete product
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
 
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/admin/products/delete/${productId}`;
+                const productId = this.dataset.id;
+                const productName = this.dataset.name;
 
-                console.log('Form action:', form.action);
+                console.log('Delete button clicked:', {
+                    productId,
+                    productName
+                });
 
-                document.body.appendChild(form);
-                form.submit();
-            } else {
-                console.log('User cancelled delete');
-            }
+                if (confirm(
+                        `Bạn có chắc chắn muốn xóa sản phẩm "${productName}"?\n\nHành động này không thể hoàn tác!`
+                    )) {
+                    console.log('User confirmed delete');
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/admin/products/delete/${productId}`;
+
+                    console.log('Form action:', form.action);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    console.log('User cancelled delete');
+                }
+            });
         });
     });
-});
 </script>
 
 <style>
-/* Custom styles cho trang danh sách sản phẩm */
-.card-header.bg-light {
-    background-color: #f8f9fc !important;
-    border-bottom: 2px solid #e3e6f0;
-}
+    /* Custom styles cho trang danh sách sản phẩm */
+    .card-header.bg-light {
+        background-color: #f8f9fc !important;
+        border-bottom: 2px solid #e3e6f0;
+    }
 
-.form-label.fw-semibold {
-    font-weight: 600;
-    color: #5a5c69;
-    margin-bottom: 0.5rem;
-}
-
-.form-control-lg {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-}
-
-.form-select,
-.form-control {
-    border: 1px solid #d1d3e2;
-    border-radius: 0.35rem;
-    transition: all 0.3s ease;
-}
-
-.form-select:focus,
-.form-control:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-}
-
-.btn {
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 0.35rem;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    min-width: 120px;
-}
-
-.btn-secondary {
-    min-width: 120px;
-}
-
-.d-flex.gap-2 {
-    gap: 0.5rem;
-}
-
-/* Table styling */
-.table {
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.table thead th {
-    background: #7b7a7aff;
-    color: white;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-    padding: 1rem 0.75rem;
-    border: none;
-    vertical-align: middle;
-}
-
-.table thead th a {
-    color: white !important;
-    text-decoration: none;
-}
-
-.table thead th a:hover {
-    color: #e0e0e0 !important;
-}
-
-.table tbody tr {
-    transition: all 0.2s ease;
-    background: white;
-}
-
-.table tbody tr:hover {
-    background: #f8f9fc;
-    transform: translateX(2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.table tbody td {
-    padding: 1rem 0.75rem;
-    vertical-align: middle;
-    border-color: #e3e6f0;
-}
-
-.img-thumbnail {
-    border-radius: 8px;
-    border: 2px solid #e3e6f0;
-    transition: transform 0.2s ease;
-}
-
-.img-thumbnail:hover {
-    transform: scale(1.1);
-    border-color: #4e73df;
-}
-
-.badge {
-    padding: 0.35rem 0.65rem;
-    font-weight: 500;
-    font-size: 0.75rem;
-    border-radius: 6px;
-}
-
-/* Category badges - chỉ viền, không background */
-.badge-category {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    margin: 0.15rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 20px;
-    border: 1.5px solid;
-    background: transparent !important;
-    transition: all 0.2s ease;
-}
-
-.badge-category.badge-primary {
-    color: #4e73df;
-    border-color: #4e73df;
-}
-
-.badge-category.badge-primary:hover {
-    background: rgba(78, 115, 223, 0.1) !important;
-}
-
-.badge-category.badge-success {
-    color: #1cc88a;
-    border-color: #1cc88a;
-}
-
-.badge-category.badge-success:hover {
-    background: rgba(28, 200, 138, 0.1) !important;
-}
-
-.badge-category.badge-danger {
-    color: #e74a3b;
-    border-color: #e74a3b;
-}
-
-.badge-category.badge-danger:hover {
-    background: rgba(231, 74, 59, 0.1) !important;
-}
-
-.badge-category.badge-warning {
-    color: #f6c23e;
-    border-color: #f6c23e;
-}
-
-.badge-category.badge-warning:hover {
-    background: rgba(246, 194, 62, 0.1) !important;
-}
-
-.badge-category.badge-info {
-    color: #36b9cc;
-    border-color: #36b9cc;
-}
-
-.badge-category.badge-info:hover {
-    background: rgba(54, 185, 204, 0.1) !important;
-}
-
-.badge-category.badge-secondary {
-    color: #858796;
-    border-color: #858796;
-}
-
-.badge-category.badge-secondary:hover {
-    background: rgba(133, 135, 150, 0.1) !important;
-}
-
-.badge-category.badge-dark {
-    color: #5a5c69;
-    border-color: #5a5c69;
-}
-
-.badge-category.badge-dark:hover {
-    background: rgba(90, 92, 105, 0.1) !important;
-}
-
-.btn-group .btn {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.875rem;
-}
-
-.btn-outline-warning {
-    color: #f6c23e;
-    border-color: #f6c23e;
-}
-
-.btn-outline-warning:hover {
-    background-color: #f6c23e;
-    border-color: #f6c23e;
-    color: #fff;
-}
-
-.btn-outline-info {
-    color: #36b9cc;
-    border-color: #36b9cc;
-}
-
-.btn-outline-info:hover {
-    background-color: #36b9cc;
-    border-color: #36b9cc;
-    color: #fff;
-}
-
-.btn-outline-danger {
-    color: #e74a3b;
-    border-color: #e74a3b;
-}
-
-.btn-outline-danger:hover {
-    background-color: #e74a3b;
-    border-color: #e74a3b;
-    color: #fff;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .row.g-3>div {
+    .form-label.fw-semibold {
+        font-weight: 600;
+        color: #5a5c69;
         margin-bottom: 0.5rem;
+    }
+
+    .form-control-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .form-select,
+    .form-control {
+        border: 1px solid #d1d3e2;
+        border-radius: 0.35rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
     }
 
     .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.35rem;
+        transition: all 0.3s ease;
     }
-}
+
+    .btn-primary {
+        min-width: 120px;
+    }
+
+    .btn-secondary {
+        min-width: 120px;
+    }
+
+    .d-flex.gap-2 {
+        gap: 0.5rem;
+    }
+
+    /* Table styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: #7b7a7aff;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+        border: none;
+        vertical-align: middle;
+    }
+
+    .table thead th a {
+        color: white !important;
+        text-decoration: none;
+    }
+
+    .table thead th a:hover {
+        color: #e0e0e0 !important;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    .table tbody tr:hover {
+        background: #f8f9fc;
+        transform: translateX(2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        border-color: #e3e6f0;
+    }
+
+    .img-thumbnail {
+        border-radius: 8px;
+        border: 2px solid #e3e6f0;
+        transition: transform 0.2s ease;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+        border-color: #4e73df;
+    }
+
+    .badge {
+        padding: 0.35rem 0.65rem;
+        font-weight: 500;
+        font-size: 0.75rem;
+        border-radius: 6px;
+    }
+
+    /* Category badges - chỉ viền, không background */
+    .badge-category {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        margin: 0.15rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border-radius: 20px;
+        border: 1.5px solid;
+        background: transparent !important;
+        transition: all 0.2s ease;
+    }
+
+    .badge-category.badge-primary {
+        color: #4e73df;
+        border-color: #4e73df;
+    }
+
+    .badge-category.badge-primary:hover {
+        background: rgba(78, 115, 223, 0.1) !important;
+    }
+
+    .badge-category.badge-success {
+        color: #1cc88a;
+        border-color: #1cc88a;
+    }
+
+    .badge-category.badge-success:hover {
+        background: rgba(28, 200, 138, 0.1) !important;
+    }
+
+    .badge-category.badge-danger {
+        color: #e74a3b;
+        border-color: #e74a3b;
+    }
+
+    .badge-category.badge-danger:hover {
+        background: rgba(231, 74, 59, 0.1) !important;
+    }
+
+    .badge-category.badge-warning {
+        color: #f6c23e;
+        border-color: #f6c23e;
+    }
+
+    .badge-category.badge-warning:hover {
+        background: rgba(246, 194, 62, 0.1) !important;
+    }
+
+    .badge-category.badge-info {
+        color: #36b9cc;
+        border-color: #36b9cc;
+    }
+
+    .badge-category.badge-info:hover {
+        background: rgba(54, 185, 204, 0.1) !important;
+    }
+
+    .badge-category.badge-secondary {
+        color: #858796;
+        border-color: #858796;
+    }
+
+    .badge-category.badge-secondary:hover {
+        background: rgba(133, 135, 150, 0.1) !important;
+    }
+
+    .badge-category.badge-dark {
+        color: #5a5c69;
+        border-color: #5a5c69;
+    }
+
+    .badge-category.badge-dark:hover {
+        background: rgba(90, 92, 105, 0.1) !important;
+    }
+
+    .btn-group .btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-outline-warning {
+        color: #f6c23e;
+        border-color: #f6c23e;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #f6c23e;
+        border-color: #f6c23e;
+        color: #fff;
+    }
+
+    .btn-outline-info {
+        color: #36b9cc;
+        border-color: #36b9cc;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #36b9cc;
+        border-color: #36b9cc;
+        color: #fff;
+    }
+
+    .btn-outline-danger {
+        color: #e74a3b;
+        border-color: #e74a3b;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #e74a3b;
+        border-color: #e74a3b;
+        color: #fff;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .row.g-3>div {
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* Image Gallery Styles */
+    .product-thumb-main {
+        transition: all 0.3s ease;
+    }
+
+    .product-thumb-main:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-thumb-mini {
+        transition: all 0.3s ease;
+        opacity: 0.7;
+    }
+
+    .product-thumb-mini:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* Image Gallery Modal */
+    .image-gallery-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .image-gallery-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .gallery-content {
+        max-width: 90%;
+        max-height: 90%;
+        position: relative;
+    }
+
+    .gallery-main-image {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .gallery-nav:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .gallery-nav.prev {
+        left: -60px;
+    }
+
+    .gallery-nav.next {
+        right: -60px;
+    }
+
+    .gallery-close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 24px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .gallery-close:hover {
+        background: white;
+        transform: rotate(90deg);
+    }
+
+    .gallery-thumbnails {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .gallery-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .gallery-thumb:hover {
+        opacity: 0.8;
+    }
+
+    .gallery-thumb.active {
+        opacity: 1;
+        border-color: #4e73df;
+    }
+
+    .gallery-counter {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        color: white;
+        font-size: 14px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px 15px;
+        border-radius: 20px;
+    }
 </style>
+
+<!-- Image Gallery Modal -->
+<div class="image-gallery-modal" id="imageGalleryModal">
+    <div class="gallery-content">
+        <button class="gallery-close" onclick="closeImageGallery()">×</button>
+        <span class="gallery-counter" id="galleryCounter">1 / 1</span>
+        <button class="gallery-nav prev" onclick="navigateGallery(-1)">‹</button>
+        <img src="" alt="Gallery Image" class="gallery-main-image" id="galleryMainImage">
+        <button class="gallery-nav next" onclick="navigateGallery(1)">›</button>
+        <div class="gallery-thumbnails" id="galleryThumbnails"></div>
+    </div>
+</div>
+
+<script>
+    let currentGalleryImages = [];
+    let currentImageIndex = 0;
+
+    function openImageGallery(images, startIndex = 0) {
+        currentGalleryImages = images;
+        currentImageIndex = startIndex;
+        updateGalleryDisplay();
+        document.getElementById('imageGalleryModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeImageGallery() {
+        document.getElementById('imageGalleryModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function navigateGallery(direction) {
+        currentImageIndex += direction;
+        if (currentImageIndex < 0) {
+            currentImageIndex = currentGalleryImages.length - 1;
+        } else if (currentImageIndex >= currentGalleryImages.length) {
+            currentImageIndex = 0;
+        }
+        updateGalleryDisplay();
+    }
+
+    function setGalleryImage(index) {
+        currentImageIndex = index;
+        updateGalleryDisplay();
+    }
+
+    function updateGalleryDisplay() {
+        const mainImage = document.getElementById('galleryMainImage');
+        const counter = document.getElementById('galleryCounter');
+        const thumbnails = document.getElementById('galleryThumbnails');
+
+        mainImage.src = currentGalleryImages[currentImageIndex];
+        counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
+
+        // Update thumbnails
+        thumbnails.innerHTML = '';
+        currentGalleryImages.forEach((img, index) => {
+            const thumb = document.createElement('img');
+            thumb.src = img;
+            thumb.className = 'gallery-thumb' + (index === currentImageIndex ? ' active' : '');
+            thumb.onclick = () => setGalleryImage(index);
+            thumbnails.appendChild(thumb);
+        });
+    }
+
+    // Close on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageGallery();
+        } else if (e.key === 'ArrowLeft') {
+            navigateGallery(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigateGallery(1);
+        }
+    });
+
+    // Close on backdrop click
+    document.getElementById('imageGalleryModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeImageGallery();
+        }
+    });
+</script>

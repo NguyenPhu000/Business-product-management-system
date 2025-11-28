@@ -41,6 +41,25 @@
 
     <!-- Bootstrap 5 Bundle JS (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load sidebar state on page load
+        window.addEventListener('load', function() {
+            const sidebar = document.getElementById('adminSidebar');
+            if (sidebar) {
+                try {
+                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                    if (isCollapsed) {
+                        sidebar.classList.add('collapsed');
+                    }
+                } catch (e) {
+                    const match = document.cookie.match(/sidebarCollapsed=([^;]+)/);
+                    if (match && match[1] === 'true') {
+                        sidebar.classList.add('collapsed');
+                    }
+                }
+            }
+        });
+    </script>
     <script src="/assets/js/app.js"></script>
     <script>
         // Kiểm tra session và ngăn back button
@@ -53,13 +72,15 @@
                 window.location.replace('/admin/login');
             } else {
                 // Đánh dấu đã đăng nhập
-                sessionStorage.setItem('authenticated', Date.now().toString());
+                try {
+                    sessionStorage.setItem('authenticated', Date.now().toString());
+                } catch (e) {}
             }
 
             // Ngăn back button bằng cách thay thế history
             window.history.pushState(null, '', window.location.href);
             window.onpopstate = function() {
-                if (!isLoggedIn || !sessionStorage.getItem('authenticated')) {
+                if (!isLoggedIn) {
                     window.location.replace('/admin/login');
                 } else {
                     window.history.pushState(null, '', window.location.href);
