@@ -102,8 +102,3 @@ MIT License - xem file [LICENSE](LICENSE) để biết thêm chi tiết.
 ## 👥 Nhóm phát triển
 
 - Nguyễn Phú ([@NguyenPhu000](https://github.com/NguyenPhu000))
-
-## 📞 Liên hệ
-
-- Email: your-email@example.com
-- GitHub: https://github.com/NguyenPhu000/Business-product-management-system

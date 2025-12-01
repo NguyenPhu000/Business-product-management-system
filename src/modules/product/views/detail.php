@@ -1,1 +1,0 @@
-<!-- detail.php (Product) - Chi tiết sản phẩm đầy đủ -->
